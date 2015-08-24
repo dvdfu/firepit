@@ -25,7 +25,7 @@ Enemy.static.collisions = {
     platform = {
         type = 'cross',
         func = function(self, col)
-            if col.normal.y == -1 then
+            if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
     			self.vy = 0
                 self.y = col.other.y - self.h
                 self.world:update(self, self.x, self.y)
@@ -47,18 +47,14 @@ local _vFall = 10
 local _vMove = 4
 
 function Enemy:initialize(world, x, y)
+    Object.initialize(self, world, x, y, 16, 16)
     self.name = 'enemy'
-    self.world = world
-    self.x, self.y = x, y
     self.vx, self.vy = 0.4, 0
-    self.w, self.h = 16, 16
     self.ground = nil
     self.state = 'walk'
     self.direction = self.vx > 0 and 1 or -1
-    world:add(self, x, y, self.w, self.h)
 
     self.stompTimer = 0
-
     self.animWalk = newAnimation(self.class.sprWalk, 24, 24, 1/8, 0)
     self.animRock = newAnimation(self.class.sprRock, 24, 24, 1/8, 0)
     self.animStar = newAnimation(self.class.sprStar, 10, 10, 1/8, 0)
@@ -122,6 +118,7 @@ function Rock:enteredState()
     self.sprite = self.animRock
     self.stompTimer = 5*60
     self.vx = 0
+    self.sprite.speed = 0
 end
 
 return Enemy

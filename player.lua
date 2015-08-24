@@ -4,7 +4,7 @@ local Player = Class('player', Object)
 
 local _vJump = 7
 local _vFall = 10
-local _aFall = 0.4
+local _aFall = 0.3
 local _vMove = 2
 local _aMoveAir = 0.1
 local _aMoveGround = 0.5
@@ -27,7 +27,7 @@ Player.static.collisions = {
     platform = {
         type = 'cross',
         func = function(self, col)
-			if col.normal.y == -1 then
+			if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
 				self.vy = 0
                 self.y = col.other.y - self.h
                 self.world:update(self, self.x, self.y)
@@ -38,32 +38,29 @@ Player.static.collisions = {
     enemy = {
         type = 'cross',
         func = function(self, col)
-            if col.normal.y == -1 and self.vy > _aFall then
+            if col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
                 col.other:stomp()
-                self.vy = -_vJump
+                self.vy = -_vJump*0.7
             end
         end
     }
 }
 
 function Player:initialize(world, x, y)
+    Object.initialize(self, world, x, y, 24, 24)
     self.name = 'player'
-    self.world = world
-    self.x, self.y = x, y
-    self.vx, self.vy = 0, 0
-    self.w, self.h = 24, 24
     self.ground = nil
-    world:add(self, x, y, self.w, self.h)
+    self.jumpTimer = 0
 end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
-    if love.keyboard.isDown('left') then
+    if love.keyboard.isDown('a') then
         self.vx = self.vx - aMove
         if self.vx < -_vMove then
             self.vx = -_vMove
         end
-    elseif love.keyboard.isDown('right') then
+    elseif love.keyboard.isDown('d') then
         self.vx = self.vx + aMove
         if self.vx > _vMove then
             self.vx = _vMove
@@ -79,7 +76,7 @@ function Player:update(dt)
     end
 
     if self.ground then
-        if love.keyboard.isDown('up') then
+        if love.keyboard.isDown('w') then
             self.vy = -_vJump
             self.ground = nil
         end

@@ -21,12 +21,12 @@ Object:
     :draw()
 ]]--
 
-function Object:initialize(world, x, y)
+function Object:initialize(world, x, y, w, h)
     self.name = 'object'
     self.world = world
     self.x, self.y = x, y
     self.vx, self.vy = 0, 0
-    self.w, self.h = 16, 16
+    self.w, self.h = w, h
     self.world:add(self, x, y, self.w, self.h)
 end
 
