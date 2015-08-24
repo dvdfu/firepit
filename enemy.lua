@@ -55,9 +55,9 @@ function Enemy:initialize(world, x, y)
     self.direction = self.vx > 0 and 1 or -1
 
     self.stompTimer = 0
-    self.animWalk = newAnimation(self.class.sprWalk, 24, 24, 1/8, 0)
-    self.animRock = newAnimation(self.class.sprRock, 24, 24, 1/8, 0)
-    self.animStar = newAnimation(self.class.sprStar, 10, 10, 1/8, 0)
+    self.animWalk = newAnimation(Enemy.sprWalk, 24, 24, 1/8, 0)
+    self.animRock = newAnimation(Enemy.sprRock, 24, 24, 1/8, 0)
+    self.animStar = newAnimation(Enemy.sprStar, 10, 10, 1/8, 0)
 	self.sprite = self.animWalk
 end
 

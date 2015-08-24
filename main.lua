@@ -6,6 +6,7 @@ Camera = require 'hump.camera'
 Solid = require 'solid'
 Player = require 'player'
 Enemy = require 'enemy'
+Lava = require 'lava'
 local Bump = require 'bump'
 world = Bump.newWorld(64)
 
@@ -23,7 +24,9 @@ function love.load()
     wall_l = Solid:new(world, 0, 0, 32, sh)
     wall_r = Solid:new(world, sw-32, 0, 32, sh)
     p = Player:new(world, 32, 0)
-    cam = Camera(sw/2, 0)
+    l = Lava:new(world)
+    cx, cy = sw/2, 0
+    cam = Camera(cx, cy)
     e1 = Enemy:new(world, sw-64, 0)
     e2 = Enemy:new(world, sw-112, 0)
 
@@ -50,12 +53,14 @@ end
 function love.update(dt)
     next_time = next_time + min_dt
 
-    local dy = p.y+p.h/2 - cam.y
-    cam:move(0, dy/20)
+    cx = cx + (sw/2 + (p.x+p.w/2 - sw/2)/4 - cx)/20
+    cy = cy + (p.y+p.h/2 - cy)/20
+    cam:lookAt(math.floor(cx+0.5), math.floor(cy+0.5))
 
     p:update(dt)
     e1:update(dt)
     e2:update(dt)
+    l:update(dt)
 end
 
 function camDraw(func)
@@ -79,6 +84,7 @@ function love.draw()
         p:draw()
         e1:draw()
         e2:draw()
+        l:draw()
         love.graphics.setCanvas()
     end)
     love.graphics.setShader(scaleShader)
