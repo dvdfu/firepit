@@ -1,5 +1,7 @@
 love.graphics.setDefaultFilter('nearest', 'nearest')
-love.graphics.setLineWidth(1)
+love.graphics.setLineWidth(2)
+love.graphics.setLineStyle('rough')
+love.graphics.setBackgroundColor(16, 24, 40)
 math.randomseed(os.time())
 
 Camera = require 'hump.camera'
@@ -10,6 +12,7 @@ Lava = require 'lava'
 local Bump = require 'bump'
 world = Bump.newWorld(64)
 
+scale = 1
 sw = love.graphics.getWidth()/2
 sh = love.graphics.getHeight()/2
 
@@ -17,12 +20,27 @@ function love.load()
     level1 = Solid:new(world, (sw-224)/2, sh-64, 224, 64)
     level2_l = Solid:new(world, 32, sh-128, 112, 128)
     level2_r = Solid:new(world, sw-112-32, sh-128, 112, 128)
-    level3 = Solid:new(world, (sw-224)/2, sh-192, 224, 192)
+    level3 = Solid:new(world, sw/2, sh-192, 112, 192)
     level2_l.name = 'platform'
     level2_r.name = 'platform'
     level3.name = 'platform'
-    wall_l = Solid:new(world, 0, 0, 32, sh)
-    wall_r = Solid:new(world, sw-32, 0, 32, sh)
+    level3.color = {
+        r = 40,
+        g = 48,
+        b = 80
+    }
+    level2_l.color = {
+        r = 72,
+        g = 72,
+        b = 128
+    }
+    level2_r.color = {
+        r = 72,
+        g = 72,
+        b = 128
+    }
+    wall_l = Solid:new(world, -64, -96, 32+64, sh+96)
+    wall_r = Solid:new(world, sw-32, -96, 32+64, sh+96)
     p = Player:new(world, 32, 0)
     l = Lava:new(world)
     cx, cy = sw/2, 0
@@ -32,9 +50,10 @@ function love.load()
 
     canvas = love.graphics.newCanvas(sw, sh)
     scaleShader = love.graphics.newShader[[
+        extern float scale;
         #ifdef VERTEX
         vec4 position(mat4 transform_projection, vec4 vertex_position) {
-            vertex_position.xy *= 2.0;
+            vertex_position.xy *= scale;
             return transform_projection * vertex_position;
         }
         #endif
@@ -45,6 +64,8 @@ function love.load()
         }
         #endif
     ]]
+    love.window.setMode(480*scale, 360*scale)
+    scaleShader:send('scale', scale)
 
     min_dt = 1/60
     next_time = love.timer.getTime()
@@ -66,7 +87,7 @@ end
 function camDraw(func)
     love.graphics.push()
     love.graphics.origin()
-    love.graphics.translate(-sw/2, -sh/2)
+    love.graphics.translate(-sw/2*(scale-1), -sh/2*(scale-1))
     cam:draw(func)
     love.graphics.pop()
 end
@@ -75,10 +96,10 @@ function love.draw()
     camDraw(function()
         canvas:clear()
         love.graphics.setCanvas(canvas)
-        level1:draw()
+        level3:draw()
         level2_l:draw()
         level2_r:draw()
-        level3:draw()
+        level1:draw()
         wall_l:draw()
         wall_r:draw()
         p:draw()

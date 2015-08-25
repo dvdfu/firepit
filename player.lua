@@ -6,7 +6,7 @@ local _vJump = 7
 local _vFall = 10
 local _aFall = 0.3
 local _vMove = 2
-local _aMoveAir = 0.1
+local _aMoveAir = 0.2
 local _aMoveGround = 0.5
 
 Player.static.collisions = {
@@ -47,7 +47,7 @@ Player.static.collisions = {
 }
 
 function Player:initialize(world, x, y)
-    Object.initialize(self, world, x, y, 24, 24)
+    Object.initialize(self, world, x, y, 16, 16)
     self.name = 'player'
     self.ground = nil
     self.jumpTimer = 0
