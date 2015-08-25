@@ -17,7 +17,7 @@ Lava.static.shader = love.graphics.newShader[[
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec2 hs = love_ScreenSize.xy;
         float disp = sin(16*texture_coords.x + 4*time);
-        texture_coords.y += 4*disp/hs.y;
+        texture_coords.y += 3.0*disp/hs.y;
         return Texel(texture, texture_coords);
     }
     #endif

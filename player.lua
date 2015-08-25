@@ -1,3 +1,4 @@
+require 'AnAL'
 local Class = require 'middleclass'
 local Object = require 'object'
 local Player = Class('player', Object)
@@ -8,6 +9,11 @@ local _aFall = 0.3
 local _vMove = 2
 local _aMoveAir = 0.2
 local _aMoveGround = 0.5
+
+Player.static.sprIdle = love.graphics.newImage('assets/player_idle.png')
+Player.static.sprRun = love.graphics.newImage('assets/player_run.png')
+Player.static.sprJump = love.graphics.newImage('assets/player_jump.png')
+Player.static.sprFall = love.graphics.newImage('assets/player_fall.png')
 
 Player.static.collisions = {
     solid = {
@@ -47,10 +53,17 @@ Player.static.collisions = {
 }
 
 function Player:initialize(world, x, y)
-    Object.initialize(self, world, x, y, 16, 16)
+    Object.initialize(self, world, x, y, 16, 24)
     self.name = 'player'
     self.ground = nil
     self.jumpTimer = 0
+    self.direction = self.vx > 0 and 1 or -1
+
+    self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
+    self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
+    self.animJump = newAnimation(Player.sprJump, 24, 24, 1/8, 0)
+    self.animFall = newAnimation(Player.sprFall, 24, 24, 1/8, 0)
+    self.sprite = self.animRun
 end
 
 function Player:update(dt)
@@ -60,11 +73,15 @@ function Player:update(dt)
         if self.vx < -_vMove then
             self.vx = -_vMove
         end
+        self.direction = -1
+        self.sprite = self.animRun
     elseif love.keyboard.isDown('d') then
         self.vx = self.vx + aMove
         if self.vx > _vMove then
             self.vx = _vMove
         end
+        self.direction = 1
+        self.sprite = self.animRun
     else
         if self.vx > aMove then
             self.vx = self.vx - aMove
@@ -73,6 +90,7 @@ function Player:update(dt)
         else
             self.vx = 0
         end
+        self.sprite = self.animIdle
     end
 
     if self.ground then
@@ -91,6 +109,16 @@ function Player:update(dt)
     self.y = self.y + self.vy
     self.ground = nil
     self:collide()
+
+    if not self.ground then
+        self.sprite = self.vy < 0 and self.animJump or self.animFall
+    end
+    self.sprite:update(dt)
+end
+
+function Player:draw()
+    -- Object.draw(self)
+    self.sprite:draw(self.x+self.w/2, self.y+self.h, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
 return Player

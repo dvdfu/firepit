@@ -36,6 +36,12 @@ Enemy.static.collisions = {
     enemy = {
         type = 'cross',
         func = function(self, col)
+            if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+    			self.vy = 0
+                self.y = col.other.y - self.h
+                self.world:update(self, self.x, self.y)
+    			self.ground = col.other
+    		end
             if col.normal.x ~= 0 then
                 self.vx = -self.vx
             end
@@ -69,7 +75,10 @@ local function update(self, dt)
 
     self.x = self.x + self.vx
     self.y = self.y + self.vy
-    self.ground = nil
+    if self.ground then
+        self.x = self.x + self.ground.vx
+        self.ground = nil
+    end
     self:collide()
 
     self.sprite:update(dt)

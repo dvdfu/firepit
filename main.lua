@@ -1,5 +1,5 @@
 love.graphics.setDefaultFilter('nearest', 'nearest')
-love.graphics.setLineWidth(2)
+love.graphics.setLineWidth(1)
 love.graphics.setLineStyle('rough')
 love.graphics.setBackgroundColor(16, 24, 40)
 math.randomseed(os.time())
@@ -12,7 +12,7 @@ Lava = require 'lava'
 local Bump = require 'bump'
 world = Bump.newWorld(64)
 
-scale = 1
+scale = 2
 sw = love.graphics.getWidth()/2
 sh = love.graphics.getHeight()/2
 
@@ -46,7 +46,7 @@ function love.load()
     cx, cy = sw/2, 0
     cam = Camera(cx, cy)
     e1 = Enemy:new(world, sw-64, 0)
-    e2 = Enemy:new(world, sw-112, 0)
+    e2 = Enemy:new(world, sw-64, -32)
 
     canvas = love.graphics.newCanvas(sw, sh)
     scaleShader = love.graphics.newShader[[
