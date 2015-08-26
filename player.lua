@@ -145,7 +145,8 @@ end
 
 function Player:draw()
     -- Object.draw(self)
-    self.sprite:draw(self.x+self.w/2, self.y+self.h, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+    local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
+    self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
 return Player
