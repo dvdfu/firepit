@@ -25,16 +25,16 @@ Lava.static.shader = love.graphics.newShader[[
 
 function Lava:initialize(world)
     Object.initialize(self, world, -64, 360, 480+128, 176)
-    self.name = 'lava'
+    self.name = 'solid'
 end
 
 function Lava:draw()
     Lava.shader:send('time', os.clock())
     local s = love.graphics.getShader()
     love.graphics.setShader(Lava.shader)
-    love.graphics.draw(Lava.sprLava, self.x, self.y-32, 0, self.w/16, self.h/16)
+    love.graphics.draw(Lava.sprLava, self.x, self.y-16, 0, self.w/16, self.h/16)
     love.graphics.setShader(s)
-    -- love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
+    -- Object.draw(self)
 end
 
 return Lava

@@ -12,7 +12,7 @@ Lava = require 'lava'
 local Bump = require 'bump'
 world = Bump.newWorld(64)
 
-scale = 2
+scale = 1
 sw = love.graphics.getWidth()/2
 sh = love.graphics.getHeight()/2
 

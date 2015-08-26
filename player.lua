@@ -51,9 +51,9 @@ Player.static.collisions = {
         func = function(self, col)
             if love.keyboard.isDown(Player.keyGrab) and not self.hold and col.other.stompTimer > 0 then
                 self.hold = col.other
-                col.other:gotoState('Hold')
+                col.other:grab()
             elseif col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
-                col.other:gotoState('Rock')
+                col.other:stomp()
                 self.vy = -_vJump*0.7
             end
         end
@@ -122,16 +122,16 @@ function Player:update(dt)
 
     if self.hold then
         self.holdTimer = self.holdTimer+1
-        if self.holdTimer < 15 then
-            local dx, dy = self.x - self.hold.x, self.y-16 - self.hold.y
-            self.hold.x = self.hold.x + dx*self.holdTimer/15
-            self.hold.y = self.hold.y + dy*self.holdTimer/15
+        if self.holdTimer < 20 then
+            local dx, dy = self.x - self.hold.x, self.y-24 - self.hold.y
+            self.hold.x = self.hold.x + dx*self.holdTimer/20
+            self.hold.y = self.hold.y + dy*self.holdTimer/20
         else
-            self.hold.x, self.hold.y = self.x, self.y-16
+            self.hold.x, self.hold.y = self.x, self.y-24
         end
-        if not love.keyboard.isDown(Player.keyGrab) then
+        if not love.keyboard.isDown(Player.keyGrab) or self.hold.stompTimer > 0 then
             self.hold.vx, self.hold.vy = self.direction*6, -4
-            self.hold:gotoState('Thrown')
+            self.hold:release()
             self.hold = nil
             self.holdTimer = 0
         end
