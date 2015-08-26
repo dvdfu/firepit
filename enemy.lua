@@ -103,11 +103,19 @@ function Enemy:draw()
     -- love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
 end
 
-function Enemy:stomp()
-    self:gotoState('Rock')
+local Rock = Enemy:addState('Rock')
+
+function Rock:enteredState()
+    self.sprite = self.animRock
+    self.stompTimer = 3*60
+    self.vx = 0
+    self.sprite.speed = 0
 end
 
-local Rock = Enemy:addState('Rock')
+function Rock:exitedState()
+    self.sprite = self.animWalk
+    self.vx = self.direction*0.4
+end
 
 function Rock:update(dt)
     if self.stompTimer > 0 then
@@ -118,16 +126,39 @@ function Rock:update(dt)
     update(self, dt)
 end
 
-function Rock:exitedState()
-    self.sprite = self.animWalk
-    self.vx = self.direction*0.4
-end
+local Hold = Enemy:addState('Hold')
 
-function Rock:enteredState()
+function Hold:enteredState()
     self.sprite = self.animRock
-    self.stompTimer = 5*60
+    self.stompTimer = 0
     self.vx = 0
+    self.vy = 0
     self.sprite.speed = 0
 end
+
+function Hold:update(dt)
+    self:collide()
+end
+
+local Thrown = Enemy:addState('Thrown')
+
+function Thrown:enteredState()
+    self.throwTimer = 0
+end
+
+function Thrown:update(dt)
+    if self.throwTimer < 40 then
+        self.throwTimer = self.throwTimer + 1
+    else
+        self.vx = self.vx * 0.96
+    end
+    self.sprite.speed = math.abs(self.vx/2)
+    self.direction = self.vx > 0 and 1 or -1
+    update(self, dt)
+    if math.abs(self.vx) < 0.1 then
+        self:gotoState('Rock')
+    end
+end
+
 
 return Enemy

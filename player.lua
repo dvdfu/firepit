@@ -10,6 +10,11 @@ local _vMove = 2
 local _aMoveAir = 0.2
 local _aMoveGround = 0.5
 
+Player.static.keyLeft = 'left'
+Player.static.keyRight = 'right'
+Player.static.keyJump = 'up'
+Player.static.keyGrab = 'lctrl'
+
 Player.static.sprIdle = love.graphics.newImage('assets/player_idle.png')
 Player.static.sprRun = love.graphics.newImage('assets/player_run.png')
 Player.static.sprJump = love.graphics.newImage('assets/player_jump.png')
@@ -44,8 +49,11 @@ Player.static.collisions = {
     enemy = {
         type = 'cross',
         func = function(self, col)
-            if col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
-                col.other:stomp()
+            if love.keyboard.isDown(Player.keyGrab) and not self.hold and col.other.stompTimer > 0 then
+                self.hold = col.other
+                col.other:gotoState('Hold')
+            elseif col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
+                col.other:gotoState('Rock')
                 self.vy = -_vJump*0.7
             end
         end
@@ -58,6 +66,8 @@ function Player:initialize(world, x, y)
     self.ground = nil
     self.jumpTimer = 0
     self.direction = self.vx > 0 and 1 or -1
+    self.hold = nil
+    self.holdTimer = 0
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -68,14 +78,14 @@ end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
-    if love.keyboard.isDown('a') then
+    if love.keyboard.isDown(Player.keyLeft) then
         self.vx = self.vx - aMove
         if self.vx < -_vMove then
             self.vx = -_vMove
         end
         self.direction = -1
         self.sprite = self.animRun
-    elseif love.keyboard.isDown('d') then
+    elseif love.keyboard.isDown(Player.keyRight) then
         self.vx = self.vx + aMove
         if self.vx > _vMove then
             self.vx = _vMove
@@ -94,7 +104,7 @@ function Player:update(dt)
     end
 
     if self.ground then
-        if love.keyboard.isDown('w') then
+        if love.keyboard.isDown(Player.keyJump) then
             self.vy = -_vJump
             self.ground = nil
         end
@@ -109,6 +119,23 @@ function Player:update(dt)
     self.y = self.y + self.vy
     self.ground = nil
     self:collide()
+
+    if self.hold then
+        self.holdTimer = self.holdTimer+1
+        if self.holdTimer < 15 then
+            local dx, dy = self.x - self.hold.x, self.y-16 - self.hold.y
+            self.hold.x = self.hold.x + dx*self.holdTimer/15
+            self.hold.y = self.hold.y + dy*self.holdTimer/15
+        else
+            self.hold.x, self.hold.y = self.x, self.y-16
+        end
+        if not love.keyboard.isDown(Player.keyGrab) then
+            self.hold.vx, self.hold.vy = self.direction*6, -4
+            self.hold:gotoState('Thrown')
+            self.hold = nil
+            self.holdTimer = 0
+        end
+    end
 
     if not self.ground then
         self.sprite = self.vy < 0 and self.animJump or self.animFall
