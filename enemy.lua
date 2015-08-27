@@ -38,6 +38,12 @@ Enemy.static.collisions = {
         func = function(self, col)
             self:collideEnemy(col)
         end
+    },
+    lava = {
+        type = 'cross',
+        func = function(self, col)
+            self:gotoState('Dead')
+        end
     }
 }
 
@@ -50,14 +56,17 @@ function Enemy:initialize(world, x, y)
     self.name = 'enemy'
     self.vx, self.vy = 0, 0
     self.ground = nil
+    self.player = nil
 
     self.stompTimer = 0
+    self.holdTimer = 0
     self.throwTimer = 0
+    self.deadTimer = 0
 
     self.animWalk = newAnimation(Enemy.sprWalk, 24, 24, 1/8, 0)
     self.animRock = newAnimation(Enemy.sprRock, 24, 24, 1/8, 0)
     self.animStar = newAnimation(Enemy.sprStar, 10, 10, 1/8, 0)
-    self.direction = 1
+    self.direction = -1
     self:gotoState('Walk')
 end
 
@@ -99,8 +108,14 @@ function Enemy:stomp()
     self:gotoState('Rock')
 end
 
+function Enemy:grab(player) end
+
 function Enemy:hit()
     self:gotoState('Rock')
+end
+
+function Enemy:isDead()
+    return false
 end
 
 -- === WALK STATE ===
@@ -127,10 +142,6 @@ function Rock:enteredState()
     self.sprite.speed = 0
 end
 
-function Rock:exitedState()
-    self.stompTimer = 0
-end
-
 function Rock:update(dt)
     if self.stompTimer > 0 then
         self.stompTimer = self.stompTimer - 1
@@ -143,25 +154,18 @@ end
 
 function Rock:draw()
     Enemy.draw(self)
-    for i = 1, 3 do
-        local sx = self.x+self.w/2-5 + 12*math.cos(self.stompTimer*self.stompTimer/1200 + i/3*2*math.pi)
-        local sy = self.y-12 + 6*math.sin(self.stompTimer*self.stompTimer/1200 + i/3*2*math.pi)
+    local numStars = math.ceil(self.stompTimer/60)
+    for i = 1, numStars do
+        local sx = self.x+self.w/2-5 + 12*math.cos(self.stompTimer/20 + i/numStars*2*math.pi)
+        local sy = self.y-12 + 6*math.sin(self.stompTimer/20 + i/numStars*2*math.pi)
         self.animStar:draw(sx, sy)
     end
-    -- local numStars = math.ceil(self.stompTimer/60)
-    -- for i = 1, numStars do
-    --     local sx = self.x+self.w/2-5 + 12*math.cos(self.stompTimer/20 + i/numStars*2*math.pi)
-    --     local sy = self.y-12 + 6*math.sin(self.stompTimer/20 + i/numStars*2*math.pi)
-    --     self.animStar:draw(sx, sy)
-    -- end
 end
 
-function Rock:grab()
+function Rock:grab(player)
+    player.hold = self
+    self.player = player
     self:gotoState('Hold')
-end
-
-function Rock:stomp()
-    self.stompTimer = 3*60
 end
 
 -- === HOLD STATE ===
@@ -170,29 +174,37 @@ local Hold = Enemy:addState('Hold')
 function Hold:enteredState()
     self.sprite = self.animRock
     self.sprite.speed = 0
+    self.holdTimer = 0
     self.vx = 0
     self.vy = 0
+end
+
+function Hold:update(dt)
+    if self.holdTimer < 20 then
+        local dx, dy = self.player.x - self.x, self.player.y-20 - self.y
+        self.x = self.x + dx*self.holdTimer/20
+        self.y = self.y + dy*self.holdTimer/20
+        self.holdTimer = self.holdTimer + 1
+    else
+        self.x, self.y = self.player.x, self.player.y-20
+    end
+    self.world:update(self, self.x, self.y)
+    -- Enemy.update(self, dt)
 end
 
 function Hold:release()
     self:gotoState('Thrown')
 end
 
-function Hold:stomp()
-end
+function Hold:stomp() end
 
-function Hold:hit()
-end
+function Hold:hit() end
 
 -- === THROWN STATE ===
 local Thrown = Enemy:addState('Thrown')
 
 function Thrown:enteredState()
     self.throwTimer = 30
-end
-
-function Thrown:exitedState()
-    self.throwTimer = 0
 end
 
 function Thrown:update(dt)
@@ -203,14 +215,33 @@ function Thrown:update(dt)
     end
     self.sprite.speed = math.abs(self.vx/2)
     self.direction = self.vx > 0 and 1 or -1
-    Enemy.update(self, dt)
     if math.abs(self.vx) < 0.1 then
         self:gotoState('Rock')
     end
+    Enemy.update(self, dt)
 end
 
 function Thrown:collideEnemy(col)
-    col.other:stomp()
+    col.other:gotoState('Dead')
+end
+
+-- === DEAD STATE ===
+local Dead = Enemy:addState('Dead')
+
+function Dead:enteredState()
+    self.deadTimer = 0
+    self.vy = -6
+    self.world:remove(self)
+end
+
+function Dead:update(dt)
+    self.deadTimer = self.deadTimer + 1
+    self.y = self.y + self.vy
+    self.vy = self.vy + _aFall
+end
+
+function Enemy:isDead()
+    return self.deadTimer > 60
 end
 
 return Enemy

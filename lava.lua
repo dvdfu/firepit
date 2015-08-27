@@ -16,8 +16,8 @@ Lava.static.shader = love.graphics.newShader[[
     #ifdef PIXEL
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec2 hs = love_ScreenSize.xy;
-        float disp = sin(16*texture_coords.x + 4*time);
-        texture_coords.y += 3.0*disp/hs.y;
+        float disp = sin(16*texture_coords.x + 8*time);
+        texture_coords.y += 4*disp/hs.y;
         return Texel(texture, texture_coords);
     }
     #endif
@@ -25,7 +25,7 @@ Lava.static.shader = love.graphics.newShader[[
 
 function Lava:initialize(world)
     Object.initialize(self, world, -64, 360, 480+128, 176)
-    self.name = 'solid'
+    self.name = 'lava'
 end
 
 function Lava:draw()

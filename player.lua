@@ -49,13 +49,21 @@ Player.static.collisions = {
     enemy = {
         type = 'cross',
         func = function(self, col)
-            if love.keyboard.isDown(Player.keyGrab) and not self.hold and col.other.stompTimer > 0 then
-                self.hold = col.other
-                col.other:grab()
-            elseif col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
+            local grabbed = false
+            if love.keyboard.isDown(Player.keyGrab) and not self.hold then
+                grabbed = col.other:grab(self)
+            end
+            if not grabbed and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
                 col.other:stomp()
                 self.vy = -_vJump*0.7
             end
+        end
+    },
+    lava = {
+        type = 'bounce',
+        func = function(self, col)
+            self.vy = -self.vy
+            -- TODO
         end
     }
 }
@@ -67,7 +75,6 @@ function Player:initialize(world, x, y)
     self.jumpTimer = 0
     self.direction = self.vx > 0 and 1 or -1
     self.hold = nil
-    self.holdTimer = 0
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -120,21 +127,10 @@ function Player:update(dt)
     self.ground = nil
     self:collide()
 
-    if self.hold then
-        self.holdTimer = self.holdTimer+1
-        if self.holdTimer < 20 then
-            local dx, dy = self.x - self.hold.x, self.y-24 - self.hold.y
-            self.hold.x = self.hold.x + dx*self.holdTimer/20
-            self.hold.y = self.hold.y + dy*self.holdTimer/20
-        else
-            self.hold.x, self.hold.y = self.x, self.y-24
-        end
-        if not love.keyboard.isDown(Player.keyGrab) or self.hold.stompTimer > 0 then
-            self.hold.vx, self.hold.vy = self.direction*6, -4
-            self.hold:release()
-            self.hold = nil
-            self.holdTimer = 0
-        end
+    if self.hold and not love.keyboard.isDown(Player.keyGrab) then
+        self.hold.vx, self.hold.vy = self.direction*6, -4
+        self.hold:release()
+        self.hold = nil
     end
 
     if not self.ground then

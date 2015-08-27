@@ -12,36 +12,59 @@ local sw = love.graphics.getWidth()/2
 local sh = love.graphics.getHeight()/2
 
 function Game:enter()
-    level1 = Solid:new(world, (sw-224)/2, sh-64, 224, 64)
-    level2_l = Solid:new(world, 32, sh-128, 112, 128)
-    level2_r = Solid:new(world, sw-112-32, sh-128, 112, 128)
-    level3 = Solid:new(world, sw/2, sh-192, 112, 192)
-    level2_l.name = 'platform'
-    level2_r.name = 'platform'
-    level3.name = 'platform'
-    level3.color = {
-        r = 40,
-        g = 48,
-        b = 80
-    }
-    level2_l.color = {
-        r = 72,
-        g = 72,
-        b = 128
-    }
-    level2_r.color = {
-        r = 72,
-        g = 72,
-        b = 128
-    }
-    wall_l = Solid:new(world, -64, -96, 32+64, sh+96)
-    wall_r = Solid:new(world, sw-32, -96, 32+64, sh+96)
+    solids = {}
+    addSolids()
+
     p = Player:new(world, 32, 0)
     l = Lava:new(world)
     cx, cy = sw/2, 0
     cam = Camera(cx, cy)
-    e1 = Enemy:new(world, sw-64, 0)
-    e2 = Enemy:new(world, sw-64, -32)
+
+    enemies = {}
+    addEnemy(sw-64, 0)
+    addEnemy(sw-64, -32)
+    addEnemy(sw-96, 0)
+    addEnemy(sw-96, -32)
+end
+
+function addSolids()
+    local function addSolid(x, y, w, h, platform)
+        local s = Solid:new(world, x, y, w, h)
+        if platform then
+            s.name = 'platform'
+        end
+        table.insert(solids, s)
+        return s
+    end
+    addSolid((sw-224)/2, sh-256, 112, 256, true).color = { --4
+        r = 24,
+        g = 36,
+        b = 72
+    }
+    addSolid(sw/2, sh-192, 112, 192, true).color = { --3
+        r = 40,
+        g = 48,
+        b = 80
+    }
+    addSolid(32, sh-128, 112, 128, true).color = { --2l
+        r = 72,
+        g = 72,
+        b = 128
+    }
+    addSolid(sw-112-32, sh-128, 112, 128, true).color = { --2r
+        r = 72,
+        g = 72,
+        b = 128
+    }
+    addSolid((sw-224)/2, sh-64, 224, 64) --1
+    addSolid(-64, -96, 32+64, sh+96) --wl
+    addSolid(sw-32, -96, 32+64, sh+96) --wr
+end
+
+function addEnemy(x, y)
+    local e = Enemy:new(world, x, y)
+    table.insert(enemies, e)
+    return e
 end
 
 function Game:update(dt)
@@ -51,8 +74,12 @@ function Game:update(dt)
     -- TODO: add functionality to camera class
 
     p:update(dt)
-    e1:update(dt)
-    e2:update(dt)
+    for key, enemy in pairs(enemies) do
+        enemy:update(dt)
+        if enemy:isDead() then
+            enemies[key] = nil
+        end
+    end
     l:update(dt)
 end
 
@@ -66,15 +93,13 @@ end
 
 function Game:draw()
     camDraw(function()
-        level3:draw()
-        level2_l:draw()
-        level2_r:draw()
-        level1:draw()
-        wall_l:draw()
-        wall_r:draw()
+        for _, solid in pairs(solids) do
+            solid:draw()
+        end
         p:draw()
-        e1:draw()
-        e2:draw()
+        for _, enemy in pairs(enemies) do
+            enemy:draw()
+        end
         l:draw()
     end)
 end

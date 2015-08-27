@@ -61,5 +61,7 @@ end
 function love.keypressed(key)
     if key == 'escape' then
         love.event.quit()
+    elseif key == 'r' then
+        -- Gamestate.switch(Game)
     end
 end
