@@ -6,7 +6,7 @@ love.graphics.setBackgroundColor(16, 24, 40)
 
 Gamestate = require 'hump.gamestate'
 Game = require 'game'
-scale = 1
+scale = 2
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)

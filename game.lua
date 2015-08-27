@@ -18,6 +18,7 @@ function Game:enter()
     p = Player:new(world, 32, 0)
     l = Lava:new(world)
     cx, cy = sw/2, 0
+    cs = 0
     cam = Camera(cx, cy)
 
     enemies = {}
@@ -70,7 +71,13 @@ end
 function Game:update(dt)
     cx = cx + (sw/2 + (p.x+p.w/2 - sw/2)/4 - cx)/20
     cy = cy + (p.y+p.h/2 - cy)/20
-    cam:lookAt(math.floor(cx+0.5), math.floor(cy+0.5))
+    if cs > 0 then
+        cam:lookAt(math.floor(cx+0.5) + math.random(-cs/2, cs/2), math.floor(cy+0.5) + math.random(-cs/2, cs/2))
+        cs = cs-1
+    else
+        cam:lookAt(math.floor(cx+0.5), math.floor(cy+0.5))
+    end
+
     -- TODO: add functionality to camera class
 
     p:update(dt)
@@ -96,11 +103,11 @@ function Game:draw()
         for _, solid in pairs(solids) do
             solid:draw()
         end
+        l:draw()
         p:draw()
         for _, enemy in pairs(enemies) do
             enemy:draw()
         end
-        l:draw()
     end)
 end
 

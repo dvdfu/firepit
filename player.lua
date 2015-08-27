@@ -72,7 +72,6 @@ function Player:initialize(world, x, y)
     Object.initialize(self, world, x, y, 16, 24)
     self.name = 'player'
     self.ground = nil
-    self.jumpTimer = 0
     self.direction = self.vx > 0 and 1 or -1
     self.hold = nil
 
@@ -128,7 +127,7 @@ function Player:update(dt)
     self:collide()
 
     if self.hold and not love.keyboard.isDown(Player.keyGrab) then
-        self.hold.vx, self.hold.vy = self.direction*6, -4
+        self.hold.vx, self.hold.vy = self.direction*4, -6
         self.hold:release()
         self.hold = nil
     end
