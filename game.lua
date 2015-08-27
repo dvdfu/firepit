@@ -7,11 +7,12 @@ local Enemy = require 'enemy'
 local Lava = require 'lava'
 local Bump = require 'bump'
 
-local world = Bump.newWorld(64)
+local world = {}
 local sw = love.graphics.getWidth()/2
 local sh = love.graphics.getHeight()/2
 
 function Game:enter()
+    world = Bump.newWorld(64)
     solids = {}
     addSolids()
 

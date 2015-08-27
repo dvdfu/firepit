@@ -47,7 +47,7 @@ Enemy.static.collisions = {
     }
 }
 
-local _vFall = 10
+local _vFall = 7
 local _aFall = 0.4
 local _vMove = 0.4
 
@@ -187,12 +187,12 @@ end
 
 function Hold:update(dt)
     if self.holdTimer < 20 then
-        local dx, dy = self.player.x - self.x, self.player.y-16 - self.y
+        local dx, dy = self.player.x - self.x, self.player.y-14 - self.y
         self.x = self.x + dx*self.holdTimer/20
         self.y = self.y + dy*self.holdTimer/20
         self.holdTimer = self.holdTimer + 1
     else
-        self.x, self.y = self.player.x, self.player.y-16
+        self.x, self.y = self.player.x, self.player.y-14
     end
     self.world:update(self, self.x, self.y)
 end
@@ -211,14 +211,9 @@ function Thrown:enteredState()
 end
 
 function Thrown:update(dt)
-    -- if self.throwTimer > 0 then
-    --     self.throwTimer = self.throwTimer - 1
-    -- else
-    --     self.vx = self.vx * 0.96
-    -- end
+    self.vx = self.vx * 0.98
     self.sprite.speed = math.abs(self.vx/2)
     self.direction = self.vx > 0 and 1 or -1
-    -- if math.abs(self.vx) < 0.1 then
     Enemy.update(self, dt)
     if self.ground then
         self:gotoState('Stun')
@@ -240,12 +235,15 @@ end
 
 function Dead:update(dt)
     self.deadTimer = self.deadTimer + 1
+    self.vy = self.vy + _aFall
+    if self.vy > _vFall then
+        self.vy = _vFall
+    end
     self.x = self.x + self.vx
     self.y = self.y + self.vy
-    self.vy = self.vy + _aFall
 end
 
-function Enemy:isDead()
+function Dead:isDead()
     return self.deadTimer > 60
 end
 

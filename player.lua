@@ -4,7 +4,7 @@ local Object = require 'object'
 local Player = Class('player', Object)
 
 local _vJump = 7
-local _vFall = 10
+local _vFall = 7
 local _aFall = 0.3
 local _vMove = 2
 local _aMoveAir = 0.2
@@ -12,13 +12,19 @@ local _aMoveGround = 0.5
 
 Player.static.keyLeft = 'left'
 Player.static.keyRight = 'right'
-Player.static.keyJump = 'up'
-Player.static.keyGrab = 'lctrl'
+Player.static.keyUp = 'up'
+Player.static.keyDown = 'down'
+Player.static.keyA = 'z'
+Player.static.keyB = 'x'
 
 Player.static.sprIdle = love.graphics.newImage('assets/player_idle.png')
 Player.static.sprRun = love.graphics.newImage('assets/player_run.png')
 Player.static.sprJump = love.graphics.newImage('assets/player_jump.png')
 Player.static.sprFall = love.graphics.newImage('assets/player_fall.png')
+Player.static.sprIdleLift = love.graphics.newImage('assets/player_idle_lift.png')
+Player.static.sprRunLift = love.graphics.newImage('assets/player_run_lift.png')
+Player.static.sprJumpLift = love.graphics.newImage('assets/player_jump_lift.png')
+Player.static.sprFallLift = love.graphics.newImage('assets/player_fall_lift.png')
 
 Player.static.collisions = {
     solid = {
@@ -50,7 +56,7 @@ Player.static.collisions = {
         type = 'cross',
         func = function(self, col)
             local grabbed = false
-            if Input:isDown(Player.keyGrab) and not self.hold then
+            if Input:isDown(Player.keyB) and not self.hold then
                 grabbed = col.other:grab(self)
             end
             if not grabbed and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
@@ -79,6 +85,10 @@ function Player:initialize(world, x, y)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
     self.animJump = newAnimation(Player.sprJump, 24, 24, 1/8, 0)
     self.animFall = newAnimation(Player.sprFall, 24, 24, 1/8, 0)
+    self.animIdleLift = newAnimation(Player.sprIdleLift, 24, 24, 1/8, 0)
+    self.animRunLift = newAnimation(Player.sprRunLift, 24, 24, 1/12, 0)
+    self.animJumpLift = newAnimation(Player.sprJumpLift, 24, 24, 1/8, 0)
+    self.animFallLift = newAnimation(Player.sprFallLift, 24, 24, 1/8, 0)
     self.sprite = self.animRun
 end
 
@@ -90,14 +100,14 @@ function Player:update(dt)
             self.vx = -_vMove
         end
         self.direction = -1
-        self.sprite = self.animRun
+        self.sprite = self.hold and self.animRunLift or self.animRun
     elseif Input:isDown(Player.keyRight) then
         self.vx = self.vx + aMove
         if self.vx > _vMove then
             self.vx = _vMove
         end
         self.direction = 1
-        self.sprite = self.animRun
+        self.sprite = self.hold and self.animRunLift or self.animRun
     else
         if self.vx > aMove then
             self.vx = self.vx - aMove
@@ -106,11 +116,11 @@ function Player:update(dt)
         else
             self.vx = 0
         end
-        self.sprite = self.animIdle
+        self.sprite = self.hold and self.animIdleLift or self.animIdle
     end
 
     if self.ground then
-        if Input:pressed(Player.keyJump) then
+        if Input:pressed(Player.keyA) then
             self.vy = -_vJump
             self.ground = nil
         end
@@ -126,14 +136,19 @@ function Player:update(dt)
     self.ground = nil
     self:collide()
 
-    if self.hold and Input:released(Player.keyGrab) then
-        self.hold.vx, self.hold.vy = self.direction*4, -6
+    if self.hold and self.hold.holdTimer >= 20 and Input:pressed(Player.keyB) then
+        local rx, ry = self.vx, 0
+        if Input:isDown(Player.keyLeft) then rx = rx - 5 end
+        if Input:isDown(Player.keyRight) then rx = rx + 5 end
+        if Input:isDown(Player.keyUp) then ry = ry - 5 end
+        if Input:isDown(Player.keyDown) then ry = ry + 5 end
+        self.hold.vx, self.hold.vy = rx, ry
         self.hold:release()
         self.hold = nil
     end
 
     if not self.ground then
-        self.sprite = self.vy < 0 and self.animJump or self.animFall
+        self.sprite = self.vy < 0 and (self.hold and self.animJumpLift or self.animJump) or (self.hold and self.animFallLift or self.animFall)
     end
     self.sprite:update(dt)
 end

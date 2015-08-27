@@ -1,6 +1,6 @@
 math.randomseed(os.time())
 love.graphics.setDefaultFilter('nearest', 'nearest')
-love.graphics.setLineWidth(1)
+love.graphics.setLineWidth(4)
 love.graphics.setLineStyle('rough')
 
 Input = require 'input'
@@ -41,6 +41,9 @@ function love.update(dt)
     Gamestate.current():update(dt)
     if Input:pressed('escape') then
         love.event.quit()
+    end
+    if Input:pressed('r') then
+        Gamestate.switch(Game)
     end
     Input:update()
 end
