@@ -2,8 +2,8 @@ math.randomseed(os.time())
 love.graphics.setDefaultFilter('nearest', 'nearest')
 love.graphics.setLineWidth(1)
 love.graphics.setLineStyle('rough')
-love.graphics.setBackgroundColor(16, 24, 40)
 
+Input = require 'input'
 Gamestate = require 'hump.gamestate'
 Game = require 'game'
 scale = 2
@@ -21,7 +21,8 @@ function love.load()
 
         #ifdef PIXEL
         vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-            return Texel(texture, texture_coords);
+            vec4 pixel = Texel(texture, texture_coords);
+            return pixel;
         }
         #endif
     ]]
@@ -38,6 +39,10 @@ end
 function love.update(dt)
     next_time = next_time + min_dt
     Gamestate.current():update(dt)
+    if Input:pressed('escape') then
+        love.event.quit()
+    end
+    Input:update()
 end
 
 function love.draw()
@@ -56,12 +61,4 @@ function love.draw()
       return
     end
     love.timer.sleep(next_time - cur_time)
-end
-
-function love.keypressed(key)
-    if key == 'escape' then
-        love.event.quit()
-    elseif key == 'r' then
-        -- Gamestate.switch(Game)
-    end
 end

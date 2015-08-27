@@ -17,7 +17,7 @@ function Game:enter()
 
     p = Player:new(world, 32, 0)
     l = Lava:new(world)
-    cx, cy = sw/2, 0
+    cx, cy = sw/2, sh/2
     cs = 0
     cam = Camera(cx, cy)
 
@@ -28,7 +28,10 @@ function Game:enter()
     addEnemy(sw-96, -32)
 end
 
+-- timer = 0
+
 function addSolids()
+    love.graphics.setBackgroundColor(16, 24, 40)
     local function addSolid(x, y, w, h, platform)
         local s = Solid:new(world, x, y, w, h)
         if platform then
@@ -40,7 +43,7 @@ function addSolids()
     addSolid((sw-224)/2, sh-256, 112, 256, true).color = { --4
         r = 24,
         g = 36,
-        b = 72
+        b = 60
     }
     addSolid(sw/2, sh-192, 112, 192, true).color = { --3
         r = 40,
@@ -69,6 +72,12 @@ function addEnemy(x, y)
 end
 
 function Game:update(dt)
+    -- if timer < 1 then
+    --     timer = timer + dt
+    -- else
+    --     timer = 0
+    --     addEnemy(150, 0)
+    -- end
     cx = cx + (sw/2 + (p.x+p.w/2 - sw/2)/4 - cx)/20
     cy = cy + (p.y+p.h/2 - cy)/20
     if cs > 0 then
@@ -77,7 +86,6 @@ function Game:update(dt)
     else
         cam:lookAt(math.floor(cx+0.5), math.floor(cy+0.5))
     end
-
     -- TODO: add functionality to camera class
 
     p:update(dt)

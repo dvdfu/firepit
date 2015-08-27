@@ -50,7 +50,7 @@ Player.static.collisions = {
         type = 'cross',
         func = function(self, col)
             local grabbed = false
-            if love.keyboard.isDown(Player.keyGrab) and not self.hold then
+            if Input:isDown(Player.keyGrab) and not self.hold then
                 grabbed = col.other:grab(self)
             end
             if not grabbed and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
@@ -84,14 +84,14 @@ end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
-    if love.keyboard.isDown(Player.keyLeft) then
+    if Input:isDown(Player.keyLeft) then
         self.vx = self.vx - aMove
         if self.vx < -_vMove then
             self.vx = -_vMove
         end
         self.direction = -1
         self.sprite = self.animRun
-    elseif love.keyboard.isDown(Player.keyRight) then
+    elseif Input:isDown(Player.keyRight) then
         self.vx = self.vx + aMove
         if self.vx > _vMove then
             self.vx = _vMove
@@ -110,7 +110,7 @@ function Player:update(dt)
     end
 
     if self.ground then
-        if love.keyboard.isDown(Player.keyJump) then
+        if Input:pressed(Player.keyJump) then
             self.vy = -_vJump
             self.ground = nil
         end
@@ -126,7 +126,7 @@ function Player:update(dt)
     self.ground = nil
     self:collide()
 
-    if self.hold and not love.keyboard.isDown(Player.keyGrab) then
+    if self.hold and Input:released(Player.keyGrab) then
         self.hold.vx, self.hold.vy = self.direction*4, -6
         self.hold:release()
         self.hold = nil
