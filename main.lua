@@ -6,7 +6,7 @@ love.graphics.setLineStyle('rough')
 Input = require 'input'
 Gamestate = require 'hump.gamestate'
 Game = require 'game'
-scale = 2
+scale = 1
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)

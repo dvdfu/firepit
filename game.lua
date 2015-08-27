@@ -4,6 +4,7 @@ local Camera = require 'hump.camera'
 local Solid = require 'solid'
 local Player = require 'player'
 local Enemy = require 'enemy'
+local Item = require 'item'
 local Lava = require 'lava'
 local Bump = require 'bump'
 
@@ -27,9 +28,11 @@ function Game:enter()
     addEnemy(sw-64, -32)
     addEnemy(sw-96, 0)
     addEnemy(sw-96, -32)
+
+    items = {}
 end
 
--- timer = 0
+timer = 0
 
 function addSolids()
     love.graphics.setBackgroundColor(16, 24, 40)
@@ -68,17 +71,24 @@ end
 
 function addEnemy(x, y)
     local e = Enemy:new(world, x, y)
+    e.dropItem = addItem
     table.insert(enemies, e)
     return e
 end
 
+function addItem(x, y)
+    local i = Item:new(world, x, y)
+    table.insert(items, i)
+    return i
+end
+
 function Game:update(dt)
-    -- if timer < 1 then
-    --     timer = timer + dt
-    -- else
-    --     timer = 0
-    --     addEnemy(150, 0)
-    -- end
+    if timer < 2 then
+        timer = timer + dt
+    else
+        timer = 0
+        addEnemy(150, 0)
+    end
     cx = cx + (sw/2 + (p.x+p.w/2 - sw/2)/4 - cx)/20
     cy = cy + (p.y+p.h/2 - cy)/20
     if cs > 0 then
@@ -94,6 +104,12 @@ function Game:update(dt)
         enemy:update(dt)
         if enemy:isDead() then
             enemies[key] = nil
+        end
+    end
+    for key, item in pairs(items) do
+        item:update(dt)
+        if item:isDead() then
+            items[key] = nil
         end
     end
     l:update(dt)
@@ -116,6 +132,9 @@ function Game:draw()
         p:draw()
         for _, enemy in pairs(enemies) do
             enemy:draw()
+        end
+        for key, item in pairs(items) do
+            item:draw()
         end
     end)
 end

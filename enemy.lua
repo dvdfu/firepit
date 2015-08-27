@@ -228,6 +228,7 @@ end
 local Dead = Enemy:addState('Dead')
 
 function Dead:enteredState()
+    self.dropItem(self.x, self.y)
     self.deadTimer = 0
     self.vy = -6
     self.world:remove(self)

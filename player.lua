@@ -71,6 +71,14 @@ Player.static.collisions = {
             self.vy = -self.vy
             -- TODO
         end
+    },
+    item = {
+        type = 'cross',
+        func = function(self, col)
+            if Input:isDown(Player.keyDown) then
+                col.other:grab(self)
+            end
+        end
     }
 }
 
@@ -137,7 +145,7 @@ function Player:update(dt)
     self:collide()
 
     if self.hold and self.hold.holdTimer >= 20 and Input:pressed(Player.keyB) then
-        local rx, ry = self.vx, 0
+        local rx, ry = self.vx, -3
         if Input:isDown(Player.keyLeft) then rx = rx - 5 end
         if Input:isDown(Player.keyRight) then rx = rx + 5 end
         if Input:isDown(Player.keyUp) then ry = ry - 5 end
