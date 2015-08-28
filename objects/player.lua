@@ -1,6 +1,6 @@
 require 'AnAL'
 local Class = require 'middleclass'
-local Object = require 'object'
+local Object = require 'objects/object'
 local Player = Class('player', Object)
 
 local _vJump = 7
@@ -25,6 +25,7 @@ Player.static.sprIdleLift = love.graphics.newImage('assets/player_idle_lift.png'
 Player.static.sprRunLift = love.graphics.newImage('assets/player_run_lift.png')
 Player.static.sprJumpLift = love.graphics.newImage('assets/player_jump_lift.png')
 Player.static.sprFallLift = love.graphics.newImage('assets/player_fall_lift.png')
+Player.static.sprParticle = love.graphics.newImage('assets/particle.png')
 
 Player.static.collisions = {
     solid = {
@@ -98,6 +99,15 @@ function Player:initialize(world, x, y)
     self.animJumpLift = newAnimation(Player.sprJumpLift, 24, 24, 1/8, 0)
     self.animFallLift = newAnimation(Player.sprFallLift, 24, 24, 1/8, 0)
     self.sprite = self.animRun
+
+    self.dust = love.graphics.newParticleSystem(Player.sprParticle)
+	self.dust:setParticleLifetime(0.1, 0.3)
+	self.dust:setDirection(-math.pi/2)
+    self.dust:setSpread(math.pi/2)
+	self.dust:setSpeed(0, 100)
+    -- self.dust:setLinearAcceleration(0, 100)
+	self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
+	self.dust:setSizes(2, 0)
 end
 
 function Player:update(dt)
@@ -131,6 +141,8 @@ function Player:update(dt)
         if Input:pressed(Player.keyA) then
             self.vy = -_vJump
             self.ground = nil
+            self.dust:setPosition(self.x+self.w/2, self.y+self.h)
+            self.dust:emit(10)
         end
     end
 
@@ -159,10 +171,12 @@ function Player:update(dt)
         self.sprite = self.vy < 0 and (self.hold and self.animJumpLift or self.animJump) or (self.hold and self.animFallLift or self.animFall)
     end
     self.sprite:update(dt)
+    self.dust:update(dt)
 end
 
 function Player:draw()
     -- Object.draw(self)
+	love.graphics.draw(self.dust)
     local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end

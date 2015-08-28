@@ -1,6 +1,6 @@
 hump/
-AnAL.lua
+bump/
+middleclass/
+stateful/
+love-misc-libs/
 autogen.sh
-bump.lua
-middleclass.lua
-stateful.lua

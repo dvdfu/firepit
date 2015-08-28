@@ -1,5 +1,5 @@
 local Class = require 'middleclass'
-local Object = require 'object'
+local Object = require 'objects/object'
 local Lava = Class('lava', Object)
 
 Lava.static.sprLava = love.graphics.newImage('assets/lava.png')

@@ -1,8 +1,13 @@
 local Class = require 'middleclass'
-local Object = require 'object'
+local Object = require 'objects/object'
 local Item = Class('item', Object)
 
 Item.static.sprite = love.graphics.newImage('assets/item.png')
+
+Item.static.powerups = {
+    'doublejump',
+    'dash'
+}
 
 Item.static.collisions = {
     solid = {
@@ -37,6 +42,7 @@ Item.static.collisions = {
 function Item:initialize(world, x, y)
     Object.initialize(self, world, x, y, 16, 16)
     self.name = 'item'
+    self.type = Item.powerups[math.random(1, #Item.powerups)]
     self.vy = -5
     self.vx = math.random(-3, 3)
     self.timer = 0

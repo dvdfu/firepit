@@ -1,12 +1,14 @@
+package.path = '?/?.lua;love-misc-libs/?/?.lua;'..package.path
+
 math.randomseed(os.time())
 love.graphics.setDefaultFilter('nearest', 'nearest')
 love.graphics.setLineWidth(4)
 love.graphics.setLineStyle('rough')
 
 Input = require 'input'
-Gamestate = require 'hump.gamestate'
-Game = require 'game'
-scale = 1
+Gamestate = require 'hump/gamestate'
+Game = require 'states/game'
+scale = 2
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)

@@ -1,6 +1,6 @@
 require 'AnAL'
 local Class = require 'middleclass'
-local Object = require 'object'
+local Object = require 'objects/object'
 local Enemy = Class('enemy', Object)
 
 Enemy.static.sprWalk = love.graphics.newImage('assets/enemy_walk.png')
@@ -66,7 +66,7 @@ function Enemy:initialize(world, x, y)
     self.animWalk = newAnimation(Enemy.sprWalk, 24, 24, 1/8, 0)
     self.animStun = newAnimation(Enemy.sprStun, 24, 24, 1/8, 0)
     self.animStar = newAnimation(Enemy.sprStar, 10, 10, 1/8, 0)
-    self.direction = -1
+    self.direction = math.random() > 0.5 and -1 or 1
     self:gotoState('Walk')
 end
 
@@ -185,6 +185,12 @@ function Hold:enteredState()
     self.vy = 0
 end
 
+function Hold:exitedState()
+    if self.player and self.player.hold == self then
+        self.player.hold = nil
+    end
+end
+
 function Hold:update(dt)
     if self.holdTimer < 20 then
         local dx, dy = self.player.x - self.x, self.player.y-14 - self.y
@@ -228,7 +234,7 @@ end
 local Dead = Enemy:addState('Dead')
 
 function Dead:enteredState()
-    self.dropItem(self.x, self.y)
+    -- self.dropItem(self.x, self.y) TODO
     self.deadTimer = 0
     self.vy = -6
     self.world:remove(self)

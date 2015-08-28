@@ -1,12 +1,11 @@
 local Game = {}
-
-local Camera = require 'hump.camera'
-local Solid = require 'solid'
-local Player = require 'player'
-local Enemy = require 'enemy'
-local Item = require 'item'
-local Lava = require 'lava'
+local Camera = require 'hump/camera'
 local Bump = require 'bump'
+local Solid = require 'objects/solid'
+local Player = require 'objects/player'
+local Enemy = require 'objects/enemy'
+local Item = require 'objects/item'
+local Lava = require 'objects/lava'
 
 local world = {}
 local sw = love.graphics.getWidth()/2
@@ -24,11 +23,6 @@ function Game:enter()
     cam = Camera(cx, cy)
 
     enemies = {}
-    addEnemy(sw-64, 0)
-    addEnemy(sw-64, -32)
-    addEnemy(sw-96, 0)
-    addEnemy(sw-96, -32)
-
     items = {}
 end
 

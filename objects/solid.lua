@@ -1,5 +1,5 @@
 local Class = require 'middleclass'
-local Object = require 'object'
+local Object = require 'objects/object'
 local Solid = Class('solid', Object)
 
 function Solid:initialize(world, x, y, w, h)
