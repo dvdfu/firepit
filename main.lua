@@ -1,4 +1,4 @@
-package.path = '?/?.lua;love-misc-libs/?/?.lua;'..package.path
+package.path = '.?/?.lua;.hump/?.lua;.lml/?/?.lua;'..package.path
 
 math.randomseed(os.time())
 love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -6,7 +6,7 @@ love.graphics.setLineWidth(4)
 love.graphics.setLineStyle('rough')
 
 Input = require 'input'
-Gamestate = require 'hump/gamestate'
+Gamestate = require 'gamestate'
 Game = require 'states/game'
 scale = 2
 

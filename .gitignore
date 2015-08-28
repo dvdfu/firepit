@@ -1,6 +1,2 @@
-hump/
-bump/
-middleclass/
-stateful/
-love-misc-libs/
+.*/
 autogen.sh

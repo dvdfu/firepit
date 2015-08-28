@@ -1,5 +1,5 @@
 local Game = {}
-local Camera = require 'hump/camera'
+local Camera = require 'camera'
 local Bump = require 'bump'
 local Solid = require 'objects/solid'
 local Player = require 'objects/player'
