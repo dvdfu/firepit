@@ -64,7 +64,7 @@ Player.static.collisions = {
             if col.other.state == Enemy.stunState and Input:isDown(Player.keyB) and self.state == Player.normalState then
                 col.other:grab(self)
                 self:gotoState(Player.liftState)
-            elseif col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
+            elseif self.state ~= Player.hurtState and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
                 self.vy = -_vJump*0.7
                 self.y = col.other.y - self.h
                 self.world:update(self, self.x, self.y)
@@ -75,7 +75,12 @@ Player.static.collisions = {
                 end
             elseif col.other.state == Enemy.walkState and self.state ~= Player.hurtState then
                 self:gotoState(Player.hurtState)
-                self.px = col.other.direction * 4
+                if col.normal.x == 0 then
+                    self.px = col.other.direction*6
+                else
+                    self.px = col.normal.x*6
+                end
+                self.py = -3
             end
         end
     },
@@ -107,7 +112,7 @@ function Player:initialize(world, x, y)
     self.direction = self.vx > 0 and 1 or -1
     self.hold = nil
     self.mx = 0 --move
-    self.px = 0 --push
+    self.px, self.py = 0, 0 --push
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -186,8 +191,12 @@ function Player:update(dt)
     end
 
     self.vx = self.mx + self.px
+    if self.py ~= 0 then
+        self.vy = self.py
+        self.py = 0
+    end
     if math.abs(self.px) > 0.1 then
-        self.px = self.px * 0.95
+        self.px = self.px * 0.9
     else
         self.px = 0
     end
@@ -255,10 +264,7 @@ local Hurt = Player:addState(Player.hurtState)
 
 function Hurt:enteredState()
     self.state = Player.hurtState
-    self.hurtTimer = 15
-    if self.vy > -4 then
-        self.vy = -4
-    end
+    self.hurtTimer = 60
 end
 
 function Hurt:update(dt)

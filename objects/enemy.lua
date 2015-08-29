@@ -70,6 +70,7 @@ Enemy.static.collisions = {
         func = function(self, col)
             col.other:touch(self.x, self.state == Enemy.walkState)
             self:gotoState(Enemy.deadState)
+            self.deadTimer = 60
         end
     }
 }
@@ -131,6 +132,9 @@ end
 
 function Enemy:stomp()
     self:gotoState(Enemy.stunState)
+end
+
+function Enemy:grab(player)
 end
 
 function Enemy:isDead()
@@ -273,10 +277,10 @@ function Dead:update(dt)
     self.y = self.y + self.vy
 end
 
-function Hold:stomp() end
+function Dead:stomp() end
 
 function Dead:isDead()
-    return self.deadTimer > 0 --TODO
+    return self.deadTimer > 60 --TODO
 end
 
 return Enemy

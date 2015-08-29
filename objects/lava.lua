@@ -3,25 +3,32 @@ local Object = require 'objects/object'
 local Lava = Class('lava', Object)
 
 Lava.static.sprLava = love.graphics.newImage('assets/lava.png')
+Lava.static.sprGlow = love.graphics.newImage('assets/lava_glow.png')
 Lava.static.sprParticle = love.graphics.newImage('assets/particle.png')
 
-Lava.static.shader = love.graphics.newShader[[
+Lava.static.lavaShader = love.graphics.newShader[[
     extern float time;
-
-    #ifdef VERTEX
-    vec4 position(mat4 transform_projection, vec4 vertex_position) {
-        return transform_projection * vertex_position;
-    }
-    #endif
-
-    #ifdef PIXEL
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec2 hs = love_ScreenSize.xy;
         float disp = sin(16*texture_coords.x + 2*time);
         texture_coords.y += 4*disp/hs.y;
         return Texel(texture, texture_coords);
     }
-    #endif
+]]
+
+Lava.static.glowShader = love.graphics.newShader[[
+    extern float time;
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+        vec4 pixel = vec4(0.6, 0.4, 0.1, 1);
+
+        vec2 hs = love_ScreenSize.xy;
+        float disp = sin(16*texture_coords.x + 2*time);
+        texture_coords.y += 20*disp/hs.y;
+
+        pixel.a = texture_coords.y*texture_coords.y;
+        pixel.a = floor(pixel.a*5)/5;
+        return pixel;
+    }
 ]]
 
 function Lava:initialize(world)
@@ -54,12 +61,18 @@ function Lava:draw()
     self.fire:update(1/60)
     love.graphics.draw(self.fire)
 
-    Lava.shader:send('time', os.clock())
+    Lava.lavaShader:send('time', os.clock())
+    Lava.glowShader:send('time', os.clock())
     local s = love.graphics.getShader()
-    love.graphics.setShader(Lava.shader)
+
+    love.graphics.setShader(Lava.glowShader)
+    love.graphics.setBlendMode('additive')
+    love.graphics.draw(Lava.sprGlow, self.x, self.y-96, 0, self.w/16, 96/16)
+    love.graphics.setBlendMode('alpha')
+    love.graphics.setShader(Lava.lavaShader)
     love.graphics.draw(Lava.sprLava, self.x, self.y-13, 0, self.w/16, self.h/16)
+
     love.graphics.setShader(s)
-    -- Object.draw(self)
 end
 
 function Lava:touch(x, feed)
