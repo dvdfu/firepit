@@ -30,11 +30,11 @@ function Lava:initialize(world)
     self.level = self.y
 
     self.fire = love.graphics.newParticleSystem(Lava.sprParticle)
-	self.fire:setParticleLifetime(0.1, 1)
+	self.fire:setParticleLifetime(0.3, 1)
 	self.fire:setDirection(-math.pi/2)
     self.fire:setSpread(math.pi/4)
-    self.fire:setAreaSpread('normal', 4, 4)
-	self.fire:setSpeed(50, 150)
+    self.fire:setAreaSpread('normal', 8, 0)
+	self.fire:setSpeed(50, 200)
     self.fire:setLinearAcceleration(0, 200)
 	self.fire:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
 	self.fire:setSizes(2, 0)
@@ -62,10 +62,12 @@ function Lava:draw()
     -- Object.draw(self)
 end
 
-function Lava:feed(x)
+function Lava:touch(x, feed)
     self.fire:setPosition(x, self.y)
-    self.fire:emit(20)
-    self.level = self.level - 16
+    self.fire:emit(10)
+    if feed then
+        self.level = self.level - 16
+    end
 end
 
 return Lava

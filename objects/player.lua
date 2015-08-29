@@ -61,7 +61,6 @@ Player.static.collisions = {
     enemy = {
         type = 'cross',
         func = function(self, col)
-            local grabbed = false
             if col.other.state == Enemy.stunState and Input:isDown(Player.keyB) and self.state == Player.normalState then
                 col.other:grab(self)
                 self:gotoState(Player.liftState)
@@ -76,6 +75,7 @@ Player.static.collisions = {
                 end
             elseif col.other.state == Enemy.walkState and self.state ~= Player.hurtState then
                 self:gotoState(Player.hurtState)
+                self.px = col.other.direction * 4
             end
         end
     },
@@ -106,6 +106,8 @@ function Player:initialize(world, x, y)
     self.ground = nil
     self.direction = self.vx > 0 and 1 or -1
     self.hold = nil
+    self.mx = 0 --move
+    self.px = 0 --push
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -143,9 +145,9 @@ function Player:update(dt)
         if self.vx >= -aMove and self.ground then
             self.dust:emit(1)
         end
-        self.vx = self.vx - aMove
-        if self.vx < -_vMove then
-            self.vx = -_vMove
+        self.mx = self.mx - aMove
+        if self.mx < -_vMove then
+            self.mx = -_vMove
         end
         self.direction = -1
         self.sprite = self.hold and self.animRunLift or self.animRun
@@ -153,19 +155,19 @@ function Player:update(dt)
         if self.vx <= aMove and self.ground then
             self.dust:emit(1)
         end
-        self.vx = self.vx + aMove
-        if self.vx > _vMove then
-            self.vx = _vMove
+        self.mx = self.mx + aMove
+        if self.mx > _vMove then
+            self.mx = _vMove
         end
         self.direction = 1
         self.sprite = self.hold and self.animRunLift or self.animRun
     else
-        if self.vx > aMove then
-            self.vx = self.vx - aMove
-        elseif self.vx < -aMove then
-            self.vx = self.vx + aMove
+        if self.mx > aMove then
+            self.mx = self.mx - aMove
+        elseif self.mx < -aMove then
+            self.mx = self.mx + aMove
         else
-            self.vx = 0
+            self.mx = 0
         end
         self.sprite = self.hold and self.animIdleLift or self.animIdle
     end
@@ -183,6 +185,12 @@ function Player:update(dt)
         self.vy = _vFall
     end
 
+    self.vx = self.mx + self.px
+    if math.abs(self.px) > 0.1 then
+        self.px = self.px * 0.95
+    else
+        self.px = 0
+    end
     self.x = self.x + self.vx
     self.y = self.y + self.vy
     self.ground = nil
@@ -247,7 +255,10 @@ local Hurt = Player:addState(Player.hurtState)
 
 function Hurt:enteredState()
     self.state = Player.hurtState
-    self.hurtTimer = 60
+    self.hurtTimer = 15
+    if self.vy > -4 then
+        self.vy = -4
+    end
 end
 
 function Hurt:update(dt)

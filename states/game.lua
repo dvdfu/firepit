@@ -97,7 +97,7 @@ function Game:update(dt)
     for key, enemy in pairs(enemies) do
         enemy:update(dt)
         if enemy:isDead() then
-            world:remove(enemy)
+            -- world:remove(enemy)
             enemies[key] = nil
         end
     end

@@ -68,9 +68,7 @@ Enemy.static.collisions = {
     lava = {
         type = 'cross',
         func = function(self, col)
-            if self.state == Enemy.walkState then
-                col.other:feed(self.x)
-            end
+            col.other:touch(self.x, self.state == Enemy.walkState)
             self:gotoState(Enemy.deadState)
         end
     }
@@ -261,6 +259,7 @@ local Dead = Enemy:addState(Enemy.deadState)
 
 function Dead:enteredState()
     self.state = Enemy.deadState
+    self.world:remove(self)
     -- self.dropItem(self.x, self.y) --TODO
     self.deadTimer = 0
     self.vy = -8
@@ -273,6 +272,8 @@ function Dead:update(dt)
     self.x = self.x + self.vx
     self.y = self.y + self.vy
 end
+
+function Hold:stomp() end
 
 function Dead:isDead()
     return self.deadTimer > 0 --TODO
