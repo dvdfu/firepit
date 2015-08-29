@@ -8,7 +8,7 @@ local _vFall = 7
 local _aFall = 0.3
 local _vMove = 2
 local _aMoveAir = 0.2
-local _aMoveGround = 0.5
+local _aMoveGround = 0.3
 
 Player.static.keyLeft = 'left'
 Player.static.keyRight = 'right'
@@ -141,7 +141,6 @@ function Player:update(dt)
         if Input:pressed(Player.keyA) then
             self.vy = -_vJump
             self.ground = nil
-            self.dust:setPosition(self.x+self.w/2, self.y+self.h)
             self.dust:emit(10)
         end
     end
@@ -170,14 +169,15 @@ function Player:update(dt)
     if not self.ground then
         self.sprite = self.vy < 0 and (self.hold and self.animJumpLift or self.animJump) or (self.hold and self.animFallLift or self.animFall)
     end
-    self.sprite:update(dt)
-    self.dust:update(dt)
 end
 
 function Player:draw()
     -- Object.draw(self)
+    self.dust:setPosition(self.x+self.w/2, self.y+self.h)
+    self.dust:update(1/60)
 	love.graphics.draw(self.dust)
     local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
+    self.sprite:update(1/60)
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 

@@ -228,7 +228,7 @@ function Thrown:update(dt)
         if self.throwTimer == 0 then
             cs = 10
         end
-        if self.throwTimer < 30 then
+        if self.throwTimer < 30 and self.vx > 0.1 then
             self.throwTimer = self.throwTimer + 1
         else
             self:gotoState('Stun')
@@ -240,6 +240,7 @@ end
 
 function Thrown:collideEnemy(col)
     col.other:gotoState('Dead')
+    col.other.vx = self.vx
 end
 
 -- DEAD STATE
@@ -248,16 +249,14 @@ local Dead = Enemy:addState('Dead')
 function Dead:enteredState()
     -- self.dropItem(self.x, self.y) TODO
     self.deadTimer = 0
-    self.vy = -6
+    self.vy = -8
     self.world:remove(self)
 end
 
 function Dead:update(dt)
     self.deadTimer = self.deadTimer + 1
     self.vy = self.vy + _aFall
-    if self.vy > _vFall then
-        self.vy = _vFall
-    end
+    self.vx = self.vx * 0.98
     self.x = self.x + self.vx
     self.y = self.y + self.vy
 end
