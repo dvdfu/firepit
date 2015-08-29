@@ -124,17 +124,17 @@ function Flash:update(dt)
     self.x = self.x + self.vx
     self.y = self.y + self.vy
     self:collide()
-    self.timer = self.timer+dt
+    self.timer = self.timer + 1
 end
 
 function Flash:draw()
-    if self.timer % 0.05 > 0.025 then
+    if self.timer % 4 < 2 then
         Item.draw(self)
     end
 end
 
 function Flash:isDead()
-    return self.timer > 3
+    return self.timer > 3*60
 end
 
 return Item

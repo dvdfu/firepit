@@ -8,6 +8,12 @@ Enemy.static.sprStun = love.graphics.newImage('assets/enemy_rock.png')
 Enemy.static.sprStar = love.graphics.newImage('assets/star.png')
 Enemy.static.sprParticle = love.graphics.newImage('assets/particle.png')
 
+Enemy.static.walkState = 'Walk'
+Enemy.static.stunState = 'Stun'
+Enemy.static.holdState = 'Hold'
+Enemy.static.thrownState = 'Thrown'
+Enemy.static.deadState = 'Dead'
+
 Enemy.static.collisions = {
     solid = {
         type = 'slide',
@@ -37,13 +43,26 @@ Enemy.static.collisions = {
     enemy = {
         type = 'cross',
         func = function(self, col)
-            self:collideEnemy(col)
+            if col.other.state == Enemy.thrownState then
+                self:gotoState(Enemy.deadState)
+                self.vx = col.other.vx
+            elseif self.state ~= Enemy.thrownState then
+                if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+                    self.vy = 0
+                    self.y = col.other.y - self.h
+                    self.world:update(self, self.x, self.y)
+                    self.ground = col.other
+                end
+                if col.normal.x ~= 0 then
+                    self.vx = -self.vx
+                end
+            end
         end
     },
     lava = {
         type = 'cross',
         func = function(self, col)
-            self:gotoState('Dead')
+            self:gotoState(Enemy.deadState)
         end
     }
 }
@@ -68,7 +87,7 @@ function Enemy:initialize(world, x, y)
     self.animStun = newAnimation(Enemy.sprStun, 24, 24, 1/8, 0)
     self.animStar = newAnimation(Enemy.sprStar, 10, 10, 1/8, 0)
     self.direction = math.random() > 0.5 and -1 or 1
-    self:gotoState('Walk')
+    self:gotoState(Enemy.walkState)
 
     self.dust = love.graphics.newParticleSystem(Enemy.sprParticle)
 	self.dust:setParticleLifetime(0.1, 0.3)
@@ -103,32 +122,19 @@ function Enemy:draw()
     self.sprite:draw(self.x + self.w/2, self.y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()-self.h)
 end
 
-function Enemy:collideEnemy(col)
-    if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-        self.vy = 0
-        self.y = col.other.y - self.h
-        self.world:update(self, self.x, self.y)
-        self.ground = col.other
-    end
-    if col.normal.x ~= 0 then
-        self.vx = -self.vx
-    end
-end
-
 function Enemy:stomp()
-    self:gotoState('Stun')
+    self:gotoState(Enemy.stunState)
 end
-
-function Enemy:grab(player) end
 
 function Enemy:isDead()
     return false
 end
 
 -- WALK STATE
-local Walk = Enemy:addState('Walk')
+local Walk = Enemy:addState(Enemy.walkState)
 
 function Walk:enteredState()
+    self.state = Enemy.walkState
     self.sprite = self.animWalk
     self.sprite.speed = 1
     self.vx = _vMove * self.direction
@@ -140,10 +146,11 @@ function Walk:update(dt)
 end
 
 -- STUN STATE
-local Stun = Enemy:addState('Stun')
+local Stun = Enemy:addState(Enemy.stunState)
 
 function Stun:enteredState()
     -- cs = 6 -- TODO
+    self.state = Enemy.stunState
     self.sprite = self.animStun
     self.stompTimer = 180
     self.sprite.speed = 0
@@ -155,7 +162,7 @@ function Stun:update(dt)
     Enemy.update(self, dt)
     self.animStar:update(dt)
     if self.stompTimer <= 0 then
-        self:gotoState('Walk')
+        self:gotoState(Enemy.walkState)
     end
 end
 
@@ -172,13 +179,14 @@ end
 function Stun:grab(player)
     player.hold = self
     self.player = player
-    self:gotoState('Hold')
+    self:gotoState(Enemy.holdState)
 end
 
 -- HOLD STATE
-local Hold = Enemy:addState('Hold')
+local Hold = Enemy:addState(Enemy.holdState)
 
 function Hold:enteredState()
+    self.state = Enemy.holdState
     self.sprite = self.animStun
     self.sprite.speed = 0
     self.holdTimer = 0
@@ -205,15 +213,16 @@ function Hold:update(dt)
 end
 
 function Hold:release()
-    self:gotoState('Thrown')
+    self:gotoState(Enemy.thrownState)
 end
 
 function Hold:stomp() end
 
 -- THROWN STATE
-local Thrown = Enemy:addState('Thrown')
+local Thrown = Enemy:addState(Enemy.thrownState)
 
 function Thrown:enteredState()
+    self.state = Enemy.thrownState
     self.throwTimer = 0
 end
 
@@ -228,25 +237,21 @@ function Thrown:update(dt)
         if self.throwTimer == 0 then
             cs = 10
         end
-        if self.throwTimer < 30 and self.vx > 0.1 then
+        if self.throwTimer < 30 and math.abs(self.vx) > 0.1 then
             self.throwTimer = self.throwTimer + 1
         else
-            self:gotoState('Stun')
+            self:gotoState(Enemy.stunState)
         end
     else
         self.vx = self.vx * 0.99
     end
 end
 
-function Thrown:collideEnemy(col)
-    col.other:gotoState('Dead')
-    col.other.vx = self.vx
-end
-
 -- DEAD STATE
-local Dead = Enemy:addState('Dead')
+local Dead = Enemy:addState(Enemy.deadState)
 
 function Dead:enteredState()
+    self.state = Enemy.deadState
     -- self.dropItem(self.x, self.y) TODO
     self.deadTimer = 0
     self.vy = -8

@@ -1,4 +1,5 @@
 require 'AnAL'
+local Enemy = require 'objects/enemy'
 local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Player = Class('player', Object)
@@ -26,6 +27,10 @@ Player.static.sprRunLift = love.graphics.newImage('assets/player_run_lift.png')
 Player.static.sprJumpLift = love.graphics.newImage('assets/player_jump_lift.png')
 Player.static.sprFallLift = love.graphics.newImage('assets/player_fall_lift.png')
 Player.static.sprParticle = love.graphics.newImage('assets/particle.png')
+
+Player.static.normalState = 'Normal'
+Player.static.liftState = 'Lift'
+Player.static.hurtState = 'Hurt'
 
 Player.static.collisions = {
     solid = {
@@ -57,20 +62,30 @@ Player.static.collisions = {
         type = 'cross',
         func = function(self, col)
             local grabbed = false
-            if Input:isDown(Player.keyB) and not self.hold then
-                grabbed = col.other:grab(self)
-            end
-            if not grabbed and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
-                col.other:stomp()
+            if col.other.state == Enemy.stunState and Input:isDown(Player.keyB) and self.state == Player.normalState then
+                col.other:grab(self)
+                self:gotoState(Player.liftState)
+            elseif col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
                 self.vy = -_vJump*0.7
+                self.y = col.other.y - self.h
+                self.world:update(self, self.x, self.y)
+                col.other:stomp()
+                if Input:isDown(Player.keyB) and self.state == Player.normalState then
+                    col.other:grab(self)
+                    self:gotoState(Player.liftState)
+                end
+            elseif col.other.state == Enemy.walkState and self.state ~= Player.hurtState then
+                self:gotoState(Player.hurtState)
             end
         end
     },
     lava = {
         type = 'bounce',
         func = function(self, col)
-            self.vy = -self.vy
-            -- TODO
+            self.vy = -7
+            if self.state ~= Player.hurtState then
+                self:gotoState(Player.hurtState)
+            end
         end
     },
     item = {
@@ -99,6 +114,7 @@ function Player:initialize(world, x, y)
     self.animJumpLift = newAnimation(Player.sprJumpLift, 24, 24, 1/8, 0)
     self.animFallLift = newAnimation(Player.sprFallLift, 24, 24, 1/8, 0)
     self.sprite = self.animRun
+    self:gotoState(Player.normalState)
 
     self.dust = love.graphics.newParticleSystem(Player.sprParticle)
 	self.dust:setParticleLifetime(0.1, 0.3)
@@ -108,6 +124,15 @@ function Player:initialize(world, x, y)
 	self.dust:setSpeed(0, 100)
 	self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
 	self.dust:setSizes(2, 0)
+
+    self.fire = love.graphics.newParticleSystem(Player.sprParticle)
+	self.fire:setParticleLifetime(0.1, 0.3)
+	self.fire:setDirection(-math.pi/2)
+    self.fire:setSpread(math.pi/4)
+    self.fire:setAreaSpread('normal', 4, 4)
+	self.fire:setSpeed(0, 200)
+	self.fire:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
+	self.fire:setSizes(2, 0)
 end
 
 function Player:update(dt)
@@ -154,31 +179,90 @@ function Player:update(dt)
     self.y = self.y + self.vy
     self.ground = nil
     self:collide()
+end
 
-    if self.hold and self.hold.holdTimer >= 20 and Input:pressed(Player.keyB) then
+function Player:draw()
+    self.dust:setPosition(self.x+self.w/2, self.y+self.h)
+    self.dust:update(1/60)
+	love.graphics.draw(self.dust)
+    self.fire:setPosition(self.x+self.w/2, self.y+self.h/2)
+    self.fire:update(1/60)
+	love.graphics.draw(self.fire)
+
+    local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
+    self.sprite:update(1/60)
+    self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+end
+
+local Normal = Player:addState(Player.normalState)
+
+function Normal:enteredState()
+    self.state = Player.normalState
+end
+
+function Normal:update(dt)
+    Player.update(self, dt)
+    if not self.ground then
+        self.sprite = self.vy < 0 and self.animJump or self.animFall
+    end
+end
+
+local Lift = Player:addState(Player.liftState)
+
+function Lift:enteredState()
+    self.state = Player.liftState
+end
+
+function Lift:exitedState()
+    self.hold:release()
+    self.hold = nil
+end
+
+function Lift:update(dt)
+    Player.update(self, dt)
+    if not self.ground then
+        self.sprite = self.vy < 0 and self.animJumpLift or self.animFallLift
+    end
+
+    if self.hold and self.hold.holdTimer >= 20 and Input:isDown(Player.keyB) then
         local rx, ry = 0, 0
         if Input:isDown(Player.keyLeft) then rx = rx - 7 end
         if Input:isDown(Player.keyRight) then rx = rx + 7 end
         if Input:isDown(Player.keyUp) then ry = ry - 7 end
         if Input:isDown(Player.keyDown) then ry = ry + 7 end
         self.hold.vx, self.hold.vy = rx, ry
-        self.hold:release()
-        self.hold = nil
-    end
-
-    if not self.ground then
-        self.sprite = self.vy < 0 and (self.hold and self.animJumpLift or self.animJump) or (self.hold and self.animFallLift or self.animFall)
+        self:gotoState(Player.normalState)
     end
 end
 
-function Player:draw()
-    -- Object.draw(self)
-    self.dust:setPosition(self.x+self.w/2, self.y+self.h)
-    self.dust:update(1/60)
-	love.graphics.draw(self.dust)
-    local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
-    self.sprite:update(1/60)
-    self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+local Hurt = Player:addState(Player.hurtState)
+
+function Hurt:enteredState()
+    self.state = Player.hurtState
+    self.hurtTimer = 60
+end
+
+function Hurt:update(dt)
+    Player.update(self, dt)
+    if not self.ground then
+        self.sprite = self.vy < 0 and self.animJump or self.animFall
+    end
+    if self.hurtTimer > 0 then
+        self.hurtTimer = self.hurtTimer - 1
+    else
+        self:gotoState(Player.normalState)
+    end
+    if self.hurtTimer % 2 == 0 then
+        self.fire:emit(1)
+    end
+end
+
+function Hurt:draw()
+    if self.hurtTimer % 4 < 2 then
+        love.graphics.setColor(255, 73, 73)
+    end
+    Player.draw(self)
+    love.graphics.setColor(255, 255, 255)
 end
 
 return Player

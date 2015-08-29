@@ -4,11 +4,12 @@ math.randomseed(os.time())
 love.graphics.setDefaultFilter('nearest', 'nearest')
 love.graphics.setLineWidth(4)
 love.graphics.setLineStyle('rough')
+love.mouse.setVisible(false)
 
 Input = require 'input'
 Gamestate = require 'gamestate'
 Game = require 'states/game'
-scale = 2
+scale = 1
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)
