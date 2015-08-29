@@ -45,7 +45,7 @@ Enemy.static.collisions = {
         func = function(self, col)
             if col.other.state == Enemy.thrownState then
                 self:gotoState(Enemy.deadState)
-                self.vx = col.other.vx
+                self.vx = col.other.vx/2
             elseif self.state ~= Enemy.thrownState then
                 if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
                     self.vy = 0
@@ -54,6 +54,12 @@ Enemy.static.collisions = {
                     self.ground = col.other
                 end
                 if col.normal.x ~= 0 then
+                    if col.normal.x == 1 then
+                        self.x = col.other.x + col.other.w
+                    else
+                        self.x = col.other.x - self.w
+                    end
+                    self.world:update(self, self.x, self.y)
                     self.vx = -self.vx
                 end
             end
@@ -62,6 +68,9 @@ Enemy.static.collisions = {
     lava = {
         type = 'cross',
         func = function(self, col)
+            if self.state == Enemy.walkState then
+                col.other:feed(self.x)
+            end
             self:gotoState(Enemy.deadState)
         end
     }
@@ -152,7 +161,7 @@ function Stun:enteredState()
     -- cs = 6 -- TODO
     self.state = Enemy.stunState
     self.sprite = self.animStun
-    self.stompTimer = 180
+    self.stompTimer = 4*60
     self.sprite.speed = 0
 end
 
@@ -252,10 +261,9 @@ local Dead = Enemy:addState(Enemy.deadState)
 
 function Dead:enteredState()
     self.state = Enemy.deadState
-    -- self.dropItem(self.x, self.y) TODO
+    -- self.dropItem(self.x, self.y) --TODO
     self.deadTimer = 0
     self.vy = -8
-    self.world:remove(self)
 end
 
 function Dead:update(dt)
@@ -267,7 +275,7 @@ function Dead:update(dt)
 end
 
 function Dead:isDead()
-    return self.deadTimer > 60
+    return self.deadTimer > 0 --TODO
 end
 
 return Enemy

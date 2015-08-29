@@ -80,9 +80,11 @@ Player.static.collisions = {
         end
     },
     lava = {
-        type = 'bounce',
+        type = 'cross',
         func = function(self, col)
             self.vy = -7
+            self.y = col.other.level - self.h
+            self.world:update(self, self.x, self.y)
             if self.state ~= Player.hurtState then
                 self:gotoState(Player.hurtState)
             end
@@ -123,7 +125,7 @@ function Player:initialize(world, x, y)
     self.dust:setAreaSpread('normal', 4, 0)
 	self.dust:setSpeed(0, 100)
 	self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
-	self.dust:setSizes(2, 0)
+	self.dust:setSizes(1, 0)
 
     self.fire = love.graphics.newParticleSystem(Player.sprParticle)
 	self.fire:setParticleLifetime(0.1, 0.3)
@@ -138,6 +140,9 @@ end
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
     if Input:isDown(Player.keyLeft) then
+        if self.vx >= -aMove and self.ground then
+            self.dust:emit(1)
+        end
         self.vx = self.vx - aMove
         if self.vx < -_vMove then
             self.vx = -_vMove
@@ -145,6 +150,9 @@ function Player:update(dt)
         self.direction = -1
         self.sprite = self.hold and self.animRunLift or self.animRun
     elseif Input:isDown(Player.keyRight) then
+        if self.vx <= aMove and self.ground then
+            self.dust:emit(1)
+        end
         self.vx = self.vx + aMove
         if self.vx > _vMove then
             self.vx = _vMove
@@ -224,7 +232,7 @@ function Lift:update(dt)
         self.sprite = self.vy < 0 and self.animJumpLift or self.animFallLift
     end
 
-    if self.hold and self.hold.holdTimer >= 20 and Input:isDown(Player.keyB) then
+    if self.hold and self.hold.holdTimer >= 20 and Input:pressed(Player.keyB) then
         local rx, ry = 0, 0
         if Input:isDown(Player.keyLeft) then rx = rx - 7 end
         if Input:isDown(Player.keyRight) then rx = rx + 7 end

@@ -97,6 +97,7 @@ function Game:update(dt)
     for key, enemy in pairs(enemies) do
         enemy:update(dt)
         if enemy:isDead() then
+            world:remove(enemy)
             enemies[key] = nil
         end
     end
@@ -122,7 +123,6 @@ function Game:draw()
         for _, solid in pairs(solids) do
             solid:draw()
         end
-        l:draw()
         p:draw()
         for _, enemy in pairs(enemies) do
             enemy:draw()
@@ -130,6 +130,7 @@ function Game:draw()
         for key, item in pairs(items) do
             item:draw()
         end
+        l:draw()
     end)
 end
 
