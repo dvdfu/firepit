@@ -6,6 +6,7 @@ local Enemy = Class('enemy', Object)
 Enemy.static.sprWalk = love.graphics.newImage('assets/enemy_walk.png')
 Enemy.static.sprStun = love.graphics.newImage('assets/enemy_rock.png')
 Enemy.static.sprStar = love.graphics.newImage('assets/star.png')
+Enemy.static.sprParticle = love.graphics.newImage('assets/particle.png')
 
 Enemy.static.collisions = {
     solid = {
@@ -68,37 +69,38 @@ function Enemy:initialize(world, x, y)
     self.animStar = newAnimation(Enemy.sprStar, 10, 10, 1/8, 0)
     self.direction = math.random() > 0.5 and -1 or 1
     self:gotoState('Walk')
-end
 
---[[
-update(dt)
-draw()
-collideEnemy(col)
-stomp()
-grab()
-isDead()
-]]--
+    self.dust = love.graphics.newParticleSystem(Enemy.sprParticle)
+	self.dust:setParticleLifetime(0.1, 0.3)
+	self.dust:setDirection(-math.pi/2)
+    self.dust:setSpread(math.pi/2)
+    self.dust:setAreaSpread('uniform', self.w/2, 0)
+	self.dust:setSpeed(0, 100)
+	self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
+	self.dust:setSizes(1, 0)
+end
 
 function Enemy:update(dt)
     self.vy = self.vy + _aFall
     if self.vy > _vFall then
         self.vy = _vFall
     end
-
     self.x = self.x + self.vx
     self.y = self.y + self.vy
     if self.ground then
         self.x = self.x + self.ground.vx
         self.ground = nil
     end
-
     self:collide()
-    self.sprite:update(dt)
 end
 
 function Enemy:draw()
+    self.dust:setPosition(self.x+self.w/2, self.y+self.h)
+    self.dust:update(1/60)
+    love.graphics.draw(self.dust)
+
+    self.sprite:update(1/60)
     self.sprite:draw(self.x + self.w/2, self.y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()-self.h)
-    -- love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
 end
 
 function Enemy:collideEnemy(col)
@@ -141,19 +143,18 @@ end
 local Stun = Enemy:addState('Stun')
 
 function Stun:enteredState()
-    cs = 6 -- TODO
+    -- cs = 6 -- TODO
     self.sprite = self.animStun
-    self.stompTimer = 3*60
+    self.stompTimer = 180
     self.sprite.speed = 0
 end
 
 function Stun:update(dt)
     self.vx = self.vx * 0.6
-    if self.stompTimer > 0 then
-        self.stompTimer = self.stompTimer - 1
-        Enemy.update(self, dt)
-        self.animStar:update(dt)
-    else
+    self.stompTimer = self.stompTimer - 1
+    Enemy.update(self, dt)
+    self.animStar:update(dt)
+    if self.stompTimer <= 0 then
         self:gotoState('Walk')
     end
 end
@@ -213,16 +214,27 @@ function Hold:stomp() end
 local Thrown = Enemy:addState('Thrown')
 
 function Thrown:enteredState()
-    self.throwTimer = 30
+    self.throwTimer = 0
 end
 
 function Thrown:update(dt)
-    self.vx = self.vx * 0.98
-    self.sprite.speed = math.abs(self.vx/2)
     self.direction = self.vx > 0 and 1 or -1
     Enemy.update(self, dt)
+    self.sprite.speed = math.abs(self.vx)
+
     if self.ground then
-        self:gotoState('Stun')
+        self.vx = self.vx * 0.9
+        self.dust:emit(self.sprite.speed)
+        if self.throwTimer == 0 then
+            cs = 10
+        end
+        if self.throwTimer < 30 then
+            self.throwTimer = self.throwTimer + 1
+        else
+            self:gotoState('Stun')
+        end
+    else
+        self.vx = self.vx * 0.99
     end
 end
 

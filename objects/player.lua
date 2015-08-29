@@ -104,8 +104,8 @@ function Player:initialize(world, x, y)
 	self.dust:setParticleLifetime(0.1, 0.3)
 	self.dust:setDirection(-math.pi/2)
     self.dust:setSpread(math.pi/2)
+    self.dust:setAreaSpread('normal', 4, 0)
 	self.dust:setSpeed(0, 100)
-    -- self.dust:setLinearAcceleration(0, 100)
 	self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
 	self.dust:setSizes(2, 0)
 end
@@ -157,11 +157,11 @@ function Player:update(dt)
     self:collide()
 
     if self.hold and self.hold.holdTimer >= 20 and Input:pressed(Player.keyB) then
-        local rx, ry = self.vx, -3
-        if Input:isDown(Player.keyLeft) then rx = rx - 5 end
-        if Input:isDown(Player.keyRight) then rx = rx + 5 end
-        if Input:isDown(Player.keyUp) then ry = ry - 5 end
-        if Input:isDown(Player.keyDown) then ry = ry + 5 end
+        local rx, ry = 0, 0
+        if Input:isDown(Player.keyLeft) then rx = rx - 7 end
+        if Input:isDown(Player.keyRight) then rx = rx + 7 end
+        if Input:isDown(Player.keyUp) then ry = ry - 7 end
+        if Input:isDown(Player.keyDown) then ry = ry + 7 end
         self.hold.vx, self.hold.vy = rx, ry
         self.hold:release()
         self.hold = nil
