@@ -9,34 +9,33 @@ Item.static.powerups = {
     'dash'
 }
 
-Item.static.collisions = {
-    solid = {
-        type = 'slide',
-        func = function(self, col)
-			if col.normal.y ~= 0 then
-				self.vy = 0
-                self.vx = 0
-				if col.normal.y == -1 then
-					self.ground = col.other
-				end
-			end
-            if col.normal.x ~= 0 then
-                self.vx = -self.vx
-            end
-        end
-    },
-    platform = {
-        type = 'cross',
-        func = function(self, col)
-			if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-				self.vy = 0
-                self.vx = 0
-                self.y = col.other.y - self.h
-                self.world:update(self, self.x, self.y)
+Item.collide_solid = {
+    type = 'slide',
+    func = function(self, col)
+		if col.normal.y ~= 0 then
+			self.vy = 0
+            self.vx = 0
+			if col.normal.y == -1 then
 				self.ground = col.other
 			end
+		end
+        if col.normal.x ~= 0 then
+            self.vx = -self.vx
         end
-    }
+    end
+}
+
+Item.collide_platform = {
+    type = 'cross',
+    func = function(self, col)
+		if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+			self.vy = 0
+            self.vx = 0
+            self.y = col.other.y - self.h
+            self.world:update(self, self.x, self.y)
+			self.ground = col.other
+		end
+    end
 }
 
 function Item:initialize(world, x, y)

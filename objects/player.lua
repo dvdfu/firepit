@@ -32,77 +32,79 @@ Player.static.normalState = 'Normal'
 Player.static.liftState = 'Lift'
 Player.static.hurtState = 'Hurt'
 
-Player.static.collisions = {
-    solid = {
-        type = 'slide',
-        func = function(self, col)
-            if col.normal.y ~= 0 then
-                self.vy = 0
-                if col.normal.y == -1 then
-                    self.ground = col.other
-                end
-            end
-            if col.normal.x ~= 0 then
-                self.vx = 0
-            end
-        end
-    },
-    platform = {
-        type = 'cross',
-        func = function(self, col)
-            if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-                self.vy = 0
-                self.y = col.other.y - self.h
-                self.world:update(self, self.x, self.y)
+Player.collide_solid = {
+    type = 'slide',
+    func = function(self, col)
+        if col.normal.y ~= 0 then
+            self.vy = 0
+            if col.normal.y == -1 then
                 self.ground = col.other
             end
         end
-    },
-    enemy = {
-        type = 'cross',
-        func = function(self, col)
-            if col.other.state == Enemy.stunState and Input:isDown(Player.keyB) and self.state == Player.normalState then
+        if col.normal.x ~= 0 then
+            self.vx = 0
+        end
+    end
+}
+
+Player.collide_platform = {
+    type = 'cross',
+    func = function(self, col)
+        if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+            self.vy = 0
+            self.y = col.other.y - self.h
+            self.world:update(self, self.x, self.y)
+            self.ground = col.other
+        end
+    end
+}
+
+Player.collide_enemy = {
+    type = 'cross',
+    func = function(self, col)
+        if col.other.state == Enemy.stunState and Input:isDown(Player.keyB) and self.state == Player.normalState then
+            col.other:grab(self)
+            self:gotoState(Player.liftState)
+        elseif self.state ~= Player.hurtState and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
+            self.vy = -_vJump*0.7
+            self.y = col.other.y - self.h
+            self.world:update(self, self.x, self.y)
+            col.other:stomp()
+            if Input:isDown(Player.keyB) and self.state == Player.normalState then
                 col.other:grab(self)
                 self:gotoState(Player.liftState)
-            elseif self.state ~= Player.hurtState and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
-                self.vy = -_vJump*0.7
-                self.y = col.other.y - self.h
-                self.world:update(self, self.x, self.y)
-                col.other:stomp()
-                if Input:isDown(Player.keyB) and self.state == Player.normalState then
-                    col.other:grab(self)
-                    self:gotoState(Player.liftState)
-                end
-            elseif col.other.state == Enemy.walkState and self.state ~= Player.hurtState then
-                self:gotoState(Player.hurtState)
-                if col.normal.x == 0 then
-                    self.px = col.other.direction*6
-                else
-                    self.px = col.normal.x*6
-                end
-                self.py = -3
             end
-        end
-    },
-    lava = {
-        type = 'cross',
-        func = function(self, col)
-            self.vy = -7
-            self.y = col.other.level - self.h
-            self.world:update(self, self.x, self.y)
-            if self.state ~= Player.hurtState then
-                self:gotoState(Player.hurtState)
+        elseif col.other.state == Enemy.moveState and self.state ~= Player.hurtState then
+            self:gotoState(Player.hurtState)
+            if col.normal.x == 0 then
+                self.px = col.other.direction*6
+            else
+                self.px = col.normal.x*6
             end
+            self.py = -3
         end
-    },
-    item = {
-        type = 'cross',
-        func = function(self, col)
-            if Input:isDown(Player.keyDown) then
-                col.other:grab(self)
-            end
+    end
+}
+
+Player.collide_lava = {
+    type = 'cross',
+    func = function(self, col)
+        self.vy = -7
+        self.y = col.other.level - self.h
+        self.world:update(self, self.x, self.y)
+        if self.state ~= Player.hurtState then
+            self:gotoState(Player.hurtState)
         end
-    }
+    end
+}
+
+Player.collide_item = {
+    type = 'cross',
+    func = function(self, col)
+        if Input:isDown(Player.keyDown) then
+            col.other:grab(self)
+        end
+    end
 }
 
 function Player:initialize(world, x, y)
@@ -239,7 +241,7 @@ function Lift:enteredState()
 end
 
 function Lift:exitedState()
-    self.hold:release()
+    self.hold:gotoState(Enemy.thrownState)
     self.hold = nil
 end
 

@@ -3,76 +3,72 @@ local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Enemy = Class('enemy', Object)
 
-Enemy.static.sprWalk = love.graphics.newImage('assets/enemy_walk.png')
+Enemy.static.sprMove = love.graphics.newImage('assets/enemy_walk.png')
 Enemy.static.sprStun = love.graphics.newImage('assets/enemy_rock.png')
 Enemy.static.sprStar = love.graphics.newImage('assets/star.png')
 Enemy.static.sprParticle = love.graphics.newImage('assets/particle.png')
 
-Enemy.static.walkState = 'Walk'
+Enemy.static.moveState = 'Move'
 Enemy.static.stunState = 'Stun'
 Enemy.static.holdState = 'Hold'
 Enemy.static.thrownState = 'Thrown'
 Enemy.static.deadState = 'Dead'
 
-Enemy.static.collisions = {
-    solid = {
-        type = 'slide',
-        func = function(self, col)
-            if col.normal.y ~= 0 then
-                self.vy = 0
-                if col.normal.y == -1 then
-                    self.ground = col.other
-                end
-            end
-            if col.normal.x ~= 0 then
-                self.vx = -self.vx
+Enemy.collide_solid = {
+    type = 'slide',
+    func = function(self, col)
+        if col.normal.y ~= 0 then
+            self.vy = 0
+            if col.normal.y == -1 then
+                self.ground = col.other
             end
         end
-    },
-    platform = {
-        type = 'cross',
-        func = function(self, col)
-            if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-    			self.vy = 0
-                self.y = col.other.y - self.h
-                self.world:update(self, self.x, self.y)
-    			self.ground = col.other
-    		end
+        if col.normal.x ~= 0 then
+            self.vx = -self.vx
         end
-    },
-    enemy = {
-        type = 'cross',
-        func = function(self, col)
-            if col.other.state == Enemy.thrownState then
-                self:gotoState(Enemy.deadState)
-                self.vx = col.other.vx/2
-            elseif self.state ~= Enemy.thrownState then
-                if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-                    self.vy = 0
-                    self.y = col.other.y - self.h
-                    self.world:update(self, self.x, self.y)
-                    self.ground = col.other
-                end
-                if col.normal.x ~= 0 then
-                    if col.normal.x == 1 then
-                        self.x = col.other.x + col.other.w
-                    else
-                        self.x = col.other.x - self.w
-                    end
-                    self.world:update(self, self.x, self.y)
-                    self.vx = -self.vx
-                end
+    end
+}
+
+Enemy.collide_platform = {
+    type = 'cross',
+    func = function(self, col)
+        if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+			self.vy = 0
+            self.y = col.other.y - self.h
+            self.world:update(self, self.x, self.y)
+			self.ground = col.other
+		end
+    end
+}
+
+Enemy.collide_enemy = {
+    type = 'cross',
+    func = function(self, col)
+        if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+            self.vy = 0
+            self.y = col.other.y - self.h
+            self.world:update(self, self.x, self.y)
+            self.ground = col.other
+        end
+        if col.normal.x ~= 0 then
+            if col.normal.x == 1 then
+                self.x = col.other.x + col.other.w
+            else
+                self.x = col.other.x - self.w
             end
+            self.world:update(self, self.x, self.y)
+            self.vx = -self.vx
         end
-    },
-    lava = {
-        type = 'cross',
-        func = function(self, col)
-            col.other:touch(self.x, self.state == Enemy.walkState)
-            self:gotoState(Enemy.deadState)
-            self.deadTimer = 60
-        end
-    }
+    end
+}
+
+Enemy.collide_lava = {
+    type = 'cross',
+    func = function(self, col)
+        col.other:touch(self.x, self.state == Enemy.moveState)
+        self:gotoState(Enemy.deadState)
+        self.deadTimer = 60
+    end
 }
 
 local _vFall = 7
@@ -91,11 +87,11 @@ function Enemy:initialize(world, x, y)
     self.throwTimer = 0
     self.deadTimer = 0
 
-    self.animWalk = newAnimation(Enemy.sprWalk, 24, 24, 1/8, 0)
+    self.animMove = newAnimation(Enemy.sprMove, 24, 24, 1/8, 0)
     self.animStun = newAnimation(Enemy.sprStun, 24, 24, 1/8, 0)
     self.animStar = newAnimation(Enemy.sprStar, 10, 10, 1/8, 0)
     self.direction = math.random() > 0.5 and -1 or 1
-    self:gotoState(Enemy.walkState)
+    self:gotoState(Enemy.moveState)
 
     self.dust = love.graphics.newParticleSystem(Enemy.sprParticle)
 	self.dust:setParticleLifetime(0.1, 0.3)
@@ -134,24 +130,28 @@ function Enemy:stomp()
     self:gotoState(Enemy.stunState)
 end
 
-function Enemy:grab(player)
+function Enemy:hit(enemy)
+    self.vx = enemy.vx/2
+    self:gotoState(Enemy.deadState)
 end
+
+function Enemy:grab(player) end
 
 function Enemy:isDead()
     return false
 end
 
--- WALK STATE
-local Walk = Enemy:addState(Enemy.walkState)
+-- MOVE STATE
+local Move = Enemy:addState(Enemy.moveState)
 
-function Walk:enteredState()
-    self.state = Enemy.walkState
-    self.sprite = self.animWalk
+function Move:enteredState()
+    self.state = Enemy.moveState
+    self.sprite = self.animMove
     self.sprite.speed = 1
     self.vx = _vMove * self.direction
 end
 
-function Walk:update(dt)
+function Move:update(dt)
     self.direction = self.vx > 0 and 1 or -1
     Enemy.update(self, dt)
 end
@@ -173,7 +173,7 @@ function Stun:update(dt)
     Enemy.update(self, dt)
     self.animStar:update(dt)
     if self.stompTimer <= 0 then
-        self:gotoState(Enemy.walkState)
+        self:gotoState(Enemy.moveState)
     end
 end
 
@@ -223,14 +223,19 @@ function Hold:update(dt)
     self.world:update(self, self.x, self.y)
 end
 
-function Hold:release()
-    self:gotoState(Enemy.thrownState)
-end
-
 function Hold:stomp() end
+
+function Hold:hit() end
 
 -- THROWN STATE
 local Thrown = Enemy:addState(Enemy.thrownState)
+
+Thrown.collide_enemy = {
+    type = 'cross',
+    func = function(self, col)
+        col.other:hit(self)
+    end
+}
 
 function Thrown:enteredState()
     self.state = Enemy.thrownState
@@ -278,6 +283,8 @@ function Dead:update(dt)
 end
 
 function Dead:stomp() end
+
+function Dead:hit() end
 
 function Dead:isDead()
     return self.deadTimer > 60 --TODO

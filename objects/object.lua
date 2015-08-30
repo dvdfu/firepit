@@ -3,8 +3,6 @@ local Stateful = require 'stateful'
 local Object = Class('object')
 Object:include(Stateful)
 
-Object.static.collisions = {}
-
 --[[
 Object:
     .name
@@ -37,18 +35,21 @@ end
 function Object:collide()
     local cols, len, col, other
     self.x, self.y, cols, len = self.world:move(self, self.x, self.y, function(item, other)
-        if self.class.collisions[other.name] then
-            return self.class.collisions[other.name].type
+        if self['collide_'..other.name] then
+            return self['collide_'..other.name].type
         end
         return 'cross'
     end)
 	for i = 1, len do
 		col = cols[i]
-        for k, v in pairs(self.class.collisions) do
-            if col.other.name == k then
-                v.func(self, col)
-            end
+        if self['collide_'..col.other.name] then
+            self['collide_'..col.other.name].func(self, col)
         end
+        -- for k, v in pairs(self.class.collisions) do
+        --     if col.other.name == k then
+        --         v.func(self, col)
+        --     end
+        -- end
 	end
 end
 
