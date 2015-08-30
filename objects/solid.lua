@@ -6,7 +6,6 @@ Solid.static.sprite = love.graphics.newImage('assets/terrain.png')
 
 function Solid:initialize(world, x, y, w, h)
     Object.initialize(self, world, x, y, w, h)
-    self.name = 'solid'
     self.color = {
         r = 104,
         g = 96,

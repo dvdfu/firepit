@@ -28,10 +28,6 @@ Player.static.sprJumpLift = love.graphics.newImage('assets/player_jump_lift.png'
 Player.static.sprFallLift = love.graphics.newImage('assets/player_fall_lift.png')
 Player.static.sprParticle = love.graphics.newImage('assets/particle.png')
 
-Player.static.normalState = 'Normal'
-Player.static.liftState = 'Lift'
-Player.static.hurtState = 'Hurt'
-
 Player.collide_solid = {
     type = 'slide',
     func = function(self, col)
@@ -62,20 +58,13 @@ Player.collide_platform = {
 Player.collide_enemy = {
     type = 'cross',
     func = function(self, col)
-        if col.other.state == Enemy.stunState and Input:isDown(Player.keyB) and self.state == Player.normalState then
-            col.other:grab(self)
-            self:gotoState(Player.liftState)
-        elseif self.state ~= Player.hurtState and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
+        if col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
             self.vy = -_vJump*0.7
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
             col.other:stomp()
-            if Input:isDown(Player.keyB) and self.state == Player.normalState then
-                col.other:grab(self)
-                self:gotoState(Player.liftState)
-            end
-        elseif col.other.state == Enemy.moveState and self.state ~= Player.hurtState then
-            self:gotoState(Player.hurtState)
+        elseif col.other:harmful() then
+            self:gotoState('Hurt')
             if col.normal.x == 0 then
                 self.px = col.other.direction*6
             else
@@ -92,9 +81,7 @@ Player.collide_lava = {
         self.vy = -7
         self.y = col.other.level - self.h
         self.world:update(self, self.x, self.y)
-        if self.state ~= Player.hurtState then
-            self:gotoState(Player.hurtState)
-        end
+        self:gotoState('Hurt')
     end
 }
 
@@ -109,7 +96,6 @@ Player.collide_item = {
 
 function Player:initialize(world, x, y)
     Object.initialize(self, world, x, y, 16, 24)
-    self.name = 'player'
     self.ground = nil
     self.direction = self.vx > 0 and 1 or -1
     self.hold = nil
@@ -125,7 +111,7 @@ function Player:initialize(world, x, y)
     self.animJumpLift = newAnimation(Player.sprJumpLift, 24, 24, 1/8, 0)
     self.animFallLift = newAnimation(Player.sprFallLift, 24, 24, 1/8, 0)
     self.sprite = self.animRun
-    self:gotoState(Player.normalState)
+    self:gotoState('Normal')
 
     self.dust = love.graphics.newParticleSystem(Player.sprParticle)
     self.dust:setParticleLifetime(0.1, 0.3)
@@ -212,6 +198,7 @@ function Player:draw()
     self.dust:setPosition(self.x+self.w/2, self.y+self.h)
     self.dust:update(1/60)
     love.graphics.draw(self.dust)
+
     self.fire:setPosition(self.x+self.w/2, self.y+self.h/2)
     self.fire:update(1/60)
     love.graphics.draw(self.fire)
@@ -221,31 +208,36 @@ function Player:draw()
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
-local Normal = Player:addState(Player.normalState)
+Player.Normal = Player:addState('Normal')
 
-function Normal:enteredState()
-    self.state = Player.normalState
-end
+Player.Normal.collide_enemy = {
+    type = 'cross',
+    func = function(self, col)
+        Player.collide_enemy.func(self, col)
+        if Input:isDown(Player.keyB) then
+            if col.other:grab(self) then
+                self.hold = col.other
+                self:gotoState('Lift')
+            end
+        end
+    end
+}
 
-function Normal:update(dt)
+function Player.Normal:update(dt)
     Player.update(self, dt)
     if not self.ground then
         self.sprite = self.vy < 0 and self.animJump or self.animFall
     end
 end
 
-local Lift = Player:addState(Player.liftState)
+Player.Lift = Player:addState('Lift')
 
-function Lift:enteredState()
-    self.state = Player.liftState
-end
-
-function Lift:exitedState()
-    self.hold:gotoState(Enemy.thrownState)
+function Player.Lift:exitedState()
+    self.hold:release()
     self.hold = nil
 end
 
-function Lift:update(dt)
+function Player.Lift:update(dt)
     Player.update(self, dt)
     if not self.ground then
         self.sprite = self.vy < 0 and self.animJumpLift or self.animFallLift
@@ -258,18 +250,31 @@ function Lift:update(dt)
         if Input:isDown(Player.keyUp) then ry = ry - 7 end
         if Input:isDown(Player.keyDown) then ry = ry + 7 end
         self.hold.vx, self.hold.vy = rx, ry
-        self:gotoState(Player.normalState)
+        self:gotoState('Normal')
     end
 end
 
-local Hurt = Player:addState(Player.hurtState)
+Player.Hurt = Player:addState('Hurt')
 
-function Hurt:enteredState()
-    self.state = Player.hurtState
-    self.hurtTimer = 60
+Player.Hurt.collide_enemy = {
+    type = 'cross',
+    func = function(self, col) end
+}
+
+Player.Hurt.collide_lava = {
+    type = 'cross',
+    func = function(self, col)
+        self.vy = -7
+        self.y = col.other.level - self.h
+        self.world:update(self, self.x, self.y)
+    end
+}
+
+function Player.Hurt:enteredState()
+    self.hurtTimer = 40
 end
 
-function Hurt:update(dt)
+function Player.Hurt:update(dt)
     Player.update(self, dt)
     if not self.ground then
         self.sprite = self.vy < 0 and self.animJump or self.animFall
@@ -277,14 +282,14 @@ function Hurt:update(dt)
     if self.hurtTimer > 0 then
         self.hurtTimer = self.hurtTimer - 1
     else
-        self:gotoState(Player.normalState)
+        self:gotoState('Normal')
     end
     if self.hurtTimer % 2 == 0 then
         self.fire:emit(1)
     end
 end
 
-function Hurt:draw()
+function Player.Hurt:draw()
     if self.hurtTimer % 4 < 2 then
         love.graphics.setColor(255, 73, 73)
     end

@@ -40,7 +40,6 @@ Item.collide_platform = {
 
 function Item:initialize(world, x, y)
     Object.initialize(self, world, x, y, 16, 16)
-    self.name = 'item'
     self.type = Item.powerups[math.random(1, #Item.powerups)]
     self.vy = -5
     self.vx = math.random(-3, 3)

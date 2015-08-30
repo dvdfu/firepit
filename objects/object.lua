@@ -20,7 +20,7 @@ Object:
 ]]--
 
 function Object:initialize(world, x, y, w, h)
-    self.name = 'object'
+    self.name = self.class.name
     self.world = world
     self.x, self.y = x, y
     self.vx, self.vy = 0, 0
