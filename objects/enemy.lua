@@ -101,6 +101,16 @@ function Enemy:initialize(world, x, y)
 	self.dust:setSpeed(0, 100)
 	self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
 	self.dust:setSizes(1, 0)
+
+    self.speck = love.graphics.newParticleSystem(Enemy.sprParticle)
+    self.speck:setEmissionRate(10)
+    self.speck:setParticleLifetime(0, 0.5)
+    self.speck:setDirection(-math.pi/2)
+    self.speck:setSpread(math.pi/6)
+    self.speck:setAreaSpread('normal', 4, 0)
+    self.speck:setSpeed(10, 50)
+    self.speck:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
+    self.speck:setSizes(0.5, 0)
 end
 
 function Enemy:update(dt)
@@ -122,6 +132,10 @@ function Enemy:draw()
     self.dust:update(1/60)
     love.graphics.draw(self.dust)
 
+    self.speck:setPosition(self.x+self.w/2, self.y)
+    self.speck:update(1/60)
+    love.graphics.draw(self.speck)
+
     self.sprite:update(1/60)
     self.sprite:draw(self.x + self.w/2, self.y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()-self.h)
 end
@@ -142,24 +156,24 @@ function Enemy:isDead()
 end
 
 -- MOVE STATE
-local Move = Enemy:addState(Enemy.moveState)
+Enemy.Move = Enemy:addState(Enemy.moveState)
 
-function Move:enteredState()
+function Enemy.Move:enteredState()
     self.state = Enemy.moveState
     self.sprite = self.animMove
     self.sprite.speed = 1
     self.vx = _vMove * self.direction
 end
 
-function Move:update(dt)
+function Enemy.Move:update(dt)
     self.direction = self.vx > 0 and 1 or -1
     Enemy.update(self, dt)
 end
 
 -- STUN STATE
-local Stun = Enemy:addState(Enemy.stunState)
+Enemy.Stun = Enemy:addState(Enemy.stunState)
 
-function Stun:enteredState()
+function Enemy.Stun:enteredState()
     -- cs = 6 -- TODO
     self.state = Enemy.stunState
     self.sprite = self.animStun
@@ -167,7 +181,7 @@ function Stun:enteredState()
     self.sprite.speed = 0
 end
 
-function Stun:update(dt)
+function Enemy.Stun:update(dt)
     self.vx = self.vx * 0.6
     self.stompTimer = self.stompTimer - 1
     Enemy.update(self, dt)
@@ -177,7 +191,7 @@ function Stun:update(dt)
     end
 end
 
-function Stun:draw()
+function Enemy.Stun:draw()
     Enemy.draw(self)
     local numStars = math.ceil(self.stompTimer/60)
     for i = 1, numStars do
@@ -187,16 +201,16 @@ function Stun:draw()
     end
 end
 
-function Stun:grab(player)
+function Enemy.Stun:grab(player)
     player.hold = self
     self.player = player
     self:gotoState(Enemy.holdState)
 end
 
 -- HOLD STATE
-local Hold = Enemy:addState(Enemy.holdState)
+Enemy.Hold = Enemy:addState(Enemy.holdState)
 
-function Hold:enteredState()
+function Enemy.Hold:enteredState()
     self.state = Enemy.holdState
     self.sprite = self.animStun
     self.sprite.speed = 0
@@ -205,13 +219,13 @@ function Hold:enteredState()
     self.vy = 0
 end
 
-function Hold:exitedState()
+function Enemy.Hold:exitedState()
     if self.player and self.player.hold == self then
         self.player.hold = nil
     end
 end
 
-function Hold:update(dt)
+function Enemy.Hold:update(dt)
     if self.holdTimer < 20 then
         local dx, dy = self.player.x - self.x, self.player.y-14 - self.y
         self.x = self.x + dx*self.holdTimer/20
@@ -223,26 +237,26 @@ function Hold:update(dt)
     self.world:update(self, self.x, self.y)
 end
 
-function Hold:stomp() end
+function Enemy.Hold:stomp() end
 
-function Hold:hit() end
+function Enemy.Hold:hit() end
 
 -- THROWN STATE
-local Thrown = Enemy:addState(Enemy.thrownState)
+Enemy.Thrown = Enemy:addState(Enemy.thrownState)
 
-Thrown.collide_enemy = {
+Enemy.Thrown.collide_enemy = {
     type = 'cross',
     func = function(self, col)
         col.other:hit(self)
     end
 }
 
-function Thrown:enteredState()
+function Enemy.Thrown:enteredState()
     self.state = Enemy.thrownState
     self.throwTimer = 0
 end
 
-function Thrown:update(dt)
+function Enemy.Thrown:update(dt)
     self.direction = self.vx > 0 and 1 or -1
     Enemy.update(self, dt)
     self.sprite.speed = math.abs(self.vx)

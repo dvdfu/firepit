@@ -3,7 +3,7 @@ local Camera = require 'camera'
 local Bump = require 'bump'
 local Solid = require 'objects/solid'
 local Player = require 'objects/player'
-local Enemy = require 'objects/enemy'
+local Enemy = require 'objects/enemy-rock'
 local Item = require 'objects/item'
 local Lava = require 'objects/lava'
 
