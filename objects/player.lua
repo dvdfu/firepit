@@ -208,6 +208,8 @@ function Player:draw()
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
+--[[======== NORMAL STATE ========]]
+
 Player.Normal = Player:addState('Normal')
 
 Player.Normal.collide_enemy = {
@@ -229,6 +231,8 @@ function Player.Normal:update(dt)
         self.sprite = self.vy < 0 and self.animJump or self.animFall
     end
 end
+
+--[[======== LIFT STATE ========]]
 
 Player.Lift = Player:addState('Lift')
 
@@ -254,20 +258,13 @@ function Player.Lift:update(dt)
     end
 end
 
+--[[======== HURT STATE ========]]
+
 Player.Hurt = Player:addState('Hurt')
 
 Player.Hurt.collide_enemy = {
     type = 'cross',
     func = function(self, col) end
-}
-
-Player.Hurt.collide_lava = {
-    type = 'cross',
-    func = function(self, col)
-        self.vy = -7
-        self.y = col.other.level - self.h
-        self.world:update(self, self.x, self.y)
-    end
 }
 
 function Player.Hurt:enteredState()

@@ -77,16 +77,18 @@ function Item:isDead()
     return false
 end
 
-local Grab = Item:addState('Grab')
+--[[======== GRAB STATE ========]]
 
-function Grab:enteredState()
+Item.Grab = Item:addState('Grab')
+
+function Item.Grab:enteredState()
     self.deadTimer = 0
     self.vx = 0
     self.vy = 0
     self.world:remove(self)
 end
 
-function Grab:update()
+function Item.Grab:update()
     self.deadTimer = self.deadTimer+1
     local dx = self.player.x + 12 - self.x
     local dy = self.player.y + 12 - self.y
@@ -94,26 +96,28 @@ function Grab:update()
     self.y = self.y + dy*self.deadTimer/20
 end
 
--- function Grab:draw()
+-- function Item.Grab:draw()
 --     local alpha = 255*(1 - self.deadTimer/20)
 --     love.graphics.setColor(255, 255, 255, alpha)
 --     love.graphics.draw(Item.sprite, self.x, self.y, 0, 1, 1, 8, 8)
 --     love.graphics.setColor(255, 255, 255, 255)
 -- end
 
-function Grab:grab() end
+function Item.Grab:grab() end
 
-function Grab:isDead()
+function Item.Grab:isDead()
     return self.deadTimer > 20
 end
 
-local Flash = Item:addState('Flash')
+--[[======== FLASH STATE ========]]
 
-function Flash:enteredState()
+Item.Flash = Item:addState('Flash')
+
+function Item.Flash:enteredState()
     self.timer = 0
 end
 
-function Flash:update(dt)
+function Item.Flash:update(dt)
     if self.vy < 5 then
         self.vy = self.vy + 0.3
     else
@@ -125,13 +129,13 @@ function Flash:update(dt)
     self.timer = self.timer + 1
 end
 
-function Flash:draw()
+function Item.Flash:draw()
     if self.timer % 4 < 2 then
         Item.draw(self)
     end
 end
 
-function Flash:isDead()
+function Item.Flash:isDead()
     return self.timer > 3*60
 end
 

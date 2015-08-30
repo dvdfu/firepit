@@ -83,6 +83,8 @@ function Enemy:isDead()
     return false
 end
 
+--[[======== MOVE STATE ========]]
+
 Enemy.Move = Enemy:addState('Move')
 
 Enemy.Move.collide_lava = {
@@ -106,6 +108,8 @@ end
 function Enemy.Move:harmful()
     return true
 end
+
+--[[======== DEAD STATE ========]]
 
 Enemy.Dead = Enemy:addState('Dead')
 

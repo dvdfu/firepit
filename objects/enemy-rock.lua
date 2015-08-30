@@ -91,6 +91,8 @@ function Enemy.Move:enteredState()
     self.vx = self.vMove * self.direction
 end
 
+--[[======== STUN STATE ========]]
+
 EnemyRock.Stun = EnemyRock:addState('Stun')
 
 function EnemyRock.Stun:enteredState()
@@ -124,6 +126,8 @@ function EnemyRock.Stun:grab(player)
     self:gotoState('Hold')
     return true
 end
+
+--[[======== HOLD STATE ========]]
 
 EnemyRock.Hold = EnemyRock:addState('Hold')
 
@@ -160,6 +164,8 @@ function EnemyRock.Hold:hit() end
 function EnemyRock.Hold:release()
     self:gotoState('Thrown')
 end
+
+--[[======== THROWN STATE ========]]
 
 EnemyRock.Thrown = EnemyRock:addState('Thrown')
 
