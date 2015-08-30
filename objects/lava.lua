@@ -37,14 +37,24 @@ function Lava:initialize(world)
     self.level = self.y
 
     self.fire = love.graphics.newParticleSystem(Lava.sprParticle)
-	self.fire:setParticleLifetime(0.3, 1)
-	self.fire:setDirection(-math.pi/2)
+    self.fire:setParticleLifetime(0.3, 1)
+    self.fire:setDirection(-math.pi/2)
     self.fire:setSpread(math.pi/4)
     self.fire:setAreaSpread('normal', 8, 0)
-	self.fire:setSpeed(50, 200)
+    self.fire:setSpeed(50, 200)
     self.fire:setLinearAcceleration(0, 200)
-	self.fire:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
-	self.fire:setSizes(2, 0)
+    self.fire:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
+    self.fire:setSizes(2, 0)
+
+    self.speck = love.graphics.newParticleSystem(Lava.sprParticle)
+    self.speck:setEmissionRate(100)
+    self.speck:setParticleLifetime(0, 1)
+    self.speck:setDirection(-math.pi/2)
+    self.speck:setSpread(math.pi/6)
+    self.speck:setAreaSpread('uniform', self.w/2, 0)
+    self.speck:setSpeed(50, 200)
+    self.speck:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
+    self.speck:setSizes(0.5, 0)
 end
 
 function Lava:update(dt)
@@ -60,6 +70,10 @@ end
 function Lava:draw()
     self.fire:update(1/60)
     love.graphics.draw(self.fire)
+
+    self.speck:setPosition(self.x+self.w/2, self.y)
+    self.speck:update(1/60)
+    love.graphics.draw(self.speck)
 
     Lava.lavaShader:send('time', os.clock())
     Lava.glowShader:send('time', os.clock())

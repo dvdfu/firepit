@@ -9,7 +9,7 @@ love.mouse.setVisible(false)
 Input = require 'input'
 Gamestate = require 'gamestate'
 Game = require 'states/game'
-scale = 2
+scale = 1
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)
@@ -63,8 +63,8 @@ function love.draw()
 
     local cur_time = love.timer.getTime()
     if next_time <= cur_time then
-      next_time = cur_time
-      return
+        next_time = cur_time
+        return
     end
     love.timer.sleep(next_time - cur_time)
 end

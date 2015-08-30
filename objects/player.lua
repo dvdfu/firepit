@@ -36,12 +36,12 @@ Player.static.collisions = {
     solid = {
         type = 'slide',
         func = function(self, col)
-			if col.normal.y ~= 0 then
-				self.vy = 0
-				if col.normal.y == -1 then
-					self.ground = col.other
-				end
-			end
+            if col.normal.y ~= 0 then
+                self.vy = 0
+                if col.normal.y == -1 then
+                    self.ground = col.other
+                end
+            end
             if col.normal.x ~= 0 then
                 self.vx = 0
             end
@@ -50,12 +50,12 @@ Player.static.collisions = {
     platform = {
         type = 'cross',
         func = function(self, col)
-			if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-				self.vy = 0
+            if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+                self.vy = 0
                 self.y = col.other.y - self.h
                 self.world:update(self, self.x, self.y)
-				self.ground = col.other
-			end
+                self.ground = col.other
+            end
         end
     },
     enemy = {
@@ -126,22 +126,22 @@ function Player:initialize(world, x, y)
     self:gotoState(Player.normalState)
 
     self.dust = love.graphics.newParticleSystem(Player.sprParticle)
-	self.dust:setParticleLifetime(0.1, 0.3)
-	self.dust:setDirection(-math.pi/2)
+    self.dust:setParticleLifetime(0.1, 0.3)
+    self.dust:setDirection(-math.pi/2)
     self.dust:setSpread(math.pi/2)
     self.dust:setAreaSpread('normal', 4, 0)
-	self.dust:setSpeed(0, 100)
-	self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
-	self.dust:setSizes(1, 0)
+    self.dust:setSpeed(0, 100)
+    self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
+    self.dust:setSizes(1, 0)
 
     self.fire = love.graphics.newParticleSystem(Player.sprParticle)
-	self.fire:setParticleLifetime(0.1, 0.3)
-	self.fire:setDirection(-math.pi/2)
+    self.fire:setParticleLifetime(0.1, 0.3)
+    self.fire:setDirection(-math.pi/2)
     self.fire:setSpread(math.pi/4)
     self.fire:setAreaSpread('normal', 4, 4)
-	self.fire:setSpeed(0, 200)
-	self.fire:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
-	self.fire:setSizes(2, 0)
+    self.fire:setSpeed(0, 200)
+    self.fire:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
+    self.fire:setSizes(2, 0)
 end
 
 function Player:update(dt)
@@ -209,10 +209,10 @@ end
 function Player:draw()
     self.dust:setPosition(self.x+self.w/2, self.y+self.h)
     self.dust:update(1/60)
-	love.graphics.draw(self.dust)
+    love.graphics.draw(self.dust)
     self.fire:setPosition(self.x+self.w/2, self.y+self.h/2)
     self.fire:update(1/60)
-	love.graphics.draw(self.fire)
+    love.graphics.draw(self.fire)
 
     local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
     self.sprite:update(1/60)
