@@ -2,7 +2,6 @@ package.path = '.?/?.lua;.hump/?.lua;.lml/?/?.lua;'..package.path
 
 math.randomseed(os.time())
 love.graphics.setDefaultFilter('nearest', 'nearest')
-love.graphics.setLineWidth(4)
 love.graphics.setLineStyle('rough')
 love.mouse.setVisible(false)
 

@@ -31,20 +31,18 @@ timer = 0
 function addSolids()
     love.graphics.setBackgroundColor(16, 24, 40)
     local function addSolid(x, y, w, h, color, platform)
-        local s = Solid:new(world, x, y, w, h, color)
-        if platform then
-            s.name = 'platform'
-        end
+        local s = Solid:new(world, x, y, w, h, color, platform)
         table.insert(solids, s)
         return s
     end
-    addSolid((sw-224)/2, sh-256, 112, 256, { r = 40, g = 48, b = 80 }, true) -- 4
-    addSolid(sw/2, sh-192, 112, 192, { r = 60, g = 64, b = 104 }, true) -- 3
-    addSolid(32, sh-128, 112, 128, { r = 72, g = 72, b = 128 }, true) -- 2l
-    addSolid(sw-112-32, sh-128, 112, 128, { r = 72, g = 72, b = 128 }, true) -- 2r
-    addSolid((sw-224)/2, sh-64, 224, 64) --1
-    addSolid(-64, -96, 32+64, sh+96) --wl
-    addSolid(sw-32, -96, 32+64, sh+96) --wr
+    addSolid(sw/2-128, sh-256, 128, 256, { r = 40, g = 48, b = 80 }, true) -- 4
+    addSolid(sw/2, sh-192, 128, 192, { r = 60, g = 64, b = 104 }, true) -- 3
+    addSolid(0, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, true) -- 2l
+    addSolid(sw-128, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, true) -- 2r
+    addSolid(sw/2-128, sh-64, 253, 64) --1
+
+    -- addSolid(-64, -96, 64, sh+96) --wl
+    addSolid(sw, sh-256, 64, 256) --wr
 end
 
 function addEnemy(x, y)

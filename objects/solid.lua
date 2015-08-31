@@ -4,9 +4,12 @@ local Solid = Class('solid', Object)
 
 Solid.static.sprite = love.graphics.newImage('assets/terrain.png')
 
-function Solid:initialize(world, x, y, w, h, color)
+function Solid:initialize(world, x, y, w, h, color, platform)
     Object.initialize(self, world, x, y, w, h)
     self.color = color or { r = 104, g = 96, b = 160 }
+    if platform then
+        self.name = 'platform'
+    end
 
     self.image = love.graphics.newCanvas(self.w, self.h)
     love.graphics.setCanvas(self.image)
@@ -20,9 +23,19 @@ function Solid:initialize(world, x, y, w, h, color)
         end
     end
     love.graphics.setStencil()
+
     love.graphics.setColor(200, 144, 200)
+    love.graphics.setLineWidth(4)
     love.graphics.line(0, 2, self.w, 2)
+    love.graphics.setColor(16, 24, 40)
+    love.graphics.setLineWidth(1)
+    love.graphics.line(0, 1, self.w, 1)
+    if not platform then
+        love.graphics.line(1, 0, 1, self.h)
+        love.graphics.line(self.w, 0, self.w, self.h)
+    end
     love.graphics.setColor(255, 255, 255)
+
     love.graphics.setCanvas()
 end
 
