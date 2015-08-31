@@ -30,8 +30,13 @@ EnemyRock.collide_enemy = {
 }
 
 function EnemyRock:initialize(world, x, y)
-    Enemy.initialize(self, world, x, y)
+    Enemy.initialize(self, world, x, y, 16, 16)
+    self.name = 'enemy'
     self.player = nil
+
+    self.vFall = 7
+    self.aFall = 0.4
+    self.vMove = 0.4
 
     self.stompTimer = 0
     self.holdTimer = 0
@@ -40,7 +45,6 @@ function EnemyRock:initialize(world, x, y)
     self.animMove = newAnimation(EnemyRock.sprMove, 24, 24, 1/8, 0)
     self.animStun = newAnimation(EnemyRock.sprStun, 24, 24, 1/8, 0)
     self.animStar = newAnimation(EnemyRock.sprStar, 10, 10, 1/8, 0)
-    self:gotoState('Move')
 
     self.dust = love.graphics.newParticleSystem(EnemyRock.sprParticle)
 	self.dust:setParticleLifetime(0.1, 0.3)
@@ -52,14 +56,27 @@ function EnemyRock:initialize(world, x, y)
 	self.dust:setSizes(1, 0)
 
     self.speck = love.graphics.newParticleSystem(EnemyRock.sprParticle)
-    self.speck:setEmissionRate(10)
     self.speck:setParticleLifetime(0, 0.5)
     self.speck:setDirection(-math.pi/2)
     self.speck:setSpread(math.pi/6)
     self.speck:setAreaSpread('normal', 4, 0)
-    self.speck:setSpeed(10, 50)
+    self.speck:setSpeed(10, 90)
     self.speck:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
     self.speck:setSizes(0.5, 0)
+
+    self:gotoState('Move')
+end
+
+function EnemyRock:update(dt)
+    self.vy = self.vy + self.aFall
+    if self.vy > self.vFall then
+        self.vy = self.vFall
+    end
+    if self.ground then
+        self.x = self.x + self.ground.vx
+        self.ground = nil
+    end
+    Enemy.update(self, dt)
 end
 
 function EnemyRock:draw()
@@ -85,10 +102,18 @@ end
 
 function EnemyRock:release() end
 
-function Enemy.Move:enteredState()
+--[[======== MOVE STATE ========]]
+
+function EnemyRock.Move:enteredState()
+    self.speck:setEmissionRate(10)
     self.sprite = self.animMove
     self.sprite.speed = 1
     self.vx = self.vMove * self.direction
+end
+
+function EnemyRock.Move:update(dt)
+    self.direction = self.vx > 0 and 1 or -1
+    EnemyRock.update(self, dt)
 end
 
 --[[======== STUN STATE ========]]
@@ -96,6 +121,7 @@ end
 EnemyRock.Stun = EnemyRock:addState('Stun')
 
 function EnemyRock.Stun:enteredState()
+    self.speck:setEmissionRate(0)
     self.sprite = self.animStun
     self.stompTimer = 4*60
     self.sprite.speed = 0
@@ -162,31 +188,36 @@ function EnemyRock.Hold:stomp() end
 function EnemyRock.Hold:hit() end
 
 function EnemyRock.Hold:release()
-    self:gotoState('Thrown')
+    self:gotoState('Throw')
 end
 
---[[======== THROWN STATE ========]]
+--[[======== THROW STATE ========]]
 
-EnemyRock.Thrown = EnemyRock:addState('Thrown')
+EnemyRock.Throw = EnemyRock:addState('Throw')
 
-EnemyRock.Thrown.collide_enemy = {
+EnemyRock.Throw.collide_enemy = {
     type = 'cross',
     func = function(self, col)
         col.other:hit(self)
     end
 }
 
-function EnemyRock.Thrown:enteredState()
+function EnemyRock.Throw:enteredState()
     self.throwTimer = 0
 end
 
-function EnemyRock.Thrown:update(dt)
+function EnemyRock.Throw:update(dt)
     self.direction = self.vx > 0 and 1 or -1
-    Enemy.update(self, dt)
+    if self.ground then
+        self.vx = self.vx * 0.9
+    else
+        self.vx = self.vx * 0.99
+    end
+
+    EnemyRock.update(self, dt)
     self.sprite.speed = math.abs(self.vx)
 
     if self.ground then
-        self.vx = self.vx * 0.9
         self.dust:emit(self.sprite.speed)
         if self.throwTimer == 0 then
             cs = 10
@@ -196,9 +227,17 @@ function EnemyRock.Thrown:update(dt)
         else
             self:gotoState('Stun')
         end
-    else
-        self.vx = self.vx * 0.99
     end
+end
+
+--[[======== THROW STATE ========]]
+
+function EnemyRock.Dead:update(dt)
+    self.deadTimer = self.deadTimer + 1
+    self.vy = self.vy + self.aFall
+    self.vx = self.vx * 0.98
+    self.x = self.x + self.vx
+    self.y = self.y + self.vy
 end
 
 return EnemyRock

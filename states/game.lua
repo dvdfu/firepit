@@ -3,7 +3,7 @@ local Camera = require 'camera'
 local Bump = require 'bump'
 local Solid = require 'objects/solid'
 local Player = require 'objects/player'
-local Enemy = require 'objects/enemy-rock'
+local EnemyRock = require 'objects/enemy-rock'
 local Item = require 'objects/item'
 local Lava = require 'objects/lava'
 
@@ -30,41 +30,25 @@ timer = 0
 
 function addSolids()
     love.graphics.setBackgroundColor(16, 24, 40)
-    local function addSolid(x, y, w, h, platform)
-        local s = Solid:new(world, x, y, w, h)
+    local function addSolid(x, y, w, h, color, platform)
+        local s = Solid:new(world, x, y, w, h, color)
         if platform then
             s.name = 'platform'
         end
         table.insert(solids, s)
         return s
     end
-    addSolid((sw-224)/2, sh-256, 112, 256, true).color = { --4
-        r = 24,
-        g = 36,
-        b = 60
-    }
-    addSolid(sw/2, sh-192, 112, 192, true).color = { --3
-        r = 40,
-        g = 48,
-        b = 80
-    }
-    addSolid(32, sh-128, 112, 128, true).color = { --2l
-        r = 72,
-        g = 72,
-        b = 128
-    }
-    addSolid(sw-112-32, sh-128, 112, 128, true).color = { --2r
-        r = 72,
-        g = 72,
-        b = 128
-    }
+    addSolid((sw-224)/2, sh-256, 112, 256, { r = 40, g = 48, b = 80 }, true) -- 4
+    addSolid(sw/2, sh-192, 112, 192, { r = 60, g = 64, b = 104 }, true) -- 3
+    addSolid(32, sh-128, 112, 128, { r = 72, g = 72, b = 128 }, true) -- 2l
+    addSolid(sw-112-32, sh-128, 112, 128, { r = 72, g = 72, b = 128 }, true) -- 2r
     addSolid((sw-224)/2, sh-64, 224, 64) --1
     addSolid(-64, -96, 32+64, sh+96) --wl
     addSolid(sw-32, -96, 32+64, sh+96) --wr
 end
 
 function addEnemy(x, y)
-    local e = Enemy:new(world, x, y)
+    local e = EnemyRock:new(world, x, y)
     e.dropItem = addItem
     table.insert(enemies, e)
     return e
@@ -97,7 +81,6 @@ function Game:update(dt)
     for key, enemy in pairs(enemies) do
         enemy:update(dt)
         if enemy:isDead() then
-            -- world:remove(enemy)
             enemies[key] = nil
         end
     end

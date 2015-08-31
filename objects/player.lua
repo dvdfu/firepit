@@ -63,7 +63,7 @@ Player.collide_enemy = {
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
             col.other:stomp()
-        elseif col.other:harmful() then
+        elseif col.other:isHarmful() then
             self:gotoState('Hurt')
             if col.normal.x == 0 then
                 self.px = col.other.direction*6

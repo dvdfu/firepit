@@ -35,7 +35,6 @@ function love.load()
     min_dt = 1/60
     next_time = love.timer.getTime()
 
-    -- Gamestate.registerEvents()
     Gamestate.switch(Game)
 end
 
