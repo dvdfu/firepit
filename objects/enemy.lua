@@ -59,50 +59,12 @@ function Enemy:hit(enemy)
     self:gotoState('Dead')
 end
 
-function Enemy:grab(player)
-    return false
-end
-
 function Enemy:isHarmful()
     return false
 end
 
 function Enemy:isDead()
     return false
-end
-
---[[======== MOVE STATE ========]]
-
-Enemy.Move = Enemy:addState('Move')
-
-Enemy.Move.collide_lava = {
-    type = 'cross',
-    func = function(self, col)
-        col.other:touch(self.x, true)
-        self:gotoState('Dead')
-        self.deadTimer = 60
-    end
-}
-
-function Enemy.Move:isHarmful()
-    return true
-end
-
---[[======== DEAD STATE ========]]
-
-Enemy.Dead = Enemy:addState('Dead')
-
-function Enemy.Dead:enteredState()
-    self.world:remove(self)
-    -- self.dropItem(self.x, self.y) --TODO
-    self.deadTimer = 0
-    self.vy = -8
-end
-
-function Enemy.Dead:hit() end
-
-function Enemy.Dead:isDead()
-    return self.deadTimer > 60 --TODO
 end
 
 return Enemy

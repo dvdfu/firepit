@@ -9,21 +9,6 @@ EnemyFloat.static.sprParticle = love.graphics.newImage('assets/particle.png')
 EnemyFloat.collide_enemy = {
     type = 'cross',
     func = function(self, col)
-        if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-            self.vy = 0
-            self.y = col.other.y - self.h
-            self.world:update(self, self.x, self.y)
-            self.ground = col.other
-        end
-        if col.normal.x ~= 0 then
-            if col.normal.x == 1 then
-                self.x = col.other.x + col.other.w
-            else
-                self.x = col.other.x - self.w
-            end
-            self.world:update(self, self.x, self.y)
-            self.vx = -self.vx
-        end
     end
 }
 
@@ -77,13 +62,20 @@ function EnemyFloat:draw()
     self.sprite:draw(self.x + self.w/2, self.y+dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()-self.h)
 end
 
-function EnemyFloat:grab(player)
-    return false
-end
-
 function EnemyFloat:release() end
 
 --[[======== MOVE STATE ========]]
+
+EnemyFloat.Move = EnemyFloat:addState('Move')
+
+EnemyFloat.Move.collide_lava = {
+    type = 'cross',
+    func = function(self, col)
+        col.other:touch(self.x, true)
+        self:gotoState('Dead')
+        self.deadTimer = 60
+    end
+}
 
 function EnemyFloat.Move:enteredState()
     self.moveTimer = 0
@@ -99,14 +91,30 @@ function EnemyFloat.Move:update(dt)
     EnemyFloat.update(self, dt)
 end
 
+function EnemyFloat.Move:isHarmful()
+    return true
+end
+
 --[[======== DEAD STATE ========]]
+
+EnemyFloat.Dead = EnemyFloat:addState('Dead')
+
+function EnemyFloat.Dead:enteredState()
+    self.speck:emit(40)
+    self.world:remove(self)
+    self.vx = 0
+    self.vy = 0
+    self.deadTimer = 0
+end
 
 function EnemyFloat.Dead:update(dt)
     self.deadTimer = self.deadTimer + 1
-    self.vy = self.vy + self.aFall
-    self.vx = self.vx * 0.98
-    self.x = self.x + self.vx
-    self.y = self.y + self.vy
+end
+
+function EnemyFloat.Dead:hit() end
+
+function EnemyFloat.Dead:isDead()
+    return self.deadTimer > 20
 end
 
 return EnemyFloat

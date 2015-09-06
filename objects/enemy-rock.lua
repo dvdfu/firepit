@@ -113,6 +113,17 @@ function EnemyRock:release() end
 
 --[[======== MOVE STATE ========]]
 
+EnemyRock.Move = EnemyRock:addState('Move')
+
+EnemyRock.Move.collide_lava = {
+    type = 'cross',
+    func = function(self, col)
+        col.other:touch(self.x, true)
+        self:gotoState('Dead')
+        self.deadTimer = 60
+    end
+}
+
 function EnemyRock.Move:enteredState()
     self.speck:setEmissionRate(10)
     self.sprite = self.animMove
@@ -123,6 +134,10 @@ end
 function EnemyRock.Move:update(dt)
     self.direction = self.vx > 0 and 1 or -1
     EnemyRock.update(self, dt)
+end
+
+function EnemyRock.Move:isHarmful()
+    return true
 end
 
 --[[======== STUN STATE ========]]
@@ -241,12 +256,27 @@ end
 
 --[[======== DEAD STATE ========]]
 
+EnemyRock.Dead = EnemyRock:addState('Dead')
+
+function EnemyRock.Dead:enteredState()
+    self.world:remove(self)
+    -- self.dropItem(self.x, self.y) --TODO
+    self.deadTimer = 0
+    self.vy = -8
+end
+
 function EnemyRock.Dead:update(dt)
     self.deadTimer = self.deadTimer + 1
     self.vy = self.vy + self.aFall
     self.vx = self.vx * 0.98
     self.x = self.x + self.vx
     self.y = self.y + self.vy
+end
+
+function EnemyRock.Dead:hit() end
+
+function EnemyRock.Dead:isDead()
+    return self.deadTimer > 60 --TODO
 end
 
 return EnemyRock

@@ -6,10 +6,9 @@ Solid.static.sprite = love.graphics.newImage('assets/terrain.png')
 
 function Solid:initialize(world, x, y, w, h, color, platform)
     Object.initialize(self, world, x, y, w, h)
+    table.insert(self.tags, Solid.name)
     if platform then
         table.insert(self.tags, 'platform')
-    else
-        table.insert(self.tags, 'solid')
     end
     self.color = color or { r = 104, g = 96, b = 160 }
 

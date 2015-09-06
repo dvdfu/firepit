@@ -226,7 +226,7 @@ Player.Normal = Player:addState('Normal')
 Player.Normal.collide_enemy_rock = {
     type = 'cross',
     func = function(self, col)
-        Player.collide_enemy.func(self, col)
+        Player.collide_enemy_rock.func(self, col)
         if Input:isDown(Player.keyB) then
             if col.other:grab(self) then
                 self.hold = col.other
@@ -279,7 +279,7 @@ Player.Hurt.collide_enemy = {
 }
 
 function Player.Hurt:enteredState()
-    self.hurtTimer = 40
+    self.hurtTimer = 120
 end
 
 function Player.Hurt:update(dt)
