@@ -4,7 +4,18 @@ local Enemy = require 'objects/enemy'
 local EnemyFloat = Class('enemy_float', Enemy)
 
 EnemyFloat.static.sprMove = love.graphics.newImage('assets/enemy_float_move.png')
+EnemyFloat.static.sprDead = love.graphics.newImage('assets/enemy_float_dead.png')
 EnemyFloat.static.sprParticle = love.graphics.newImage('assets/particle.png')
+
+EnemyFloat.static.glowShader = love.graphics.newShader[[
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+        vec4 pixel = vec4(0.6, 0.4, 0.1, 1);
+        vec2 d = 2.0*(texture_coords - vec2(0.5));
+        pixel.a = 1.0 - length(d);
+        pixel.a = floor(pixel.a*5)/5;
+        return pixel * color;
+    }
+]]
 
 EnemyFloat.collide_enemy = {
     type = 'cross',
@@ -13,7 +24,7 @@ EnemyFloat.collide_enemy = {
 }
 
 function EnemyFloat:initialize(world, x, y)
-    Enemy.initialize(self, world, x, y, 24, 24)
+    Enemy.initialize(self, world, x, y, 16, 32)
     table.insert(self.tags, EnemyFloat.name)
     self.player = nil
 
@@ -27,15 +38,25 @@ function EnemyFloat:initialize(world, x, y)
     self.throwTimer = 0
 
     self.animMove = newAnimation(EnemyFloat.sprMove, 32, 32, 1/8, 0)
+    self.animDead = newAnimation(EnemyFloat.sprDead, 32, 32, 1/12, 0)
+    self.animDead:setMode('once')
 
     self.speck = love.graphics.newParticleSystem(EnemyFloat.sprParticle)
-    self.speck:setParticleLifetime(0, 0.3)
+    self.speck:setParticleLifetime(0, 0.4)
     self.speck:setDirection(-math.pi/2)
     self.speck:setSpread(math.pi/4)
     self.speck:setAreaSpread('normal', 4, 2)
     self.speck:setSpeed(0, 30)
     self.speck:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
     self.speck:setSizes(1, 0)
+
+    self.explosion = love.graphics.newParticleSystem(EnemyFloat.sprParticle)
+    self.explosion:setParticleLifetime(0, 0.5)
+    self.explosion:setSpread(math.pi*2)
+    self.explosion:setAreaSpread('normal', 4, 4)
+    self.explosion:setSpeed(0, 100)
+    self.explosion:setColors(255, 255, 0, 255, 255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
+    self.explosion:setSizes(2, 0)
 
     self:gotoState('Move')
 end
@@ -53,13 +74,29 @@ function EnemyFloat:update(dt)
 end
 
 function EnemyFloat:draw()
+    local dy = 4*math.sin(self.moveTimer/12)
+
+    love.graphics.setColor(255, 255, 255, 255-255*self.deadTimer/60)
+    love.graphics.setBlendMode('additive')
+    love.graphics.setShader(EnemyFloat.glowShader)
+    love.graphics.draw(EnemyFloat.sprParticle, self.x+self.w/2, self.y+self.h/2+dy, 0, 8, 8, EnemyFloat.sprParticle:getWidth()/2, EnemyFloat.sprParticle:getHeight()/2)
+    love.graphics.setShader()
+    love.graphics.setBlendMode('alpha')
+    love.graphics.setColor(255, 255, 255, 255)
+
     self.speck:setPosition(self.x+self.w/2, self.y+self.h/2)
     self.speck:update(1/60)
     love.graphics.draw(self.speck)
 
-    self.sprite:update(1/60)
-    local dy = 6*math.sin(self.moveTimer/12)
-    self.sprite:draw(self.x + self.w/2, self.y+dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()-self.h)
+    self.explosion:setPosition(self.x+self.w/2, self.y+self.h/2)
+    self.explosion:update(1/60)
+    love.graphics.draw(self.explosion)
+
+    if self.sprite ~= self.animDead or self.sprite:getCurrentFrame() < self.sprite:getSize() then
+        self.sprite:update(1/60)
+        self.sprite:draw(self.x + self.w/2, self.y+dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()-self.h)
+    end
+    -- Enemy.draw(self)
 end
 
 function EnemyFloat:release() end
@@ -78,6 +115,7 @@ EnemyFloat.Move.collide_lava = {
 }
 
 function EnemyFloat.Move:enteredState()
+-- self.explosion:setEmissionRate(40)
     self.moveTimer = 0
     self.speck:setEmissionRate(50)
     self.sprite = self.animMove
@@ -100,8 +138,10 @@ end
 EnemyFloat.Dead = EnemyFloat:addState('Dead')
 
 function EnemyFloat.Dead:enteredState()
-    self.speck:emit(40)
+    self.speck:setEmissionRate(0)
+    self.explosion:emit(50)
     self.world:remove(self)
+    self.sprite = self.animDead
     self.vx = 0
     self.vy = 0
     self.deadTimer = 0
@@ -114,7 +154,8 @@ end
 function EnemyFloat.Dead:hit() end
 
 function EnemyFloat.Dead:isDead()
-    return self.deadTimer > 20
+    return self.deadTimer > 60
+    -- return self.sprite:getCurrentFrame() == self.sprite:getSize()
 end
 
 return EnemyFloat

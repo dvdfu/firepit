@@ -64,15 +64,6 @@ function EnemyRock:initialize(world, x, y)
 	self.dust:setColors(208, 190, 209, 255, 249, 239, 191, 255)
 	self.dust:setSizes(1, 0)
 
-    self.speck = love.graphics.newParticleSystem(EnemyRock.sprParticle)
-    self.speck:setParticleLifetime(0, 0.3)
-    self.speck:setDirection(-math.pi/2)
-    self.speck:setSpread(math.pi/6)
-    self.speck:setAreaSpread('normal', 4, 0)
-    self.speck:setSpeed(10, 90)
-    self.speck:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
-    self.speck:setSizes(0.5, 0)
-
     self:gotoState('Move')
 end
 
@@ -92,10 +83,6 @@ function EnemyRock:draw()
     self.dust:setPosition(self.x+self.w/2, self.y+self.h)
     self.dust:update(1/60)
     love.graphics.draw(self.dust)
-
-    self.speck:setPosition(self.x+self.w/2, self.y)
-    self.speck:update(1/60)
-    love.graphics.draw(self.speck)
 
     self.sprite:update(1/60)
     self.sprite:draw(self.x + self.w/2, self.y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()-self.h)
@@ -125,7 +112,6 @@ EnemyRock.Move.collide_lava = {
 }
 
 function EnemyRock.Move:enteredState()
-    self.speck:setEmissionRate(10)
     self.sprite = self.animMove
     self.sprite.speed = 1
     self.vx = self.vMove * self.direction
@@ -145,7 +131,6 @@ end
 EnemyRock.Stun = EnemyRock:addState('Stun')
 
 function EnemyRock.Stun:enteredState()
-    self.speck:setEmissionRate(0)
     self.sprite = self.animStun
     self.stompTimer = 4*60
     self.sprite.speed = 0
