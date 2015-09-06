@@ -32,7 +32,8 @@ Lava.static.glowShader = love.graphics.newShader[[
 ]]
 
 function Lava:initialize(world)
-    Object.initialize(self, world, -64, 360, 480+128, 176)
+    Object.initialize(self, world, -128, 360, 480+256, 176)
+    table.insert(self.tags, Lava.name)
     self.level = self.y
 
     self.fire = love.graphics.newParticleSystem(Lava.sprParticle)

@@ -40,6 +40,7 @@ Enemy.collide_lava = {
 
 function Enemy:initialize(world, x, y, w, h)
     Object.initialize(self, world, x, y, w, h)
+    table.insert(self.tags, Enemy.name)
     self.vx, self.vy = 0, 0
     self.ground = nil
 

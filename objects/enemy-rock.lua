@@ -8,6 +8,15 @@ EnemyRock.static.sprStun = love.graphics.newImage('assets/enemy_rock.png')
 EnemyRock.static.sprStar = love.graphics.newImage('assets/star.png')
 EnemyRock.static.sprParticle = love.graphics.newImage('assets/particle.png')
 
+EnemyRock.collide_player = {
+    type = 'cross',
+    func = function(self, col)
+        if col.normal.y == 1 and col.other.vy > 0 and col.other.y+col.other.h-col.other.vy <= self.y then
+            self:stomp()
+        end
+    end
+}
+
 EnemyRock.collide_enemy = {
     type = 'cross',
     func = function(self, col)
@@ -31,7 +40,7 @@ EnemyRock.collide_enemy = {
 
 function EnemyRock:initialize(world, x, y)
     Enemy.initialize(self, world, x, y, 16, 16)
-    self.name = 'enemy'
+    table.insert(self.tags, EnemyRock.name)
     self.player = nil
 
     self.vFall = 7
@@ -56,7 +65,7 @@ function EnemyRock:initialize(world, x, y)
 	self.dust:setSizes(1, 0)
 
     self.speck = love.graphics.newParticleSystem(EnemyRock.sprParticle)
-    self.speck:setParticleLifetime(0, 0.5)
+    self.speck:setParticleLifetime(0, 0.3)
     self.speck:setDirection(-math.pi/2)
     self.speck:setSpread(math.pi/6)
     self.speck:setAreaSpread('normal', 4, 0)
@@ -230,7 +239,7 @@ function EnemyRock.Throw:update(dt)
     end
 end
 
---[[======== THROW STATE ========]]
+--[[======== DEAD STATE ========]]
 
 function EnemyRock.Dead:update(dt)
     self.deadTimer = self.deadTimer + 1

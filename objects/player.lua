@@ -58,12 +58,7 @@ Player.collide_platform = {
 Player.collide_enemy = {
     type = 'cross',
     func = function(self, col)
-        if col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
-            self.vy = -_vJump*0.7
-            self.y = col.other.y - self.h
-            self.world:update(self, self.x, self.y)
-            col.other:stomp()
-        elseif col.other:isHarmful() then
+        if col.other:isHarmful() then
             self:gotoState('Hurt')
             if col.normal.x == 0 then
                 self.px = col.other.direction*6
@@ -71,6 +66,20 @@ Player.collide_enemy = {
                 self.px = col.normal.x*6
             end
             self.py = -3
+        end
+    end
+}
+
+Player.collide_enemy_rock = {
+    type = 'cross',
+    func = function(self, col)
+        if col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
+            self.vy = -_vJump*0.7
+            self.y = col.other.y - self.h
+            self.world:update(self, self.x, self.y)
+            col.other:stomp()
+        else
+            Player.collide_enemy.func(self, col)
         end
     end
 }
@@ -96,6 +105,8 @@ Player.collide_item = {
 
 function Player:initialize(world, x, y)
     Object.initialize(self, world, x, y, 16, 24)
+    table.insert(self.tags, Player.name)
+
     self.ground = nil
     self.direction = self.vx > 0 and 1 or -1
     self.hold = nil
@@ -212,7 +223,7 @@ end
 
 Player.Normal = Player:addState('Normal')
 
-Player.Normal.collide_enemy = {
+Player.Normal.collide_enemy_rock = {
     type = 'cross',
     func = function(self, col)
         Player.collide_enemy.func(self, col)

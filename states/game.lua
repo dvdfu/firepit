@@ -4,6 +4,7 @@ local Bump = require 'bump'
 local Solid = require 'objects/solid'
 local Player = require 'objects/player'
 local EnemyRock = require 'objects/enemy-rock'
+local EnemyFloat = require 'objects/enemy-float'
 local Item = require 'objects/item'
 local Lava = require 'objects/lava'
 
@@ -39,14 +40,19 @@ function addSolids()
     addSolid(sw/2, sh-192, 128, 192, { r = 60, g = 64, b = 104 }, true) -- 3
     addSolid(0, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, true) -- 2l
     addSolid(sw-128, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, true) -- 2r
-    addSolid(sw/2-128, sh-64, 253, 64) --1
+    addSolid(sw/2-128, sh-64, 256, 64) --1
 
     -- addSolid(-64, -96, 64, sh+96) --wl
-    addSolid(sw, sh-256, 64, 256) --wr
+    addSolid(sw, sh-256, 128, 256) --wr
 end
 
 function addEnemy(x, y)
-    local e = EnemyRock:new(world, x, y)
+    local e = {}
+    if math.random() > 0.5 then
+        e = EnemyRock:new(world, x, y)
+    else
+        e = EnemyFloat:new(world, x, y)
+    end
     e.dropItem = addItem
     table.insert(enemies, e)
     return e

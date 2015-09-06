@@ -20,7 +20,8 @@ Object:
 ]]--
 
 function Object:initialize(world, x, y, w, h)
-    self.name = self.class.name
+    self.tags = {}
+    table.insert(self.tags, Object.name)
     self.world = world
     self.x, self.y = x, y
     self.vx, self.vy = 0, 0
@@ -35,21 +36,21 @@ end
 function Object:collide()
     local cols, len, col, other
     self.x, self.y, cols, len = self.world:move(self, self.x, self.y, function(item, other)
-        if self['collide_'..other.name] then
-            return self['collide_'..other.name].type
+        for i = #other.tags, 1, -1 do
+            if self['collide_'..other.tags[i]] then
+                return self['collide_'..other.tags[i]].type
+            end
         end
         return 'cross'
     end)
 	for i = 1, len do
 		col = cols[i]
-        if self['collide_'..col.other.name] then
-            self['collide_'..col.other.name].func(self, col)
+        for j = #col.other.tags, 1, -1 do
+            if self['collide_'..col.other.tags[j]] then
+                self['collide_'..col.other.tags[j]].func(self, col)
+                break
+            end
         end
-        -- for k, v in pairs(self.class.collisions) do
-        --     if col.other.name == k then
-        --         v.func(self, col)
-        --     end
-        -- end
 	end
 end
 
