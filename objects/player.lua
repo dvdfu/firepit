@@ -279,7 +279,7 @@ Player.Hurt.collide_enemy = {
 }
 
 function Player.Hurt:enteredState()
-    self.hurtTimer = 120
+    self.hurtTimer = 60
 end
 
 function Player.Hurt:update(dt)

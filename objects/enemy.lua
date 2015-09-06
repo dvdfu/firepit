@@ -42,6 +42,7 @@ function Enemy:initialize(world, x, y, w, h)
     Object.initialize(self, world, x, y, w, h)
     table.insert(self.tags, Enemy.name)
     self.vx, self.vy = 0, 0
+    self.vx = math.random() > 0.5 and 1 or -1
     self.ground = nil
 
     self.deadTimer = 0
