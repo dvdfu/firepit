@@ -35,6 +35,7 @@ Player.collide_solid = {
             self.vy = 0
             if col.normal.y == -1 then
                 self.ground = col.other
+                col.other:setState('ice', self.x+self.w/2)
             end
         end
         if col.normal.x ~= 0 then
@@ -51,6 +52,7 @@ Player.collide_platform = {
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
             self.ground = col.other
+            col.other:setState('ice', self.x+self.w/2)
         end
     end
 }
@@ -145,6 +147,9 @@ end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
+    if self.ground and self.ground:getState(self.x) == 'ice' then
+        aMove = aMove * 0.2
+    end
     if Input:isDown(Player.keyLeft) then
         if self.vx >= -aMove and self.ground then
             self.dust:emit(1)
@@ -279,7 +284,7 @@ Player.Hurt.collide_enemy = {
 }
 
 function Player.Hurt:enteredState()
-    self.hurtTimer = 120
+    self.hurtTimer = 60
 end
 
 function Player.Hurt:update(dt)

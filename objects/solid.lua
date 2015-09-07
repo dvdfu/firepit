@@ -1,4 +1,5 @@
 local Class = require 'middleclass'
+local Tile = require 'objects/tile'
 local Object = require 'objects/object'
 local Solid = Class('solid', Object)
 
@@ -35,12 +36,43 @@ function Solid:initialize(world, x, y, w, h, color, platform)
         love.graphics.line(self.w, 0, self.w, self.h)
     end
     love.graphics.setColor(255, 255, 255)
-
     love.graphics.setCanvas()
+
+    self.tiles = {}
+    for i = 0, self.w/16-1, 1 do
+        self.tiles[i] = Tile:new(self.x+i*16, self.y)
+    end
+end
+
+function Solid:update(dt)
+    for i = 0, #self.tiles do
+        self.tiles[i]:update(dt)
+    end
 end
 
 function Solid:draw()
     love.graphics.draw(self.image, self.x, self.y)
+    for i = 0, #self.tiles do
+        self.tiles[i]:draw()
+    end
+end
+
+function Solid:setState(state, x)
+    local i = math.floor((x-self.x)/16)
+    if i < 0 then
+        i = 0
+    elseif i > #self.tiles then
+        i = #self.tiles
+    end
+    self.tiles[i]:setState(state)
+end
+
+function Solid:getState(x)
+    local i = math.floor((x-self.x)/16)
+    if i < 0 or i > #self.tiles then
+        return nil
+    end
+    return self.tiles[i]:getState()
 end
 
 return Solid

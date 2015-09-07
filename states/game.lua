@@ -94,6 +94,9 @@ function Game:update(dt)
             items[key] = nil
         end
     end
+    for _, solid in pairs(solids) do
+        solid:update(dt)
+    end
     l:update(dt)
 end
 

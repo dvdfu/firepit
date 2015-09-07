@@ -38,7 +38,7 @@ function EnemyFloat:initialize(world, x, y)
     self.throwTimer = 0
 
     self.animMove = newAnimation(EnemyFloat.sprMove, 32, 32, 1/8, 0)
-    self.animDead = newAnimation(EnemyFloat.sprDead, 32, 32, 1/12, 0)
+    self.animDead = newAnimation(EnemyFloat.sprDead, 32, 32, 1/8, 0)
     self.animDead:setMode('once')
 
     self.speck = love.graphics.newParticleSystem(EnemyFloat.sprParticle)
@@ -49,6 +49,15 @@ function EnemyFloat:initialize(world, x, y)
     self.speck:setSpeed(0, 30)
     self.speck:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
     self.speck:setSizes(1, 0)
+    self.speck:setPosition(self.x+self.w/2, self.y+self.h/2)
+
+    self.explosion = love.graphics.newParticleSystem(EnemyFloat.sprParticle)
+    self.explosion:setParticleLifetime(0, 0.5)
+    self.explosion:setSpread(math.pi*2)
+    self.explosion:setAreaSpread('normal', 4, 4)
+    self.explosion:setSpeed(0, 100)
+    self.explosion:setColors(255, 255, 0, 255, 255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
+    self.explosion:setSizes(2, 0)
 
     self.explosion = love.graphics.newParticleSystem(EnemyFloat.sprParticle)
     self.explosion:setParticleLifetime(0, 0.5)
@@ -138,6 +147,7 @@ end
 EnemyFloat.Dead = EnemyFloat:addState('Dead')
 
 function EnemyFloat.Dead:enteredState()
+    -- self.dropItem(self.x, self.y) --TODO
     self.speck:setEmissionRate(0)
     self.explosion:emit(50)
     self.world:remove(self)

@@ -244,8 +244,8 @@ end
 EnemyRock.Dead = EnemyRock:addState('Dead')
 
 function EnemyRock.Dead:enteredState()
-    self.world:remove(self)
     -- self.dropItem(self.x, self.y) --TODO
+    self.world:remove(self)
     self.deadTimer = 0
     self.vy = -8
 end

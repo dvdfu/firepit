@@ -41,6 +41,7 @@ Item.collide_platform = {
 function Item:initialize(world, x, y)
     Object.initialize(self, world, x, y, 16, 16)
     self.type = Item.powerups[math.random(1, #Item.powerups)]
+    table.insert(self.tags, Item.name)
     self.vy = -5
     self.vx = math.random(-3, 3)
     self.timer = 0
