@@ -1,4 +1,5 @@
 local Game = {}
+local GUI = require 'gui'
 local Camera = require 'camera'
 local Bump = require 'bump'
 local Solid = require 'objects/solid'
@@ -19,6 +20,7 @@ function Game:enter()
 
     p = Player:new(world, 32, 0)
     l = Lava:new(world)
+    gui = GUI:new(p)
     cx, cy = sw/2, sh/2
     cs = 0
     cam = Camera(cx, cy)
@@ -122,6 +124,7 @@ function Game:draw()
         end
         l:draw()
     end)
+    gui:draw()
 end
 
 return Game

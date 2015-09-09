@@ -1,4 +1,5 @@
 require 'AnAL'
+local Powerups = require 'powerups'
 local Class = require 'middleclass'
 local Enemy = require 'objects/enemy'
 local EnemyRock = Class('enemy_rock', Enemy)
@@ -119,13 +120,13 @@ end
 
 function EnemyRock.Move:update(dt)
     self.direction = self.vx > 0 and 1 or -1
-    -- if self.ground and self.ground.class.name == 'solid' then
-    --     if self.ground:getState(self.x+self.w/2) == 'ice' then
-    --         self.vx = self.vMove/4 * self.direction
-    --     else
-    --         self.vx = self.vMove * self.direction
-    --     end
-    -- end
+    if self.ground and self.ground.class.name == 'solid' then
+        if self.ground:getState(self.x+self.w/2) == Powerups.coldFeet then
+            self.vx = self.vMove/4 * self.direction
+        else
+            self.vx = self.vMove * self.direction
+        end
+    end
     EnemyRock.update(self, dt)
 end
 

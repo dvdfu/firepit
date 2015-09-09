@@ -8,7 +8,7 @@ love.mouse.setVisible(false)
 Input = require 'input'
 Gamestate = require 'gamestate'
 Game = require 'states/game'
-scale = 2
+scale = 1
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)

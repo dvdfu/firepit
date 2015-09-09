@@ -42,7 +42,7 @@ end
 function Tile:setState(state)
     self.state = state
     if state == Powerups.coldFeet then
-        self.stateTimer = 3*60
+        self.stateTimer = 5*60
     end
 end
 

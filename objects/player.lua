@@ -135,6 +135,7 @@ function Player:initialize(world, x, y)
     self.mx = 0 --move
     self.px, self.py = 0, 0 --push
     self.jumpTimer = 0
+    self.powerup = Powerups.coldFeet
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -168,9 +169,9 @@ end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
-    -- if self.ground and self.ground:getState(self.x) == Powerups.coldFeet then
-    --     aMove = aMove * 0.2
-    -- end
+    if self.powerup == Powerups.coldFeet and self.ground then
+        aMove = aMove * 0.2
+    end
     if Input:isDown(Player.keyLeft) then
         if self.vx >= -aMove and self.ground then
             self.dust:emit(1)
@@ -257,7 +258,7 @@ function Player:draw()
 end
 
 function Player:hasPower(power)
-    return true;
+    return self.powerup == power;
 end
 
 --[[======== NORMAL STATE ========]]
