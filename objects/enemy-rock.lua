@@ -17,7 +17,7 @@ EnemyRock.collide_player = {
     end
 }
 
-EnemyRock.collide_enemy = {
+EnemyRock.collide_enemy_rock = {
     type = 'cross',
     func = function(self, col)
         if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
@@ -119,6 +119,13 @@ end
 
 function EnemyRock.Move:update(dt)
     self.direction = self.vx > 0 and 1 or -1
+    -- if self.ground and self.ground.class.name == 'solid' then
+    --     if self.ground:getState(self.x+self.w/2) == 'ice' then
+    --         self.vx = self.vMove/4 * self.direction
+    --     else
+    --         self.vx = self.vMove * self.direction
+    --     end
+    -- end
     EnemyRock.update(self, dt)
 end
 
@@ -209,6 +216,11 @@ EnemyRock.Throw.collide_enemy = {
     func = function(self, col)
         col.other:hit(self)
     end
+}
+
+EnemyRock.Throw.collide_enemy_rock = {
+    type = 'cross',
+    func = EnemyRock.Throw.collide_enemy.func
 }
 
 function EnemyRock.Throw:enteredState()

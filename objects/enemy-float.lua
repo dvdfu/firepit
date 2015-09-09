@@ -17,10 +17,16 @@ EnemyFloat.static.glowShader = love.graphics.newShader[[
     }
 ]]
 
-EnemyFloat.collide_enemy = {
+EnemyFloat.collide_platform = {
     type = 'cross',
     func = function(self, col)
+        Enemy.collide_platform.func(self, col)
     end
+}
+
+EnemyFloat.collide_enemy = {
+    type = 'cross',
+    func = function(self, col) end
 }
 
 function EnemyFloat:initialize(world, x, y)
@@ -80,6 +86,9 @@ function EnemyFloat:update(dt)
         self.ground = nil
     end
     Enemy.update(self, dt)
+    if self.ground and self.ground:getState(self.x+self.w/2) == 'ice' then
+        self:gotoState('Dead')
+    end
 end
 
 function EnemyFloat:draw()
@@ -108,7 +117,9 @@ function EnemyFloat:draw()
     -- Enemy.draw(self)
 end
 
-function EnemyFloat:release() end
+function EnemyFloat:stomp()
+    self:gotoState('Dead')
+end
 
 --[[======== MOVE STATE ========]]
 
@@ -167,5 +178,7 @@ function EnemyFloat.Dead:isDead()
     return self.deadTimer > 60
     -- return self.sprite:getCurrentFrame() == self.sprite:getSize()
 end
+
+function EnemyFloat.Dead:stomp() end
 
 return EnemyFloat

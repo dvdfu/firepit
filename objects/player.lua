@@ -1,15 +1,17 @@
 require 'AnAL'
+local Powerups = require 'powerups'
 local Enemy = require 'objects/enemy'
 local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Player = Class('player', Object)
 
-local _vJump = 7
+local _vJump = 4.5
 local _vFall = 7
 local _aFall = 0.3
 local _vMove = 2
 local _aMoveAir = 0.2
 local _aMoveGround = 0.3
+local _jumpTimerMax = 10
 
 Player.static.keyLeft = 'left'
 Player.static.keyRight = 'right'
@@ -35,7 +37,9 @@ Player.collide_solid = {
             self.vy = 0
             if col.normal.y == -1 then
                 self.ground = col.other
-                col.other:setState('ice', self.x+self.w/2)
+                if self:hasPower(Powerups.coldFeet) then
+                    col.other:setState(Powerups.coldFeet, self.x+self.w/2)
+                end
             end
         end
         if col.normal.x ~= 0 then
@@ -52,7 +56,9 @@ Player.collide_platform = {
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
             self.ground = col.other
-            col.other:setState('ice', self.x+self.w/2)
+            if self:hasPower(Powerups.coldFeet) then
+                col.other:setState(Powerups.coldFeet, self.x+self.w/2)
+            end
         end
     end
 }
@@ -76,6 +82,20 @@ Player.collide_enemy_rock = {
     type = 'cross',
     func = function(self, col)
         if col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
+            self.vy = -_vJump*0.7
+            self.y = col.other.y - self.h
+            self.world:update(self, self.x, self.y)
+            col.other:stomp()
+        else
+            Player.collide_enemy.func(self, col)
+        end
+    end
+}
+
+Player.collide_enemy_float = {
+    type = 'cross',
+    func = function(self, col)
+        if self:hasPower(Powerups.coldFeet) and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
             self.vy = -_vJump*0.7
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
@@ -114,6 +134,7 @@ function Player:initialize(world, x, y)
     self.hold = nil
     self.mx = 0 --move
     self.px, self.py = 0, 0 --push
+    self.jumpTimer = 0
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -147,9 +168,9 @@ end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
-    if self.ground and self.ground:getState(self.x) == 'ice' then
-        aMove = aMove * 0.2
-    end
+    -- if self.ground and self.ground:getState(self.x) == Powerups.coldFeet then
+    --     aMove = aMove * 0.2
+    -- end
     if Input:isDown(Player.keyLeft) then
         if self.vx >= -aMove and self.ground then
             self.dust:emit(1)
@@ -182,10 +203,21 @@ function Player:update(dt)
     end
 
     if self.ground then
+        self.jumpTimer = 0
         if Input:pressed(Player.keyA) then
             self.vy = -_vJump
+            self.jumpTimer = _jumpTimerMax
             self.ground = nil
             self.dust:emit(10)
+        end
+    else
+        if Input:isDown(Player.keyA) then
+            if self.jumpTimer > 0 then
+                self.vy = -_vJump
+            end
+            self.jumpTimer = self.jumpTimer - 1
+        else
+            self.jumpTimer = 0
         end
     end
 
@@ -222,6 +254,10 @@ function Player:draw()
     local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
     self.sprite:update(1/60)
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+end
+
+function Player:hasPower(power)
+    return true;
 end
 
 --[[======== NORMAL STATE ========]]
