@@ -64,21 +64,6 @@ Player.collide_platform = {
     end
 }
 
-Player.collide_enemy = {
-    type = 'cross',
-    func = function(self, col)
-        if col.other:isHarmful() then
-            self:gotoState('Hurt')
-            if col.normal.x == 0 then
-                self.px = col.other.direction*6
-            else
-                self.px = col.normal.x*6
-            end
-            self.py = -3
-        end
-    end
-}
-
 Player.collide_enemy_rock = {
     type = 'cross',
     func = function(self, col)
@@ -88,7 +73,7 @@ Player.collide_enemy_rock = {
             self.world:update(self, self.x, self.y)
             col.other:stomp()
         else
-            Player.collide_enemy.func(self, col)
+            self:getHit(col.other)
         end
     end
 }
@@ -102,7 +87,7 @@ Player.collide_enemy_float = {
             self.world:update(self, self.x, self.y)
             col.other:stomp()
         else
-            Player.collide_enemy.func(self, col)
+            self:getHit(col.other)
         end
     end
 }
@@ -113,7 +98,7 @@ Player.collide_lava = {
         self.vy = -7
         self.y = col.other.level - self.h
         self.world:update(self, self.x, self.y)
-        self:gotoState('Hurt')
+        self:getHit()
     end
 }
 
@@ -136,7 +121,7 @@ function Player:initialize(world, x, y)
     self.mx = 0 --move
     self.px, self.py = 0, 0 --push
     self.jumpTimer = 0
-    self.powerup = Powerups.coldFeet
+    self.powerup = nil-- Powerups.coldFeet
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -262,6 +247,18 @@ function Player:hasPower(power)
     return self.powerup == power;
 end
 
+function Player:getHit(other)
+    if other:isHarmful() then
+        self:gotoState('Hurt')
+        if self.x > other.x then
+            self.px = 5
+        else
+            self.px = -5
+        end
+        self.py = -4
+    end
+end
+
 --[[======== NORMAL STATE ========]]
 
 Player.Normal = Player:addState('Normal')
@@ -316,11 +313,6 @@ end
 
 Player.Hurt = Player:addState('Hurt')
 
-Player.Hurt.collide_enemy = {
-    type = 'cross',
-    func = function(self, col) end
-}
-
 function Player.Hurt:enteredState()
     self.hurtTimer = 60
 end
@@ -347,5 +339,7 @@ function Player.Hurt:draw()
     Player.draw(self)
     love.graphics.setColor(255, 255, 255)
 end
+
+function Player.Hurt:getHit() end
 
 return Player

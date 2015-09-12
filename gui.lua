@@ -7,8 +7,10 @@ function GUI:initialize(player)
 end
 
 function GUI:draw()
-    local powerup = Powerups.power[self.player.powerup].icon
-    love.graphics.draw(powerup, 32, 32)
+    if self.player.powerup then
+        local powerup = Powerups.power[self.player.powerup].icon
+        love.graphics.draw(powerup, 32, 32)
+    end
 end
 
 return GUI

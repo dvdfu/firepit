@@ -252,6 +252,8 @@ function EnemyRock.Throw:update(dt)
     end
 end
 
+function EnemyRock.Throw:stomp() end
+
 --[[======== DEAD STATE ========]]
 
 EnemyRock.Dead = EnemyRock:addState('Dead')
