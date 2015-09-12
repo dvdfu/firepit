@@ -1,8 +1,11 @@
-local Powerups = require 'powerups'
 local Class = require 'middleclass'
 local Tile = Class('tile')
 
 Tile.static.sprParticle = love.graphics.newImage('assets/particle2.png')
+Tile.static.sprIce = love.graphics.newImage('assets/tile_ice.png')
+Tile.static.state = {
+    iced = 'iced'
+}
 
 function Tile:initialize(x, y)
     self.x, self.y = x, y
@@ -32,16 +35,20 @@ function Tile:update(dt)
 end
 
 function Tile:draw()
-    if self.state == Powerups.coldFeet then
+    if self.state == Tile.state.iced then
         self.frost:update(1/60)
+        -- if self.stateTimer < 10 then
+        --     love.graphics.setColor(255, 255, 255, 255*self.stateTimer/10)
+        -- end
         love.graphics.draw(self.frost)
-        love.graphics.rectangle('fill', self.x, self.y, self.w, 4)
+        love.graphics.draw(Tile.sprIce, self.x, self.y)
+        -- love.graphics.setColor(255, 255, 255, 255)
     end
 end
 
 function Tile:setState(state)
     self.state = state
-    if state == Powerups.coldFeet then
+    if state == Tile.state.iced then
         self.stateTimer = 5*60
     end
 end

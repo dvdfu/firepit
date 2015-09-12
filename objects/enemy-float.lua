@@ -1,5 +1,5 @@
 require 'AnAL'
-local Powerups = require 'powerups'
+local Tile = require 'objects/tile'
 local Class = require 'middleclass'
 local Enemy = require 'objects/enemy'
 local EnemyFloat = Class('enemy_float', Enemy)
@@ -87,7 +87,7 @@ function EnemyFloat:update(dt)
         self.ground = nil
     end
     Enemy.update(self, dt)
-    if self.ground and self.ground:getState(self.x+self.w/2) == Powerups.coldFeet then
+    if self.ground and self.ground:getState(self.x+self.w/2) == Tile.state.iced then
         self:gotoState('Dead')
     end
 end

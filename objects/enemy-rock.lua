@@ -1,5 +1,5 @@
 require 'AnAL'
-local Powerups = require 'powerups'
+local Tile = require 'objects/tile'
 local Class = require 'middleclass'
 local Enemy = require 'objects/enemy'
 local EnemyRock = Class('enemy_rock', Enemy)
@@ -18,26 +18,26 @@ EnemyRock.collide_player = {
     end
 }
 
-EnemyRock.collide_enemy_rock = {
-    type = 'cross',
-    func = function(self, col)
-        if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-            self.vy = 0
-            self.y = col.other.y - self.h
-            self.world:update(self, self.x, self.y)
-            self.ground = col.other
-        end
-        if col.normal.x ~= 0 then
-            if col.normal.x == 1 then
-                self.x = col.other.x + col.other.w
-            else
-                self.x = col.other.x - self.w
-            end
-            self.world:update(self, self.x, self.y)
-            self.vx = -self.vx
-        end
-    end
-}
+-- EnemyRock.collide_enemy_rock = {
+--     type = 'cross',
+--     func = function(self, col)
+--         if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+--             self.vy = 0
+--             self.y = col.other.y - self.h
+--             self.world:update(self, self.x, self.y)
+--             self.ground = col.other
+--         end
+--         if col.normal.x ~= 0 then
+--             if col.normal.x == 1 then
+--                 self.x = col.other.x + col.other.w
+--             else
+--                 self.x = col.other.x - self.w
+--             end
+--             self.world:update(self, self.x, self.y)
+--             self.vx = -self.vx
+--         end
+--     end
+-- }
 
 function EnemyRock:initialize(world, x, y)
     Enemy.initialize(self, world, x, y, 16, 16)
@@ -121,7 +121,7 @@ end
 function EnemyRock.Move:update(dt)
     self.direction = self.vx > 0 and 1 or -1
     if self.ground and self.ground.class.name == 'solid' then
-        if self.ground:getState(self.x+self.w/2) == Powerups.coldFeet then
+        if self.ground:getState(self.x+self.w/2) == Tile.state.iced then
             self.vx = self.vMove/4 * self.direction
         else
             self.vx = self.vMove * self.direction

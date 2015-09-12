@@ -1,4 +1,5 @@
 require 'AnAL'
+local Tile = require 'objects/tile'
 local Powerups = require 'powerups'
 local Enemy = require 'objects/enemy'
 local Class = require 'middleclass'
@@ -38,7 +39,7 @@ Player.collide_solid = {
             if col.normal.y == -1 then
                 self.ground = col.other
                 if self:hasPower(Powerups.coldFeet) then
-                    col.other:setState(Powerups.coldFeet, self.x+self.w/2)
+                    col.other:setState(Tile.state.iced, self.x+self.w/2)
                 end
             end
         end
@@ -57,7 +58,7 @@ Player.collide_platform = {
             self.world:update(self, self.x, self.y)
             self.ground = col.other
             if self:hasPower(Powerups.coldFeet) then
-                col.other:setState(Powerups.coldFeet, self.x+self.w/2)
+                col.other:setState(Tile.state.iced, self.x+self.w/2)
             end
         end
     end
