@@ -20,6 +20,7 @@ Player.static.keyUp = 'up'
 Player.static.keyDown = 'down'
 Player.static.keyA = 'z'
 Player.static.keyB = 'x'
+Player.static.keyC = 'c'
 
 Player.static.sprIdle = love.graphics.newImage('assets/player_idle.png')
 Player.static.sprRun = love.graphics.newImage('assets/player_run.png')
@@ -40,8 +41,7 @@ Player.collide_solid = {
                 self.ground = col.other
                 if self:hasPower(Powerups.coldFeet) then
                     col.other:setState(Tile.state.iced, self.x+self.w/2)
-                    col.other:setState(Tile.state.iced, self.x+self.w/2-16)
-                    col.other:setState(Tile.state.iced, self.x+self.w/2+16)
+                    col.other:setState(Tile.state.iced, self.x+self.w/2+16*self.direction)
                 end
             end
         end
@@ -125,7 +125,9 @@ function Player:initialize(world, x, y)
     self.mx = 0 --move
     self.px, self.py = 0, 0 --push
     self.jumpTimer = 0
-    self.powerup = Powerups.coldFeet
+    self.staticPowers = {}
+    table.insert(self.staticPowers, Powerups.coldFeet)
+    table.insert(self.staticPowers, Powerups.coldFeet)
     self.maxHealth = 6
     self.health = self.maxHealth
 
@@ -161,7 +163,7 @@ end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
-    if self.powerup == Powerups.coldFeet and self.ground then
+    if self:hasPower(Powerups.coldFeet) and self.ground then
         aMove = aMove * 0.2
     end
     if Input:isDown(Player.keyLeft) then
@@ -250,7 +252,12 @@ function Player:draw()
 end
 
 function Player:hasPower(power)
-    return self.powerup == power;
+    for _, p in ipairs(self.staticPowers) do
+        if p == power then
+            return true
+        end
+    end
+    return false
 end
 
 function Player:getHit(other)
