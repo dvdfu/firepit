@@ -29,12 +29,11 @@ function Solid:initialize(world, x, y, w, h, color, platform)
     love.graphics.setColor(200, 144, 200)
     love.graphics.setLineWidth(4)
     love.graphics.line(0, 2, self.w, 2)
-    if not platform then
-        love.graphics.setColor(16, 24, 40)
-        love.graphics.setLineWidth(1)
-        love.graphics.line(1, 0, 1, self.h)
-        love.graphics.line(self.w, 0, self.w, self.h)
-    end
+    -- if not platform then
+    --     love.graphics.setColor(16, 24, 40)
+    --     love.graphics.line(1, 0, 1, self.h)
+    --     love.graphics.line(self.w, 0, self.w, self.h)
+    -- end
     love.graphics.setColor(255, 255, 255)
     love.graphics.setCanvas()
 

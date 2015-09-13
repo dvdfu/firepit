@@ -123,6 +123,18 @@ function Game:draw()
             item:draw()
         end
         l:draw()
+
+        -- for _, solid in pairs(solids) do
+        --     solid:drawDebug()
+        -- end
+        -- p:drawDebug()
+        -- for _, enemy in pairs(enemies) do
+        --     enemy:drawDebug()
+        -- end
+        -- for key, item in pairs(items) do
+        --     item:drawDebug()
+        -- end
+        -- l:drawDebug()
     end)
     gui:draw()
 end

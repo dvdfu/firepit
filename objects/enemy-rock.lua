@@ -18,27 +18,6 @@ EnemyRock.collide_player = {
     end
 }
 
--- EnemyRock.collide_enemy_rock = {
---     type = 'cross',
---     func = function(self, col)
---         if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
---             self.vy = 0
---             self.y = col.other.y - self.h
---             self.world:update(self, self.x, self.y)
---             self.ground = col.other
---         end
---         if col.normal.x ~= 0 then
---             if col.normal.x == 1 then
---                 self.x = col.other.x + col.other.w
---             else
---                 self.x = col.other.x - self.w
---             end
---             self.world:update(self, self.x, self.y)
---             self.vx = -self.vx
---         end
---     end
--- }
-
 function EnemyRock:initialize(world, x, y)
     Enemy.initialize(self, world, x, y, 16, 16)
     table.insert(self.tags, EnemyRock.name)
@@ -190,12 +169,12 @@ end
 
 function EnemyRock.Hold:update(dt)
     if self.holdTimer < 20 then
-        local dx, dy = self.player.x - self.x, self.player.y-14 - self.y
+        local dx, dy = (self.player.x+self.player.w/2-self.w/2)-self.x, (self.player.y-self.h)-self.y
         self.x = self.x + dx*self.holdTimer/20
         self.y = self.y + dy*self.holdTimer/20
         self.holdTimer = self.holdTimer + 1
     else
-        self.x, self.y = self.player.x, self.player.y-14
+        self.x, self.y = self.player.x+self.player.w/2-self.w/2, self.player.y-self.h
     end
     self.world:update(self, self.x, self.y)
 end

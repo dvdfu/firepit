@@ -31,7 +31,7 @@ EnemyFloat.collide_enemy = {
 }
 
 function EnemyFloat:initialize(world, x, y)
-    Enemy.initialize(self, world, x, y, 16, 32)
+    Enemy.initialize(self, world, x, y, 20, 20)
     table.insert(self.tags, EnemyFloat.name)
     self.player = nil
 
@@ -93,7 +93,7 @@ function EnemyFloat:update(dt)
 end
 
 function EnemyFloat:draw()
-    local dy = 4*math.sin(self.moveTimer/12)
+    local dy = math.sin(self.moveTimer/12)
 
     love.graphics.setColor(255, 255, 255, 255-255*self.deadTimer/60)
     love.graphics.setBlendMode('additive')
@@ -113,9 +113,8 @@ function EnemyFloat:draw()
 
     if self.sprite ~= self.animDead or self.sprite:getCurrentFrame() < self.sprite:getSize() then
         self.sprite:update(1/60)
-        self.sprite:draw(self.x + self.w/2, self.y+dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()-self.h)
+        self.sprite:draw(self.x+self.w/2, self.y+self.h/2+dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     end
-    -- Enemy.draw(self)
 end
 
 function EnemyFloat:stomp()

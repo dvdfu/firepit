@@ -54,7 +54,7 @@ function Object:collide()
 	end
 end
 
-function Object:draw()
+function Object:drawDebug()
     love.graphics.rectangle('line', self.x, self.y, self.w, self.h)
     love.graphics.setColor(0, 255, 0)
     love.graphics.line(self.x, self.y-4, self.x, self.y+4)

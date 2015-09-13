@@ -40,6 +40,8 @@ Player.collide_solid = {
                 self.ground = col.other
                 if self:hasPower(Powerups.coldFeet) then
                     col.other:setState(Tile.state.iced, self.x+self.w/2)
+                    col.other:setState(Tile.state.iced, self.x+self.w/2-16)
+                    col.other:setState(Tile.state.iced, self.x+self.w/2+16)
                 end
             end
         end
@@ -59,6 +61,8 @@ Player.collide_platform = {
             self.ground = col.other
             if self:hasPower(Powerups.coldFeet) then
                 col.other:setState(Tile.state.iced, self.x+self.w/2)
+                col.other:setState(Tile.state.iced, self.x+self.w/2-16)
+                col.other:setState(Tile.state.iced, self.x+self.w/2+16)
             end
         end
     end
@@ -67,8 +71,8 @@ Player.collide_platform = {
 Player.collide_enemy_rock = {
     type = 'cross',
     func = function(self, col)
-        if col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
-            self.vy = -_vJump*0.7
+        if col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
+            self.vy = -_vJump
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
             col.other:stomp()
@@ -81,8 +85,8 @@ Player.collide_enemy_rock = {
 Player.collide_enemy_float = {
     type = 'cross',
     func = function(self, col)
-        if self:hasPower(Powerups.coldFeet) and col.normal.y == -1 and self.vy > _aFall and self.y+self.h-self.vy <= col.other.y then
-            self.vy = -_vJump*0.7
+        if self:hasPower(Powerups.coldFeet) and col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
+            self.vy = -_vJump
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
             col.other:stomp()
@@ -98,7 +102,7 @@ Player.collide_lava = {
         self.vy = -7
         self.y = col.other.level - self.h
         self.world:update(self, self.x, self.y)
-        self:getHit()
+        self:gotoState('Hurt')
     end
 }
 
@@ -112,7 +116,7 @@ Player.collide_item = {
 }
 
 function Player:initialize(world, x, y)
-    Object.initialize(self, world, x, y, 16, 24)
+    Object.initialize(self, world, x, y, 8, 20)
     table.insert(self.tags, Player.name)
 
     self.ground = nil
@@ -121,7 +125,9 @@ function Player:initialize(world, x, y)
     self.mx = 0 --move
     self.px, self.py = 0, 0 --push
     self.jumpTimer = 0
-    self.powerup = nil-- Powerups.coldFeet
+    self.powerup = Powerups.coldFeet
+    self.maxHealth = 6
+    self.health = self.maxHealth
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -315,6 +321,9 @@ Player.Hurt = Player:addState('Hurt')
 
 function Player.Hurt:enteredState()
     self.hurtTimer = 60
+    if self.health > 0 then
+        self.health = self.health - 1
+    end
 end
 
 function Player.Hurt:update(dt)
