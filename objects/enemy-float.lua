@@ -4,9 +4,9 @@ local Class = require 'middleclass'
 local Enemy = require 'objects/enemy'
 local EnemyFloat = Class('enemy_float', Enemy)
 
-EnemyFloat.static.sprMove = love.graphics.newImage('assets/enemy_float_move.png')
-EnemyFloat.static.sprDead = love.graphics.newImage('assets/enemy_float_dead.png')
-EnemyFloat.static.sprParticle = love.graphics.newImage('assets/particle.png')
+EnemyFloat.static.sprMove = love.graphics.newImage('assets/images/enemies/float_move.png')
+EnemyFloat.static.sprDead = love.graphics.newImage('assets/images/enemies/float_dead.png')
+EnemyFloat.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
 EnemyFloat.static.glowShader = love.graphics.newShader[[
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {

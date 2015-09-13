@@ -2,7 +2,7 @@ local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Item = Class('item', Object)
 
-Item.static.sprite = love.graphics.newImage('assets/item.png')
+Item.static.sprite = love.graphics.newImage('assets/images/item.png')
 
 Item.static.powerups = {
     'doublejump',

@@ -2,9 +2,9 @@ local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Lava = Class('lava', Object)
 
-Lava.static.sprLava = love.graphics.newImage('assets/lava.png')
-Lava.static.sprGlow = love.graphics.newImage('assets/lava_glow.png')
-Lava.static.sprParticle = love.graphics.newImage('assets/particle.png')
+Lava.static.sprLava = love.graphics.newImage('assets/images/stage/lava.png')
+Lava.static.sprGlow = love.graphics.newImage('assets/images/stage/lava_glow.png')
+Lava.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
 Lava.static.lavaShader = love.graphics.newShader[[
     extern float time;
@@ -31,8 +31,8 @@ Lava.static.glowShader = love.graphics.newShader[[
     }
 ]]
 
-function Lava:initialize(world)
-    Object.initialize(self, world, -128, 360, 480+256, 176)
+function Lava:initialize(world, y)
+    Object.initialize(self, world, -128, y, 480+256, 176)
     table.insert(self.tags, Lava.name)
     self.level = self.y
 

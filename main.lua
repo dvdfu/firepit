@@ -1,14 +1,13 @@
-package.path = '.?/?.lua;.hump/?.lua;.lml/?/?.lua;'..package.path
-
 math.randomseed(os.time())
 love.graphics.setDefaultFilter('nearest', 'nearest')
 love.graphics.setLineStyle('rough')
 love.mouse.setVisible(false)
 
+Jupiter = require 'jupiter'
 Input = require 'input'
 Gamestate = require 'gamestate'
 Game = require 'states/game'
-scale = 2
+scale = 1
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)
@@ -28,7 +27,8 @@ function love.load()
         }
         #endif
     ]]
-    love.window.setMode(480*scale, 360*scale)
+    -- love.window.setMode(480*scale, 360*scale)
+    scale = Jupiter.load("settings.lua").scale
     scaleShader:send('scale', scale)
 
     min_dt = 1/60

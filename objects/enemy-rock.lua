@@ -4,10 +4,10 @@ local Class = require 'middleclass'
 local Enemy = require 'objects/enemy'
 local EnemyRock = Class('enemy_rock', Enemy)
 
-EnemyRock.static.sprMove = love.graphics.newImage('assets/enemy_walk.png')
-EnemyRock.static.sprStun = love.graphics.newImage('assets/enemy_rock.png')
-EnemyRock.static.sprStar = love.graphics.newImage('assets/star.png')
-EnemyRock.static.sprParticle = love.graphics.newImage('assets/particle.png')
+EnemyRock.static.sprMove = love.graphics.newImage('assets/images/enemies/rock_move.png')
+EnemyRock.static.sprStun = love.graphics.newImage('assets/images/enemies/rock_stun.png')
+EnemyRock.static.sprStar = love.graphics.newImage('assets/images/enemies/star.png')
+EnemyRock.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
 EnemyRock.collide_player = {
     type = 'cross',

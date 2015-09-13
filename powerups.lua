@@ -8,14 +8,14 @@ Powerups.coldFeet = 'coldFeet' --id = key
 Powerups.numbered[1] = 'coldFeet' --index
 Powerups.power.coldFeet = {
     name = 'Cold Feet',
-    icon = love.graphics.newImage('assets/power_cold_feet.png')
+    icon = love.graphics.newImage('assets/images/powers/cold_feet.png')
 }
 
 Powerups.jumpGlide = 'jumpGlide' --id = key
 Powerups.numbered[2] = 'jumpGlide' --index
 Powerups.power.jumpGlide = {
     name = 'Jump Glide',
-    icon = love.graphics.newImage('assets/power_jump_glide.png')
+    icon = love.graphics.newImage('assets/images/powers/jump_glide.png')
 }
 
 Powerups.getRandom = function()

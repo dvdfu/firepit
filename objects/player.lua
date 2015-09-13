@@ -22,15 +22,15 @@ Player.static.keyA = 'z'
 Player.static.keyB = 'x'
 Player.static.keyC = 'c'
 
-Player.static.sprIdle = love.graphics.newImage('assets/player_idle.png')
-Player.static.sprRun = love.graphics.newImage('assets/player_run.png')
-Player.static.sprJump = love.graphics.newImage('assets/player_jump.png')
-Player.static.sprFall = love.graphics.newImage('assets/player_fall.png')
-Player.static.sprIdleLift = love.graphics.newImage('assets/player_idle_lift.png')
-Player.static.sprRunLift = love.graphics.newImage('assets/player_run_lift.png')
-Player.static.sprJumpLift = love.graphics.newImage('assets/player_jump_lift.png')
-Player.static.sprFallLift = love.graphics.newImage('assets/player_fall_lift.png')
-Player.static.sprParticle = love.graphics.newImage('assets/particle.png')
+Player.static.sprIdle = love.graphics.newImage('assets/images/player/idle.png')
+Player.static.sprRun = love.graphics.newImage('assets/images/player/move.png')
+Player.static.sprJump = love.graphics.newImage('assets/images/player/jump.png')
+Player.static.sprFall = love.graphics.newImage('assets/images/player/fall.png')
+Player.static.sprIdleLift = love.graphics.newImage('assets/images/player/idle_lift.png')
+Player.static.sprRunLift = love.graphics.newImage('assets/images/player/move_lift.png')
+Player.static.sprJumpLift = love.graphics.newImage('assets/images/player/jump_lift.png')
+Player.static.sprFallLift = love.graphics.newImage('assets/images/player/fall_lift.png')
+Player.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
 Player.collide_solid = {
     type = 'slide',
@@ -270,6 +270,20 @@ function Player:hasPower(power)
         end
     end
     return false
+end
+
+function Player:getPowerTimer(power)
+    if power == Powerups.jumpGlide then
+        return self.glideTimer / 120
+    end
+    return 0
+end
+
+function Player:getPowerUses(power)
+    if power == Powerups.jumpGlide then
+        return 1
+    end
+    return -1
 end
 
 function Player:getHit(other)

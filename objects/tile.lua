@@ -1,8 +1,8 @@
 local Class = require 'middleclass'
 local Tile = Class('tile')
 
-Tile.static.sprParticle = love.graphics.newImage('assets/particle2.png')
-Tile.static.sprIce = love.graphics.newImage('assets/tile_ice.png')
+Tile.static.sprParticle = love.graphics.newImage('assets/images/particles/diamond.png')
+Tile.static.sprIce = love.graphics.newImage('assets/images/stage/tile_ice.png')
 Tile.static.state = {
     iced = 'iced'
 }

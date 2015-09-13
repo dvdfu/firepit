@@ -3,7 +3,7 @@ local Tile = require 'objects/tile'
 local Object = require 'objects/object'
 local Solid = Class('solid', Object)
 
-Solid.static.sprite = love.graphics.newImage('assets/terrain.png')
+Solid.static.sprite = love.graphics.newImage('assets/images/stage/terrain.png')
 
 function Solid:initialize(world, x, y, w, h, color, platform)
     Object.initialize(self, world, x, y, w, h)

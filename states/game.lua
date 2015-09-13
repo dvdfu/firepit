@@ -19,7 +19,7 @@ function Game:enter()
     addSolids()
 
     p = Player:new(world, 32, 0)
-    l = Lava:new(world)
+    l = Lava:new(world, sh)
     gui = GUI:new(p)
     cx, cy = sw/2, sh/2
     cs = 0
