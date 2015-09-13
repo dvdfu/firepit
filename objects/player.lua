@@ -125,9 +125,11 @@ function Player:initialize(world, x, y)
     self.mx = 0 --move
     self.px, self.py = 0, 0 --push
     self.jumpTimer = 0
+    self.glideTimer = 0
+
     self.staticPowers = {}
     table.insert(self.staticPowers, Powerups.coldFeet)
-    table.insert(self.staticPowers, Powerups.coldFeet)
+    table.insert(self.staticPowers, Powerups.jumpGlide)
     self.maxHealth = 6
     self.health = self.maxHealth
 
@@ -199,6 +201,7 @@ function Player:update(dt)
 
     if self.ground then
         self.jumpTimer = 0
+        self.glideTimer = 0
         if Input:pressed(Player.keyA) then
             self.vy = -_vJump
             self.jumpTimer = _jumpTimerMax
@@ -209,16 +212,25 @@ function Player:update(dt)
         if Input:isDown(Player.keyA) then
             if self.jumpTimer > 0 then
                 self.vy = -_vJump
+                self.jumpTimer = self.jumpTimer - 1
             end
-            self.jumpTimer = self.jumpTimer - 1
         else
             self.jumpTimer = 0
         end
     end
 
-    self.vy = self.vy + _aFall
-    if self.vy > _vFall then
-        self.vy = _vFall
+    if self.glideTimer > 0 and not Input:isDown(Player.keyA) then
+        self.glideTimer = 120
+    end
+
+    if self:hasPower(Powerups.jumpGlide) and not self.ground and Input:isDown(Player.keyA) and self.jumpTimer == 0 and self.vy >= 0 and self.glideTimer < 120 then
+        self.vy = 0
+        self.glideTimer = self.glideTimer+1
+    else
+        self.vy = self.vy + _aFall
+        if self.vy > _vFall then
+            self.vy = _vFall
+        end
     end
 
     self.vx = self.mx + self.px

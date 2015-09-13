@@ -11,6 +11,13 @@ Powerups.power.coldFeet = {
     icon = love.graphics.newImage('assets/power_cold_feet.png')
 }
 
+Powerups.jumpGlide = 'jumpGlide' --id = key
+Powerups.numbered[2] = 'jumpGlide' --index
+Powerups.power.jumpGlide = {
+    name = 'Jump Glide',
+    icon = love.graphics.newImage('assets/power_jump_glide.png')
+}
+
 Powerups.getRandom = function()
     local r = math.random(#Powerups.power)
     return Powerups[Powerups.numbered[r]]
