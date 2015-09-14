@@ -1,6 +1,7 @@
 require 'AnAL'
 local Tile = require 'objects/tile'
-local Powerups = require 'powerups'
+-- local Powerups = require 'powerups'
+local Powerup = require 'powerup'
 local Enemy = require 'objects/enemy'
 local Class = require 'middleclass'
 local Object = require 'objects/object'
@@ -39,7 +40,7 @@ Player.collide_solid = {
             self.vy = 0
             if col.normal.y == -1 then
                 self.ground = col.other
-                if self:hasPower(Powerups.coldFeet) then
+                if self:getPower(Powerup.names.coldFeet) then
                     col.other:setState(Tile.state.iced, self.x+self.w/2)
                     col.other:setState(Tile.state.iced, self.x+self.w/2+16*self.direction)
                 end
@@ -59,7 +60,7 @@ Player.collide_platform = {
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
             self.ground = col.other
-            if self:hasPower(Powerups.coldFeet) then
+            if self:getPower(Powerup.names.coldFeet) then
                 col.other:setState(Tile.state.iced, self.x+self.w/2)
                 col.other:setState(Tile.state.iced, self.x+self.w/2-16)
                 col.other:setState(Tile.state.iced, self.x+self.w/2+16)
@@ -85,7 +86,7 @@ Player.collide_enemy_rock = {
 Player.collide_enemy_float = {
     type = 'cross',
     func = function(self, col)
-        if self:hasPower(Powerups.coldFeet) and col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
+        if self:getPower(Powerup.names.coldFeet) and col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
             self.vy = -_vJump
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
@@ -125,11 +126,13 @@ function Player:initialize(world, x, y)
     self.mx = 0 --move
     self.px, self.py = 0, 0 --push
     self.jumpTimer = 0
-    self.glideTimer = 0
 
-    self.staticPowers = {}
-    table.insert(self.staticPowers, Powerups.coldFeet)
-    table.insert(self.staticPowers, Powerups.jumpGlide)
+    self.activePower = Powerup:new()
+    self.staticPowers = {
+        [1] = Powerup:new(),
+        [2] = Powerup:new()
+    }
+    self.staticPowers[1]:setPower(Powerup.names.jumpGlide)
     self.maxHealth = 6
     self.health = self.maxHealth
 
@@ -165,7 +168,7 @@ end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
-    if self:hasPower(Powerups.coldFeet) and self.ground then
+    if self:getPower(Powerup.names.coldFeet) and self.ground then
         aMove = aMove * 0.2
     end
     if Input:isDown(Player.keyLeft) then
@@ -201,7 +204,6 @@ function Player:update(dt)
 
     if self.ground then
         self.jumpTimer = 0
-        self.glideTimer = 0
         if Input:pressed(Player.keyA) then
             self.vy = -_vJump
             self.jumpTimer = _jumpTimerMax
@@ -219,18 +221,26 @@ function Player:update(dt)
         end
     end
 
-    if self.glideTimer > 0 and not Input:isDown(Player.keyA) then
-        self.glideTimer = 120
+    self.vy = self.vy + _aFall
+    if self.vy > _vFall then
+        self.vy = _vFall
     end
 
-    if self:hasPower(Powerups.jumpGlide) and not self.ground and Input:isDown(Player.keyA) and self.jumpTimer == 0 and self.vy >= 0 and self.glideTimer < 120 then
-        self.vy = 0
-        self.glideTimer = self.glideTimer+1
-    else
-        self.vy = self.vy + _aFall
-        if self.vy > _vFall then
-            self.vy = _vFall
+    local power = self:getPower(Powerup.names.jumpGlide)
+    if power then
+        if self.ground then
+            power.timer = power.info.cooldown
+        elseif Input:isDown(Player.keyA) and self.jumpTimer == 0 and self.vy >= 0 and power.timer > 0 then
+            self.vy = 0
+            power:update(dt)
         end
+        if not Input:isDown(Player.keyA) and power.timer < power.info.cooldown then
+            power.timer = 0
+        end
+    end
+
+    if Input:isDown(Player.keyC) then
+        self:useActivePower()
     end
 
     self.vx = self.mx + self.px
@@ -263,27 +273,17 @@ function Player:draw()
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
-function Player:hasPower(power)
-    for _, p in ipairs(self.staticPowers) do
-        if p == power then
-            return true
-        end
+function Player:getPower(power)
+    if self.staticPowers[1].set and self.staticPowers[1].info.name == power then
+        return self.staticPowers[1]
     end
-    return false
-end
-
-function Player:getPowerTimer(power)
-    if power == Powerups.jumpGlide then
-        return self.glideTimer / 120
+    if self.staticPowers[2].set and self.staticPowers[2].info.name == power then
+        return self.staticPowers[2]
     end
-    return 0
-end
-
-function Player:getPowerUses(power)
-    if power == Powerups.jumpGlide then
-        return 1
+    if self.activePower.set and self.activePower.info.name == power then
+        return self.activePower
     end
-    return -1
+    return nil
 end
 
 function Player:getHit(other)
