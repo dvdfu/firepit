@@ -26,7 +26,7 @@ Powerup.static.info = {
         name = 'Apple',
         type = 'static',
         icon = love.graphics.newImage('assets/images/powers/apple.png'),
-        uses = -1,
+        uses = 1,
         cooldown = -1
     }
 }
@@ -58,7 +58,10 @@ function Powerup:use()
 end
 
 function Powerup:getIconFill()
-    return 1 - self.timer / self.info.cooldown
+    if self.info.cooldown > 0 then
+        return 1 - self.timer / self.info.cooldown
+    end
+    return 0;
 end
 
 return Powerup

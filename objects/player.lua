@@ -133,6 +133,8 @@ function Player:initialize(world, x, y)
         [2] = Powerup:new()
     }
     self.staticPowers[1]:setPower(Powerup.names.jumpGlide)
+    self.staticPowers[2]:setPower(Powerup.names.coldFeet)
+    self.activePower:setPower(Powerup.names.apple)
     self.maxHealth = 6
     self.health = self.maxHealth
 
@@ -239,8 +241,12 @@ function Player:update(dt)
         end
     end
 
-    if Input:isDown(Player.keyC) then
-        self:useActivePower()
+    if Input:pressed(Player.keyC) then
+        power = self:getPower(Powerup.names.apple)
+        if power then
+            power:use()
+            self.health = self.maxHealth
+        end
     end
 
     self.vx = self.mx + self.px
