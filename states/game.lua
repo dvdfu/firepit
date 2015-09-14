@@ -10,8 +10,8 @@ local Item = require 'objects/item'
 local Lava = require 'objects/lava'
 
 local world = {}
-local sw = love.graphics.getWidth()/2
-local sh = love.graphics.getHeight()/2
+local sw = 480
+local sh = 360
 
 function Game:enter()
     world = Bump.newWorld(64)

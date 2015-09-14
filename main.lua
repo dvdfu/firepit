@@ -27,8 +27,8 @@ function love.load()
         }
         #endif
     ]]
-    -- love.window.setMode(480*scale, 360*scale)
-    scale = Jupiter.load("settings.lua").scale
+    love.window.setMode(480*scale, 360*scale)
+    -- scale = Jupiter.load("settings.lua").scale
     scaleShader:send('scale', scale)
 
     min_dt = 1/60

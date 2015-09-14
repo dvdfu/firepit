@@ -22,6 +22,8 @@ function GUI:draw()
         love.graphics.rectangle('line', 16+(i-1)*bar, 56, bar, 8)
     end
     love.graphics.rectangle('line', 16, 56, self.player.maxHealth*bar, 8)
+    love.graphics.setFont(GUI.numberFont)
+    love.graphics.print('HP: '..self.player.health..'/'..self.player.maxHealth, 16+self.player.maxHealth*bar+6, 56)
 end
 
 function GUI:drawPower(power, i)

@@ -24,7 +24,7 @@ Powerup.static.info = {
     },
     ['Apple'] = {
         name = 'Apple',
-        type = 'static',
+        type = 'active',
         icon = love.graphics.newImage('assets/images/powers/apple.png'),
         uses = 1,
         cooldown = -1
@@ -48,6 +48,7 @@ function Powerup:setPower(name)
     self.set = true
     self.info = Powerup.info[name]
     self.uses = self.info.uses
+    self.timer = self.info.cooldown
 end
 
 function Powerup:use()
