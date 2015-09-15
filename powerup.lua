@@ -5,7 +5,7 @@ Powerup.static.names = {
     coldFeet = 'Cold Feet',
     jumpGlide = 'Jump Glide',
     apple = 'Apple',
-    star = 'Star Cannon'
+    bubble = 'Bubble Blower'
 }
 
 Powerup.static.info = {
@@ -33,12 +33,12 @@ Powerup.static.info = {
         cooldown = -1,
         updates = false
     },
-    ['Star Cannon'] = {
-        name = 'Star Cannon',
+    ['Bubble Blower'] = {
+        name = 'Bubble Blower',
         type = 'active',
-        icon = love.graphics.newImage('assets/images/powers/apple.png'),
+        icon = love.graphics.newImage('assets/images/powers/bubble.png'),
         uses = -1,
-        cooldown = 20,
+        cooldown = 6,
         updates = true
     }
 }

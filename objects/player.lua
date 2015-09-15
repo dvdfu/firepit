@@ -1,8 +1,8 @@
 require 'AnAL'
 local Tile = require 'objects/tile'
--- local Powerups = require 'powerups'
 local Powerup = require 'powerup'
 local Enemy = require 'objects/enemy'
+local Bullet = require 'objects/bullet'
 local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Player = Class('player', Object)
@@ -134,9 +134,10 @@ function Player:initialize(world, x, y)
     }
     self.staticPowers[1]:setPower(Powerup.names.jumpGlide)
     self.staticPowers[2]:setPower(Powerup.names.coldFeet)
-    self.activePower:setPower(Powerup.names.star)
+    self.activePower:setPower(Powerup.names.bubble)
     self.maxHealth = 6
     self.health = self.maxHealth
+    self.bullets = {}
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
@@ -260,6 +261,13 @@ function Player:update(dt)
     self.y = self.y + self.vy
     self.ground = nil
     self:collide()
+
+    for key, bullet in pairs(self.bullets) do
+        bullet:update(dt)
+        if bullet:isDead() then
+            self.bullets[key] = nil
+        end
+    end
 end
 
 function Player:draw()
@@ -274,6 +282,10 @@ function Player:draw()
     local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
     self.sprite:update(1/60)
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+
+    for key, bullet in pairs(self.bullets) do
+        bullet:draw()
+    end
 end
 
 function Player:hasPower(power)
@@ -301,11 +313,17 @@ function Player:useActivePower()
     if power.info.name == Powerup.names.apple then
         power:use()
         self.health = self.maxHealth
-    elseif power.info.name == Powerup.names.star then
+    elseif power.info.name == Powerup.names.bubble then
         if power.timer == 0 then
             power:use()
+            self:createBullet(Bullet.names.bubble)
         end
     end
+end
+
+function Player:createBullet(type)
+    local b = Bullet:new(type, self)
+    table.insert(self.bullets, b)
 end
 
 function Player:getHit(other)

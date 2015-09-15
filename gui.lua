@@ -4,7 +4,6 @@ local Powerup = require 'powerup'
 
 GUI.static.numberFont = love.graphics.newFont('assets/fonts/04b_21.ttf', 8)
 
-
 GUI.static.dropShadowShader = love.graphics.newShader[[
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec4 pixel = Texel(texture, texture_coords);
