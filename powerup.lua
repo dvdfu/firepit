@@ -38,7 +38,7 @@ Powerup.static.info = {
         type = 'active',
         icon = love.graphics.newImage('assets/images/powers/bubble.png'),
         uses = -1,
-        cooldown = 6,
+        cooldown = 4,
         updates = true
     }
 }

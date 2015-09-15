@@ -265,6 +265,7 @@ function Player:update(dt)
     for key, bullet in pairs(self.bullets) do
         bullet:update(dt)
         if bullet:isDead() then
+            self.world:remove(bullet)
             self.bullets[key] = nil
         end
     end

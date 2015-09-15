@@ -10,12 +10,14 @@ Bullet.static.info = {
     ['Bubble'] = {
         name = 'Bubble',
         sprite = love.graphics.newImage('assets/images/bullets/bubble.png'),
-        speed = 3,
+        speed = 1,
+        speedMax = 3,
         angle = 0,
-        angleSpread = 15,
+        angleSpread = 10,
         ax = 0.98,
         ay = 0.99,
-        time = 60
+        time = 30,
+        timeMax = 80
     }
 }
 
@@ -31,11 +33,12 @@ function Bullet:initialize(name, parent)
     Object.initialize(self, parent.world, parent.x, parent.y, 8, 8)
     table.insert(self.tags, Bullet.name)
     self.info = Bullet.info[name]
-    self.angle = (parent.direction == 1 and 0 or 180) + math.random(-self.info.angleSpread, self.info.angleSpread)
-    self.vx = parent.vx + self.info.speed * math.cos(self.angle/180*math.pi)
-    self.vy = self.info.speed * math.sin(self.angle/180*math.pi)
+    self.angle = (parent.direction == 1 and 0 or 180) + self.info.angleSpread*2*math.random()-self.info.angleSpread
+    local speed = self.info.speed + (self.info.speedMax-self.info.speed)*math.random()
+    self.vx = parent.vx + speed * math.cos(self.angle/180*math.pi)
+    self.vy = speed * math.sin(self.angle/180*math.pi)
     self.dead = false
-    self.timer = 0
+    self.timer = self.info.time + (self.info.timeMax-self.info.time)*math.random()
 end
 
 function Bullet:update(dt)
@@ -43,7 +46,7 @@ function Bullet:update(dt)
     self.vy = self.vy*self.info.ay
     self.x = self.x + self.vx
     self.y = self.y + self.vy
-    self.timer = self.timer + 1
+    self.timer = self.timer - 1
     self:collide()
 end
 
@@ -53,7 +56,7 @@ function Bullet:draw()
 end
 
 function Bullet:isDead()
-    return dead or self.timer > self.info.time
+    return dead or self.timer <= 0
 end
 
 return Bullet
