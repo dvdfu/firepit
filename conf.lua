@@ -2,7 +2,7 @@ package.path = '.?/?.lua;.hump/?.lua;.lml/?/?.lua;'..package.path
 Jupiter = require 'jupiter'
 
 function love.conf(t)
-    t.window.title = 'Game Title'
+    t.window.title = ''
     t.window.fullscreen = false
     t.window.resizable = false
     t.window.vsync = true

@@ -139,4 +139,10 @@ function Game:draw()
     gui:draw()
 end
 
+function Game:redraw()
+    for _, solid in pairs(solids) do
+        solid:redraw()
+    end
+end
+
 return Game

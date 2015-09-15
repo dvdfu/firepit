@@ -319,6 +319,11 @@ function Player:useActivePower()
             power:use()
             self:createBullet(Bullet.names.bubble)
         end
+    elseif power.info.name == Powerup.names.star then
+        if power.timer == 0 then
+            power:use()
+            self:createBullet(Bullet.names.star)
+        end
     end
 end
 

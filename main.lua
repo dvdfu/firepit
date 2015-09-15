@@ -7,7 +7,7 @@ Jupiter = require 'jupiter'
 Input = require 'input'
 Gamestate = require 'gamestate'
 Game = require 'states/game'
-scale = 1
+scale = 0
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)
@@ -22,14 +22,13 @@ function love.load()
             return Texel(texture, texture_coords);
         }
     ]]
-    love.window.setMode(480*scale, 360*scale)
     -- scale = Jupiter.load("settings.lua").scale
-    scaleShader:send('scale', scale)
 
     min_dt = 1/60
     next_time = love.timer.getTime()
 
     Gamestate.switch(Game)
+    setScale(1)
 end
 
 function love.update(dt)
@@ -41,6 +40,9 @@ function love.update(dt)
     if Input:pressed('r') then
         Gamestate.switch(Game)
     end
+    if Input:pressed('1') then setScale(1) end
+    if Input:pressed('2') then setScale(2) end
+    if Input:pressed('3') then setScale(3) end
     Input:update()
 end
 
@@ -55,9 +57,18 @@ function love.draw()
     love.graphics.setShader()
 
     local cur_time = love.timer.getTime()
-    if next_time <= cur_time then
+    if next_time > cur_time then
+        love.timer.sleep(next_time - cur_time)
+    else
         next_time = cur_time
-        return
     end
-    love.timer.sleep(next_time - cur_time)
+end
+
+function setScale(s)
+    if scale == s then return end
+    if s <= 0 then return end
+    scale = s
+    love.window.setMode(480*s, 360*s)
+    scaleShader:send('scale', s)
+    Gamestate.current():redraw()
 end
