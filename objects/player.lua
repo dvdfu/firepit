@@ -40,7 +40,7 @@ Player.collide_solid = {
             self.vy = 0
             if col.normal.y == -1 then
                 self.ground = col.other
-                if self:getPower(Powerup.names.coldFeet) then
+                if self:hasPower(Powerup.names.coldFeet) then
                     col.other:setState(Tile.state.iced, self.x+self.w/2)
                     col.other:setState(Tile.state.iced, self.x+self.w/2+16*self.direction)
                 end
@@ -60,7 +60,7 @@ Player.collide_platform = {
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
             self.ground = col.other
-            if self:getPower(Powerup.names.coldFeet) then
+            if self:hasPower(Powerup.names.coldFeet) then
                 col.other:setState(Tile.state.iced, self.x+self.w/2)
                 col.other:setState(Tile.state.iced, self.x+self.w/2-16)
                 col.other:setState(Tile.state.iced, self.x+self.w/2+16)
@@ -86,7 +86,7 @@ Player.collide_enemy_rock = {
 Player.collide_enemy_float = {
     type = 'cross',
     func = function(self, col)
-        if self:getPower(Powerup.names.coldFeet) and col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
+        if self:hasPower(Powerup.names.coldFeet) and col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
             self.vy = -_vJump
             self.y = col.other.y - self.h
             self.world:update(self, self.x, self.y)
@@ -134,7 +134,7 @@ function Player:initialize(world, x, y)
     }
     self.staticPowers[1]:setPower(Powerup.names.jumpGlide)
     self.staticPowers[2]:setPower(Powerup.names.coldFeet)
-    self.activePower:setPower(Powerup.names.apple)
+    self.activePower:setPower(Powerup.names.star)
     self.maxHealth = 6
     self.health = self.maxHealth
 
@@ -170,7 +170,7 @@ end
 
 function Player:update(dt)
     local aMove = self.ground and _aMoveGround or _aMoveAir
-    if self:getPower(Powerup.names.coldFeet) and self.ground then
+    if self:hasPower(Powerup.names.coldFeet) and self.ground then
         aMove = aMove * 0.2
     end
     if Input:isDown(Player.keyLeft) then
@@ -228,26 +228,23 @@ function Player:update(dt)
         self.vy = _vFall
     end
 
-    local power = self:getPower(Powerup.names.jumpGlide)
-    if power then
+    if self:hasPower(Powerup.names.jumpGlide) then
+        local power = self:getPower(Powerup.names.jumpGlide)
         if self.ground then
-            power.timer = power.info.cooldown
-        elseif Input:isDown(Player.keyA) and self.jumpTimer == 0 and self.vy >= 0 and power.timer > 0 then
+            power:tick(4)
+        elseif Input:isDown(Player.keyA) and self.jumpTimer == 0 and self.vy >= 0 and power.timer < power.info.cooldown then
             self.vy = 0
-            power:update(dt)
-        end
-        if not Input:isDown(Player.keyA) and power.timer < power.info.cooldown then
-            power.timer = 0
+            power:tick(-1)
         end
     end
 
-    if Input:pressed(Player.keyC) then
-        power = self:getPower(Powerup.names.apple)
-        if power then
-            power:use()
-            self.health = self.maxHealth
-        end
+    if Input:isDown(Player.keyC) then
+        self:useActivePower()
     end
+
+    self.staticPowers[1]:update()
+    self.staticPowers[2]:update()
+    self.activePower:update()
 
     self.vx = self.mx + self.px
     if self.py ~= 0 then
@@ -279,6 +276,13 @@ function Player:draw()
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
+function Player:hasPower(power)
+    if self.staticPowers[1].set and self.staticPowers[1].info.name == power then return true end
+    if self.staticPowers[2].set and self.staticPowers[2].info.name == power then return true end
+    if self.activePower.set and self.activePower.info.name == power then return true end
+    return false
+end
+
 function Player:getPower(power)
     if self.staticPowers[1].set and self.staticPowers[1].info.name == power then
         return self.staticPowers[1]
@@ -290,6 +294,18 @@ function Player:getPower(power)
         return self.activePower
     end
     return nil
+end
+
+function Player:useActivePower()
+    local power = self.activePower
+    if power.info.name == Powerup.names.apple then
+        power:use()
+        self.health = self.maxHealth
+    elseif power.info.name == Powerup.names.star then
+        if power.timer == 0 then
+            power:use()
+        end
+    end
 end
 
 function Player:getHit(other)

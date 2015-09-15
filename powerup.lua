@@ -4,7 +4,8 @@ local Powerup = Class('powerup')
 Powerup.static.names = {
     coldFeet = 'Cold Feet',
     jumpGlide = 'Jump Glide',
-    apple = 'Apple'
+    apple = 'Apple',
+    star = 'Star Cannon'
 }
 
 Powerup.static.info = {
@@ -13,21 +14,32 @@ Powerup.static.info = {
         type = 'static',
         icon = love.graphics.newImage('assets/images/powers/cold_feet.png'),
         uses = -1,
-        cooldown = -1
+        cooldown = -1,
+        updates = false
     },
     ['Jump Glide'] = {
         name = 'Jump Glide',
         type = 'static',
         icon = love.graphics.newImage('assets/images/powers/jump_glide.png'),
         uses = -1,
-        cooldown = 120
+        cooldown = 120,
+        updates = false
     },
     ['Apple'] = {
         name = 'Apple',
         type = 'active',
         icon = love.graphics.newImage('assets/images/powers/apple.png'),
         uses = 1,
-        cooldown = -1
+        cooldown = -1,
+        updates = false
+    },
+    ['Star Cannon'] = {
+        name = 'Star Cannon',
+        type = 'active',
+        icon = love.graphics.newImage('assets/images/powers/apple.png'),
+        uses = -1,
+        cooldown = 20,
+        updates = true
     }
 }
 
@@ -38,9 +50,22 @@ function Powerup:initialize()
     self.uses = 0
 end
 
-function Powerup:update(dt)
-    if self.timer > 0 then
-        self.timer = self.timer - 1
+function Powerup:update()
+    if self.info.updates then
+        self:tick()
+    end
+end
+
+function Powerup:tick(frames)
+    frames = frames or 1
+    self.timer = self.timer - frames
+    if self.timer < 0 then self.timer = 0 end
+    if self.timer > self.info.cooldown then self:timeout() end
+end
+
+function Powerup:timeout()
+    if self.info.cooldown > 0 then
+        self.timer = self.info.cooldown
     end
 end
 
@@ -48,19 +73,19 @@ function Powerup:setPower(name)
     self.set = true
     self.info = Powerup.info[name]
     self.uses = self.info.uses
-    self.timer = self.info.cooldown
+    self.timer = 0
 end
 
 function Powerup:use()
     if self.uses > 0 then
         self.uses = self.uses - 1
-        self.timer = self.info.cooldown
     end
+    self:timeout()
 end
 
 function Powerup:getIconFill()
     if self.info.cooldown > 0 then
-        return 1 - self.timer / self.info.cooldown
+        return self.timer / self.info.cooldown
     end
     return 0;
 end

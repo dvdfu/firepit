@@ -7,25 +7,20 @@ Jupiter = require 'jupiter'
 Input = require 'input'
 Gamestate = require 'gamestate'
 Game = require 'states/game'
-scale = 1
+scale = 2
 
 function love.load()
     canvas = love.graphics.newCanvas(sw, sh)
     scaleShader = love.graphics.newShader[[
         extern float scale;
-        #ifdef VERTEX
         vec4 position(mat4 transform_projection, vec4 vertex_position) {
             vertex_position.xy *= scale;
             return transform_projection * vertex_position;
         }
-        #endif
 
-        #ifdef PIXEL
         vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-            vec4 pixel = Texel(texture, texture_coords);
-            return pixel;
+            return Texel(texture, texture_coords);
         }
-        #endif
     ]]
     love.window.setMode(480*scale, 360*scale)
     -- scale = Jupiter.load("settings.lua").scale
