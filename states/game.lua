@@ -140,6 +140,7 @@ function Game:draw()
 end
 
 function Game:redraw()
+    l:redraw()
     for _, solid in pairs(solids) do
         solid:redraw()
     end

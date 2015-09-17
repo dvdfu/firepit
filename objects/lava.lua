@@ -3,6 +3,7 @@ local Object = require 'objects/object'
 local Lava = Class('lava', Object)
 
 Lava.static.sprLava = love.graphics.newImage('assets/images/stage/lava.png')
+Lava.static.sprLavaTop = love.graphics.newImage('assets/images/stage/lava_top.png')
 Lava.static.sprGlow = love.graphics.newImage('assets/images/stage/lava_glow.png')
 Lava.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
@@ -11,7 +12,8 @@ Lava.static.lavaShader = love.graphics.newShader[[
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec2 hs = love_ScreenSize.xy;
         float disp = sin(16*texture_coords.x + 2*time);
-        texture_coords.y += 4*disp/hs.y;
+        texture_coords.y -= 12*(1+disp)/hs.y;
+        texture_coords.x -= 12*texture_coords.y/hs.x;
         return Texel(texture, texture_coords);
     }
 ]]
@@ -23,7 +25,7 @@ Lava.static.glowShader = love.graphics.newShader[[
 
         vec2 hs = love_ScreenSize.xy;
         float disp = sin(16*texture_coords.x + 2*time);
-        texture_coords.y += 20*disp/hs.y;
+        texture_coords.y -= 20*(1+disp)/hs.y;
 
         pixel.a = texture_coords.y*texture_coords.y;
         pixel.a = floor(pixel.a*5)/5;
@@ -35,6 +37,9 @@ function Lava:initialize(world, y)
     Object.initialize(self, world, -128, y, 480+256, 176)
     table.insert(self.tags, Lava.name)
     self.level = self.y
+
+    self.image = love.graphics.newCanvas(self.w, self.h)
+    self:redraw()
 
     self.fire = love.graphics.newParticleSystem(Lava.sprParticle)
     self.fire:setParticleLifetime(0.3, 1)
@@ -77,16 +82,32 @@ function Lava:draw()
 
     Lava.lavaShader:send('time', os.clock())
     Lava.glowShader:send('time', os.clock())
-    local s = love.graphics.getShader()
+    local oldShader = love.graphics.getShader()
 
     love.graphics.setShader(Lava.glowShader)
     love.graphics.setBlendMode('additive')
     love.graphics.draw(Lava.sprGlow, self.x, self.y-96, 0, self.w/16, 96/16)
     love.graphics.setBlendMode('alpha')
     love.graphics.setShader(Lava.lavaShader)
-    love.graphics.draw(Lava.sprLava, self.x, self.y-13, 0, self.w/16, self.h/16)
+    love.graphics.draw(self.image, self.x, self.y-12)
+    -- love.graphics.draw(Lava.sprLava, self.x, self.y-13, 0, self.w/16, self.h/16)
+    love.graphics.setShader(oldShader)
+end
 
-    love.graphics.setShader(s)
+function Lava:redraw()
+    self.image:clear()
+    local oldCanvas = love.graphics.getCanvas()
+    love.graphics.setCanvas(self.image)
+    for i = 0, self.w, Lava.sprLava:getWidth() do
+        for j = 0, self.h, Lava.sprLava:getHeight() do
+            if j == 0 then
+                love.graphics.draw(Lava.sprLavaTop, i, j)
+            else
+                love.graphics.draw(Lava.sprLava, i, j)
+            end
+        end
+    end
+    love.graphics.setCanvas(oldCanvas)
 end
 
 function Lava:touch(x, feed)

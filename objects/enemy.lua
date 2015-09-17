@@ -2,7 +2,7 @@ local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Enemy = Class('enemy', Object)
 
-Enemy.collide_solid = {
+Enemy.collide_block = {
     type = 'slide',
     func = function(self, col)
         if col.normal.y ~= 0 then

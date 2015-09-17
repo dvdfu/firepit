@@ -3,13 +3,16 @@ local Tile = require 'objects/tile'
 local Object = require 'objects/object'
 local Solid = Class('solid', Object)
 
-Solid.static.sprite = love.graphics.newImage('assets/images/stage/terrain.png')
+Solid.static.sprTerrain = love.graphics.newImage('assets/images/stage/terrain.png')
+Solid.static.sprTop = love.graphics.newImage('assets/images/stage/terrain_top.png')
 
 function Solid:initialize(world, x, y, w, h, color, platform)
     Object.initialize(self, world, x, y, w, h)
     table.insert(self.tags, Solid.name)
     if platform then
         table.insert(self.tags, 'platform')
+    else
+        table.insert(self.tags, 'block')
     end
     self.color = color or { r = 104, g = 96, b = 160 }
     self.image = love.graphics.newCanvas(self.w, self.h)
@@ -62,14 +65,20 @@ function Solid:redraw()
     end)
     for i = 0, self.w, 32 do
         for j = 0, self.h, 32 do
-            love.graphics.draw(Solid.sprite, i, j)
+            love.graphics.draw(Solid.sprTerrain, i, j)
         end
     end
     love.graphics.setStencil()
 
-    love.graphics.setColor(200, 144, 200)
-    love.graphics.setLineWidth(4)
-    love.graphics.line(0, 2, self.w, 2)
+    local altColor = {
+        r = math.min(255, self.color.r*2.5),
+        g = math.min(255, self.color.g*2),
+        b = math.min(255, self.color.b*2)
+    }
+    love.graphics.setColor(altColor.r, altColor.g, altColor.b)
+    for i = 0, self.w, 32 do
+        love.graphics.draw(Solid.sprTop, i, 0)
+    end
     love.graphics.setColor(255, 255, 255)
     love.graphics.setCanvas(oldCanvas)
 end

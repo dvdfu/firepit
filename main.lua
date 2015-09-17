@@ -28,7 +28,7 @@ function love.load()
     next_time = love.timer.getTime()
 
     Gamestate.switch(Game)
-    setScale(1)
+    setScale(2)
 end
 
 function love.update(dt)

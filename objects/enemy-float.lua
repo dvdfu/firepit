@@ -18,13 +18,6 @@ EnemyFloat.static.glowShader = love.graphics.newShader[[
     }
 ]]
 
-EnemyFloat.collide_platform = {
-    type = 'cross',
-    func = function(self, col)
-        Enemy.collide_platform.func(self, col)
-    end
-}
-
 EnemyFloat.collide_enemy = {
     type = 'cross',
     func = function(self, col) end

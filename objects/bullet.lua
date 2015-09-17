@@ -49,6 +49,13 @@ Bullet.collide_enemy = {
     end
 }
 
+Bullet.collide_block = {
+    type = 'cross',
+    func = function(self, col)
+        self.dead = true
+    end
+}
+
 function Bullet:initialize(name, parent)
     self.info = Bullet.info[name]
     Object.initialize(self, parent.world, parent.x, parent.y, self.info.width, self.info.height)

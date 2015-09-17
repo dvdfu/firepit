@@ -33,7 +33,7 @@ Player.static.sprJumpLift = love.graphics.newImage('assets/images/player/jump_li
 Player.static.sprFallLift = love.graphics.newImage('assets/images/player/fall_lift.png')
 Player.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
-Player.collide_solid = {
+Player.collide_block = {
     type = 'slide',
     func = function(self, col)
         if col.normal.y ~= 0 then
