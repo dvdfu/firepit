@@ -60,7 +60,7 @@ function Powerup:initialize()
 end
 
 function Powerup:update()
-    if self.info.updates then
+    if self.info and self.info.updates then
         self:tick()
     end
 end

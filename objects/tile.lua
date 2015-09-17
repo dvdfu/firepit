@@ -22,7 +22,7 @@ function Tile:initialize(x, y)
     self.frost:setColors(255, 255, 255, 255, 120, 180, 255, 255)
     self.frost:setSizes(1, 0)
     self.frost:setPosition(self.x+self.w/2, self.y)
-    self.frost:setEmissionRate(4)
+    self.frost:setEmissionRate(2)
 end
 
 function Tile:update(dt)

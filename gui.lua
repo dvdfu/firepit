@@ -15,7 +15,7 @@ GUI.static.dropShadowShader = love.graphics.newShader[[
 function GUI:initialize(player)
     love.graphics.setLineWidth(1)
     self.player = player
-    self.canvas = love.graphics.newCanvas(160, 80)
+    self.canvas = love.graphics.newCanvas(240, 80)
 end
 
 function GUI:draw()
@@ -68,9 +68,9 @@ end
 
 function GUI:drawPower(power, i)
     local x, y = 16+(i-1)*40, 16
-    if i == 3 then
-        love.graphics.rectangle('fill', x-1, y-1, 32+2, 32+2)
-    end
+    love.graphics.setColor(128, 128, 128, 255)
+    love.graphics.rectangle('line', x, y, 33, 33)
+    love.graphics.setColor(255, 255, 255, 255)
 
     if not power.set then return end
 
@@ -84,9 +84,9 @@ function GUI:drawPower(power, i)
     love.graphics.setColor(0, 0, 0, 128)
     love.graphics.rectangle('fill', x, y, 32, fill)
     love.graphics.setColor(255, 255, 255, 255)
+    love.graphics.rectangle('line', x, y, 33, 33)
 
     if uses >= 0 then
-        love.graphics.setColor(255, 255, 255, 255)
         love.graphics.setFont(GUI.numberFont)
         love.graphics.print(uses, x+2, y+24)
     end

@@ -132,7 +132,7 @@ function Player:initialize(world, x, y)
         [1] = Powerup:new(),
         [2] = Powerup:new()
     }
-    self.staticPowers[1]:setPower(Powerup.names.jumpGlide)
+    -- self.staticPowers[1]:setPower(Powerup.names.jumpGlide)
     self.staticPowers[2]:setPower(Powerup.names.coldFeet)
     self.activePower:setPower(Powerup.names.bubble)
     self.maxHealth = 6

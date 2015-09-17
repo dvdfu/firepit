@@ -11,9 +11,9 @@ Lava.static.lavaShader = love.graphics.newShader[[
     extern float time;
     vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
         vec2 hs = love_ScreenSize.xy;
-        float disp = sin(16*texture_coords.x + 2*time);
-        texture_coords.y -= 12*(1+disp)/hs.y;
-        texture_coords.x -= 12*texture_coords.y/hs.x;
+        float disp = sin(24*texture_coords.x + 2*time);
+        texture_coords.y -= 8*(1+disp)/hs.y;
+        texture_coords.x -= 8*texture_coords.y/hs.x;
         return Texel(texture, texture_coords);
     }
 ]]
@@ -24,8 +24,8 @@ Lava.static.glowShader = love.graphics.newShader[[
         vec4 pixel = vec4(0.6, 0.4, 0.1, 1);
 
         vec2 hs = love_ScreenSize.xy;
-        float disp = sin(16*texture_coords.x + 2*time);
-        texture_coords.y -= 20*(1+disp)/hs.y;
+        float disp = sin(24*texture_coords.x + 2*time);
+        texture_coords.y -= 12*(1+disp)/hs.y;
 
         pixel.a = texture_coords.y*texture_coords.y;
         pixel.a = floor(pixel.a*5)/5;
@@ -89,7 +89,7 @@ function Lava:draw()
     love.graphics.draw(Lava.sprGlow, self.x, self.y-96, 0, self.w/16, 96/16)
     love.graphics.setBlendMode('alpha')
     love.graphics.setShader(Lava.lavaShader)
-    love.graphics.draw(self.image, self.x, self.y-12)
+    love.graphics.draw(self.image, self.x, self.y-8)
     -- love.graphics.draw(Lava.sprLava, self.x, self.y-13, 0, self.w/16, self.h/16)
     love.graphics.setShader(oldShader)
 end
