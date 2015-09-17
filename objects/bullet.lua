@@ -12,7 +12,8 @@ Bullet.static.info = {
     ['Bubble'] = {
         name = 'Bubble',
         sprite = love.graphics.newImage('assets/images/bullets/bubble.png'),
-        animated = false,
+        spritePop = love.graphics.newImage('assets/images/bullets/bubble_pop.png'),
+        animated = true,
         width = 8,
         height = 8,
         speed = 1,
@@ -44,7 +45,7 @@ Bullet.static.info = {
 Bullet.collide_enemy = {
     type = 'cross',
     func = function(self, col)
-        self.dead = true
+        self:gotoState('Dead')
         col.other:hit(self)
     end
 }
@@ -52,7 +53,7 @@ Bullet.collide_enemy = {
 Bullet.collide_block = {
     type = 'cross',
     func = function(self, col)
-        self.dead = true
+        self:gotoState('Dead')
     end
 }
 
@@ -69,8 +70,8 @@ function Bullet:initialize(name, parent)
     local speed = self.info.speed + (self.info.speedMax-self.info.speed)*math.random()
     self.vx = parent.vx + speed * math.cos(self.angle/180*math.pi)
     self.vy = speed * math.sin(self.angle/180*math.pi)
-    self.dead = false
     self.timer = self.info.time + (self.info.timeMax-self.info.time)*math.random()
+    self.deadTimer = 0
 end
 
 function Bullet:update(dt)
@@ -79,6 +80,9 @@ function Bullet:update(dt)
     self.x = self.x + self.vx
     self.y = self.y + self.vy
     self.timer = self.timer - 1
+    if self.timer <= 0 then
+        self:gotoState('Dead')
+    end
     self:collide()
 end
 
@@ -93,7 +97,29 @@ function Bullet:draw()
 end
 
 function Bullet:isDead()
-    return self.dead or self.timer <= 0
+    return false
+end
+
+Bullet.Dead = Bullet:addState('Dead')
+
+function Bullet.Dead:enteredState()
+    if self.info.name == Bullet.names.bubble then
+        self.deadTimer = 5
+        local sprite = Bullet.info.Bubble.spritePop
+        self.anim = newAnimation(sprite, sprite:getHeight(), sprite:getHeight(), 1/60, 0)
+        self.anim:setMode('once')
+    end
+end
+
+function Bullet.Dead:update(dt)
+    self.deadTimer = self.deadTimer - 1
+end
+
+function Bullet.Dead:isDead()
+    if self.info.name == Bullet.names.bubble then
+        return self.deadTimer == 0
+    end
+    return true
 end
 
 return Bullet
