@@ -132,9 +132,6 @@ function Player:initialize(world, x, y)
         [1] = Powerup:new(),
         [2] = Powerup:new()
     }
-    -- self.staticPowers[1]:setPower(Powerup.names.jumpGlide)
-    self.staticPowers[2]:setPower(Powerup.names.coldFeet)
-    self.activePower:setPower(Powerup.names.bubble)
     self.maxHealth = 6
     self.health = self.maxHealth
     self.bullets = {}
@@ -309,8 +306,24 @@ function Player:getPower(power)
     return nil
 end
 
+function Player:setPower(name)
+    local power = Powerup.info[name]
+    if power.static then
+        if not self.staticPowers[1].set then
+            self.staticPowers[1]:setPower(name)
+        else
+            self.staticPowers[2]:setPower(name)
+        end
+    else
+        self.activePower:setPower(name)
+    end
+end
+
 function Player:useActivePower()
     local power = self.activePower
+    if not power.set then
+        return
+    end
     if power.info.name == Powerup.names.apple then
         power:use()
         self.health = self.maxHealth

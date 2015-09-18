@@ -6,6 +6,7 @@ local Solid = require 'objects/solid'
 local Player = require 'objects/player'
 local EnemyRock = require 'objects/enemy-rock'
 local EnemyFloat = require 'objects/enemy-float'
+local Powerup = require 'powerup'
 local Item = require 'objects/item'
 local Lava = require 'objects/lava'
 
@@ -19,6 +20,9 @@ function Game:enter()
     addSolids()
 
     p = Player:new(world, 32, 0)
+    p:setPower(Powerup.names.jumpGlide)
+    p:setPower(Powerup.names.coldFeet)
+    p:setPower(Powerup.names.bubble)
     l = Lava:new(world, sh)
     gui = GUI:new(p)
     cx, cy = sw/2, sh/2

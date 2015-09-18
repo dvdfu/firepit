@@ -12,7 +12,7 @@ Powerup.static.names = {
 Powerup.static.info = {
     ['Cold Feet'] = {
         name = 'Cold Feet',
-        type = 'static',
+        static = true,
         icon = love.graphics.newImage('assets/images/powers/cold_feet.png'),
         uses = -1,
         cooldown = -1,
@@ -20,7 +20,7 @@ Powerup.static.info = {
     },
     ['Jump Glide'] = {
         name = 'Jump Glide',
-        type = 'static',
+        static = true,
         icon = love.graphics.newImage('assets/images/powers/jump_glide.png'),
         uses = -1,
         cooldown = 120,
@@ -28,7 +28,7 @@ Powerup.static.info = {
     },
     ['Apple'] = {
         name = 'Apple',
-        type = 'active',
+        static = false,
         icon = love.graphics.newImage('assets/images/powers/apple.png'),
         uses = 1,
         cooldown = -1,
@@ -36,7 +36,7 @@ Powerup.static.info = {
     },
     ['Bubble Blower'] = {
         name = 'Bubble Blower',
-        type = 'active',
+        static = false,
         icon = love.graphics.newImage('assets/images/powers/bubble.png'),
         uses = -1,
         cooldown = 6,
@@ -44,7 +44,7 @@ Powerup.static.info = {
     },
     ['Star Cannon'] = {
         name = 'Star Cannon',
-        type = 'active',
+        static = false,
         icon = love.graphics.newImage('assets/images/powers/star.png'),
         uses = -1,
         cooldown = 80,
