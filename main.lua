@@ -3,7 +3,6 @@ love.graphics.setDefaultFilter('nearest', 'nearest')
 love.graphics.setLineStyle('rough')
 love.mouse.setVisible(false)
 
-Jupiter = require 'jupiter'
 Input = require 'input'
 Gamestate = require 'gamestate'
 Game = require 'states/game'
@@ -22,13 +21,12 @@ function love.load()
             return Texel(texture, texture_coords);
         }
     ]]
-    -- scale = Jupiter.load("settings.lua").scale
 
     min_dt = 1/60
     next_time = love.timer.getTime()
 
     Gamestate.switch(Game)
-    setScale(2)
+    setScale(1)
 end
 
 function love.update(dt)
