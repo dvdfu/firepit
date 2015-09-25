@@ -43,6 +43,7 @@ function Enemy:initialize(world, x, y, w, h)
     table.insert(self.tags, Enemy.name)
     self.vx, self.vy = 0, 0
     self.vx = math.random() > 0.5 and 1 or -1
+    self.health = 1
     self.ground = nil
 
     self.deadTimer = 0
@@ -55,9 +56,17 @@ function Enemy:update(dt)
     self:collide()
 end
 
-function Enemy:hit(enemy)
-    self.vx = enemy.vx/2
-    self:gotoState('Dead')
+function Enemy:hit(other, damage)
+    -- self.vx = other.vx/2
+    damage = damage or 0
+    if damage < 0 then
+        self:gotoState('Dead')
+    elseif self.health > damage then
+        self.health = self.health - damage
+        self:pushState('Hit')
+    else
+        self:gotoState('Dead')
+    end
 end
 
 function Enemy:isHarmful()

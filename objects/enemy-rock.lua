@@ -23,6 +23,7 @@ function EnemyRock:initialize(world, x, y)
     table.insert(self.tags, EnemyRock.name)
     self.player = nil
 
+    self.health = 4
     self.vFall = 7
     self.aFall = 0.4
     self.vMove = 0.4
@@ -194,7 +195,7 @@ EnemyRock.Throw = EnemyRock:addState('Throw')
 EnemyRock.Throw.collide_enemy = {
     type = 'cross',
     func = function(self, col)
-        col.other:hit(self)
+        col.other:hit(self, 8)
     end
 }
 
@@ -233,6 +234,30 @@ end
 
 function EnemyRock.Throw:stomp() end
 
+--[[======== Hit STATE ========]]
+
+EnemyRock.Hit = EnemyRock:addState('Hit')
+
+function EnemyRock.Hit:enteredState()
+    self.hitTimer = 2
+end
+
+function EnemyRock.Hit:update(dt)
+    if self.hitTimer == 0 then
+        self:popState()
+    else
+        self.hitTimer = self.hitTimer-1
+    end
+end
+
+function EnemyRock.Hit:draw()
+    love.graphics.setColor(255, 0, 0)
+    EnemyRock.draw(self)
+    love.graphics.setColor(255, 255, 255)
+end
+
+function EnemyRock.Hit:hit() end
+
 --[[======== DEAD STATE ========]]
 
 EnemyRock.Dead = EnemyRock:addState('Dead')
@@ -241,7 +266,7 @@ function EnemyRock.Dead:enteredState()
     -- self.dropItem(self.x, self.y) --TODO
     self.world:remove(self)
     self.deadTimer = 0
-    self.vy = -8
+    self.vy = -4
 end
 
 function EnemyRock.Dead:update(dt)

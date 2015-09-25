@@ -16,6 +16,7 @@ Bullet.static.info = {
         animated = true,
         width = 8,
         height = 8,
+        damage = 1,
         speed = 1,
         speedMax = 3,
         angle = 0,
@@ -31,6 +32,7 @@ Bullet.static.info = {
         animated = true,
         width = 16,
         height = 16,
+        damage = 8,
         speed = 6,
         speedMax = 6,
         angle = 0,
@@ -46,7 +48,7 @@ Bullet.collide_enemy = {
     type = 'cross',
     func = function(self, col)
         self:gotoState('Dead')
-        col.other:hit(self)
+        col.other:hit(self, self.info.damage)
     end
 }
 

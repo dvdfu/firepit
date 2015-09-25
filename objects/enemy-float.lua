@@ -28,6 +28,7 @@ function EnemyFloat:initialize(world, x, y)
     table.insert(self.tags, EnemyFloat.name)
     self.player = nil
 
+    self.health = 4
     self.vFall = 7
     self.aFall = 0.02
     self.vMove = 0.4
@@ -145,6 +146,31 @@ end
 function EnemyFloat.Move:isHarmful()
     return true
 end
+
+--[[======== Hit STATE ========]]
+
+EnemyFloat.Hit = EnemyFloat:addState('Hit')
+
+function EnemyFloat.Hit:enteredState()
+    self.hitTimer = 2
+end
+
+function EnemyFloat.Hit:update(dt)
+    if self.hitTimer == 0 then
+        self:popState()
+    else
+        self.hitTimer = self.hitTimer-1
+    end
+end
+
+function EnemyFloat.Hit:draw()
+    love.graphics.setColor(255, 0, 0)
+    EnemyFloat.draw(self)
+    love.graphics.setColor(255, 255, 255)
+end
+
+
+function EnemyFloat.Hit:hit() end
 
 --[[======== DEAD STATE ========]]
 
