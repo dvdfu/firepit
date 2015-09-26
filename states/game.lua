@@ -21,7 +21,7 @@ function Game:enter()
 
     p = Player:new(world, 32, 0)
     p:setPower(Powerup.names.jumpGlide)
-    p:setPower(Powerup.names.coldFeet)
+    -- p:setPower(Powerup.names.coldFeet)
     p:setPower(Powerup.names.bubble)
     l = Lava:new(world, sh)
     gui = GUI:new(p)

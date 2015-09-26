@@ -23,10 +23,10 @@ Player.static.keyA = 'z'
 Player.static.keyB = 'x'
 Player.static.keyC = 'c'
 
-Player.static.sprIdle = love.graphics.newImage('assets/images/player/idle.png')
-Player.static.sprRun = love.graphics.newImage('assets/images/player/move.png')
-Player.static.sprJump = love.graphics.newImage('assets/images/player/jump.png')
-Player.static.sprFall = love.graphics.newImage('assets/images/player/fall.png')
+Player.static.sprIdle = love.graphics.newImage('assets/images/player/dragon_idle.png')
+Player.static.sprRun = love.graphics.newImage('assets/images/player/dragon_move.png')
+Player.static.sprJump = love.graphics.newImage('assets/images/player/dragon_jump.png')
+Player.static.sprFall = love.graphics.newImage('assets/images/player/dragon_fall.png')
 Player.static.sprIdleLift = love.graphics.newImage('assets/images/player/idle_lift.png')
 Player.static.sprRunLift = love.graphics.newImage('assets/images/player/move_lift.png')
 Player.static.sprJumpLift = love.graphics.newImage('assets/images/player/jump_lift.png')
@@ -137,7 +137,7 @@ function Player:initialize(world, x, y)
     self.bullets = {}
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
-    self.animRun = newAnimation(Player.sprRun, 24, 24, 1/12, 0)
+    self.animRun = newAnimation(Player.sprRun, 24, 24, 1/16, 0)
     self.animJump = newAnimation(Player.sprJump, 24, 24, 1/8, 0)
     self.animFall = newAnimation(Player.sprFall, 24, 24, 1/8, 0)
     self.animIdleLift = newAnimation(Player.sprIdleLift, 24, 24, 1/8, 0)
