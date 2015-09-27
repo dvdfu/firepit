@@ -13,3 +13,6 @@
 [submodule "modules/love-misc-libs"]
 	path = modules/love-misc-libs
 	url = git@github.com:bartbes/love-misc-libs.git
+[submodule "modules/secs"]
+	path = modules/secs
+	url = git@github.com:ecbambrick/SimpleEntityComponentSystem.git

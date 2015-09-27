@@ -279,6 +279,7 @@ function Player:draw()
 
     local dx, dy = math.floor(self.x+self.w/2 + 0.5), math.floor(self.y+self.h + 0.5)
     self.sprite:update(1/60)
+    self.sprite.speed = math.abs(self.vx/_vMove)
     self.sprite:draw(dx, dy, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 
     for key, bullet in pairs(self.bullets) do

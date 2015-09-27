@@ -23,7 +23,7 @@ function EnemyRock:initialize(world, x, y)
     table.insert(self.tags, EnemyRock.name)
     self.player = nil
 
-    self.health = 4
+    self.health = 3
     self.vFall = 7
     self.aFall = 0.4
     self.vMove = 0.4

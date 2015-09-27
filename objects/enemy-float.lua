@@ -28,7 +28,7 @@ function EnemyFloat:initialize(world, x, y)
     table.insert(self.tags, EnemyFloat.name)
     self.player = nil
 
-    self.health = 4
+    self.health = 1
     self.vFall = 7
     self.aFall = 0.02
     self.vMove = 0.4
