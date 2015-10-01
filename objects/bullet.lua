@@ -44,19 +44,20 @@ Bullet.static.info = {
     }
 }
 
-Bullet.collide_enemy = {
-    type = 'cross',
-    func = function(self, col)
-        self:gotoState('Dead')
-        col.other:hit(self, self.info.damage)
-    end
-}
-
-Bullet.collide_block = {
-    type = 'cross',
-    func = function(self, col)
-        self:gotoState('Dead')
-    end
+Bullet.collisions = {
+    enemy = {
+        type = 'cross',
+        func = function(self, col)
+            self:gotoState('Dead')
+            col.other:hit(self, self.info.damage)
+        end
+    },
+    block = {
+        type = 'cross',
+        func = function(self, col)
+            self:gotoState('Dead')
+        end
+    }
 }
 
 function Bullet:initialize(name, parent)

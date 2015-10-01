@@ -33,87 +33,84 @@ Player.static.sprJumpLift = love.graphics.newImage('assets/images/player/jump_li
 Player.static.sprFallLift = love.graphics.newImage('assets/images/player/fall_lift.png')
 Player.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
-Player.collide_block = {
-    type = 'slide',
-    func = function(self, col)
-        if col.normal.y ~= 0 then
-            self.vy = 0
-            if col.normal.y == -1 then
+Player.collisions = {
+    block = {
+        type = 'slide',
+        func = function(self, col)
+            if col.normal.y ~= 0 then
+                self.vy = 0
+                if col.normal.y == -1 then
+                    self.ground = col.other
+                    if self:hasPower(Powerup.names.coldFeet) then
+                        col.other:setState(Tile.state.iced, self.x+self.w/2)
+                        col.other:setState(Tile.state.iced, self.x+self.w/2+16*self.direction)
+                    end
+                end
+            end
+            if col.normal.x ~= 0 then
+                self.vx = 0
+            end
+        end
+    },
+    platform = {
+        type = 'cross',
+        func = function(self, col)
+            if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+                self.vy = 0
+                self.y = col.other.y - self.h
+                self.world:update(self, self.x, self.y)
                 self.ground = col.other
                 if self:hasPower(Powerup.names.coldFeet) then
                     col.other:setState(Tile.state.iced, self.x+self.w/2)
-                    col.other:setState(Tile.state.iced, self.x+self.w/2+16*self.direction)
+                    col.other:setState(Tile.state.iced, self.x+self.w/2-16)
+                    col.other:setState(Tile.state.iced, self.x+self.w/2+16)
                 end
             end
         end
-        if col.normal.x ~= 0 then
-            self.vx = 0
-        end
-    end
-}
-
-Player.collide_platform = {
-    type = 'cross',
-    func = function(self, col)
-        if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-            self.vy = 0
-            self.y = col.other.y - self.h
-            self.world:update(self, self.x, self.y)
-            self.ground = col.other
-            if self:hasPower(Powerup.names.coldFeet) then
-                col.other:setState(Tile.state.iced, self.x+self.w/2)
-                col.other:setState(Tile.state.iced, self.x+self.w/2-16)
-                col.other:setState(Tile.state.iced, self.x+self.w/2+16)
+    },
+    enemy_rock = {
+        type = 'cross',
+        func = function(self, col)
+            if col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
+                self.vy = -_vJump
+                self.y = col.other.y - self.h
+                self.world:update(self, self.x, self.y)
+                col.other:stomp()
+            else
+                self:getHit(col.other)
             end
         end
-    end
-}
-
-Player.collide_enemy_rock = {
-    type = 'cross',
-    func = function(self, col)
-        if col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
-            self.vy = -_vJump
-            self.y = col.other.y - self.h
+    },
+    enemy_float = {
+        type = 'cross',
+        func = function(self, col)
+            if self:hasPower(Powerup.names.coldFeet) and col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
+                self.vy = -_vJump
+                self.y = col.other.y - self.h
+                self.world:update(self, self.x, self.y)
+                col.other:stomp()
+            else
+                self:getHit(col.other)
+            end
+        end
+    },
+    lava = {
+        type = 'cross',
+        func = function(self, col)
+            self.vy = -7
+            self.y = col.other.level - self.h
             self.world:update(self, self.x, self.y)
-            col.other:stomp()
-        else
-            self:getHit(col.other)
+            self:gotoState('Hurt')
         end
-    end
-}
-
-Player.collide_enemy_float = {
-    type = 'cross',
-    func = function(self, col)
-        if self:hasPower(Powerup.names.coldFeet) and col.normal.y == -1 and self.vy > 0 and self.y+self.h-self.vy <= col.other.y then
-            self.vy = -_vJump
-            self.y = col.other.y - self.h
-            self.world:update(self, self.x, self.y)
-            col.other:stomp()
-        else
-            self:getHit(col.other)
+    },
+    item = {
+        type = 'cross',
+        func = function(self, col)
+            if Input:isDown(Player.keyDown) then
+                col.other:grab(self)
+            end
         end
-    end
-}
-
-Player.collide_lava = {
-    type = 'cross',
-    func = function(self, col)
-        self.vy = -7
-        self.y = col.other.level - self.h
-        self.world:update(self, self.x, self.y)
-        self:gotoState('Hurt')
-    end
-}
-
-Player.collide_item = {
-    type = 'cross',
-    func = function(self, col)
-        if Input:isDown(Player.keyDown) then
-            col.other:grab(self)
-        end
-    end
+    }
 }
 
 function Player:initialize(world, x, y)
@@ -362,17 +359,19 @@ end
 
 Player.Normal = Player:addState('Normal')
 
-Player.Normal.collide_enemy_rock = {
-    type = 'cross',
-    func = function(self, col)
-        Player.collide_enemy_rock.func(self, col)
-        if Input:isDown(Player.keyB) then
-            if col.other:grab(self) then
-                self.hold = col.other
-                self:gotoState('Lift')
+Player.Normal.collisions = {
+    enemy_rock = {
+        type = 'cross',
+        func = function(self, col)
+            Player.collisions.enemy_rock.func(self, col)
+            if Input:isDown(Player.keyB) then
+                if col.other:grab(self) then
+                    self.hold = col.other
+                    self:gotoState('Lift')
+                end
             end
         end
-    end
+    }
 }
 
 function Player.Normal:update(dt)

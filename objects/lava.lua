@@ -37,9 +37,7 @@ function Lava:initialize(world, y)
     Object.initialize(self, world, -128, y, 480+256, 176)
     table.insert(self.tags, Lava.name)
     self.level = self.y
-
-    self.image = love.graphics.newCanvas(self.w, self.h)
-    self:redraw()
+    self:render()
 
     self.fire = love.graphics.newParticleSystem(Lava.sprParticle)
     self.fire:setParticleLifetime(0.3, 1)
@@ -94,10 +92,10 @@ function Lava:draw()
     love.graphics.setShader(oldShader)
 end
 
-function Lava:redraw()
-    self.image:clear()
+function Lava:render()
+    local image = love.graphics.newCanvas(self.w, self.h)
     local oldCanvas = love.graphics.getCanvas()
-    love.graphics.setCanvas(self.image)
+    love.graphics.setCanvas(image)
     for i = 0, self.w, Lava.sprLava:getWidth() do
         for j = 0, self.h, Lava.sprLava:getHeight() do
             if j == 0 then
@@ -108,6 +106,7 @@ function Lava:redraw()
         end
     end
     love.graphics.setCanvas(oldCanvas)
+    self.image = love.graphics.newImage(image:getImageData())
 end
 
 function Lava:touch(x, feed)

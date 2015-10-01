@@ -15,8 +15,7 @@ function Solid:initialize(world, x, y, w, h, color, platform)
         table.insert(self.tags, 'block')
     end
     self.color = color or { r = 104, g = 96, b = 160 }
-    self.image = love.graphics.newCanvas(self.w, self.h)
-    self:redraw()
+    self:render()
 
     self.tiles = {}
     for i = 0, self.w/16-1, 1 do
@@ -55,10 +54,10 @@ function Solid:getState(x)
     return self.tiles[i]:getState()
 end
 
-function Solid:redraw()
-    self.image:clear()
+function Solid:render()
+    local image = love.graphics.newCanvas(self.w, self.h)
     local oldCanvas = love.graphics.getCanvas()
-    love.graphics.setCanvas(self.image)
+    love.graphics.setCanvas(image)
     love.graphics.setColor(self.color.r, self.color.g, self.color.b)
     love.graphics.setStencil(function()
         love.graphics.rectangle('fill', 0, 0, self.w, self.h)
@@ -81,6 +80,7 @@ function Solid:redraw()
     end
     love.graphics.setColor(255, 255, 255)
     love.graphics.setCanvas(oldCanvas)
+    self.image = love.graphics.newImage(image:getImageData())
 end
 
 return Solid

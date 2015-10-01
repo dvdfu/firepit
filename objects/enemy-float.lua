@@ -18,9 +18,11 @@ EnemyFloat.static.glowShader = love.graphics.newShader[[
     }
 ]]
 
-EnemyFloat.collide_enemy = {
-    type = 'cross',
-    func = function(self, col) end
+EnemyFloat.collisions = {
+    enemy = {
+        type = 'cross',
+        func = function(self, col) end
+    }
 }
 
 function EnemyFloat:initialize(world, x, y)
@@ -119,13 +121,15 @@ end
 
 EnemyFloat.Move = EnemyFloat:addState('Move')
 
-EnemyFloat.Move.collide_lava = {
-    type = 'cross',
-    func = function(self, col)
-        col.other:touch(self.x, true)
-        self:gotoState('Dead')
-        self.deadTimer = 60
-    end
+EnemyFloat.Move.collisions = {
+    lava = {
+        type = 'cross',
+        func = function(self, col)
+            col.other:touch(self.x, true)
+            self:gotoState('Dead')
+            self.deadTimer = 60
+        end
+    }
 }
 
 function EnemyFloat.Move:enteredState()

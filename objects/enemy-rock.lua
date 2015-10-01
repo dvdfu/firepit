@@ -9,13 +9,15 @@ EnemyRock.static.sprStun = love.graphics.newImage('assets/images/enemies/rock_st
 EnemyRock.static.sprStar = love.graphics.newImage('assets/images/enemies/star.png')
 EnemyRock.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
-EnemyRock.collide_player = {
-    type = 'cross',
-    func = function(self, col)
-        if col.normal.y == 1 and col.other.vy > 0 and col.other.y+col.other.h-col.other.vy <= self.y then
-            self:stomp()
+EnemyRock.collisions = {
+    player = {
+        type = 'cross',
+        func = function(self, col)
+            if col.normal.y == 1 and col.other.vy > 0 and col.other.y+col.other.h-col.other.vy <= self.y then
+                self:stomp()
+            end
         end
-    end
+    }
 }
 
 function EnemyRock:initialize(world, x, y)
@@ -83,13 +85,15 @@ function EnemyRock:release() end
 
 EnemyRock.Move = EnemyRock:addState('Move')
 
-EnemyRock.Move.collide_lava = {
-    type = 'cross',
-    func = function(self, col)
-        col.other:touch(self.x, true)
-        self:gotoState('Dead')
-        self.deadTimer = 60
-    end
+EnemyRock.Move.collisions = {
+    lava = {
+        type = 'cross',
+        func = function(self, col)
+            col.other:touch(self.x, true)
+            self:gotoState('Dead')
+            self.deadTimer = 60
+        end
+    }
 }
 
 function EnemyRock.Move:enteredState()
@@ -192,16 +196,17 @@ end
 
 EnemyRock.Throw = EnemyRock:addState('Throw')
 
-EnemyRock.Throw.collide_enemy = {
-    type = 'cross',
-    func = function(self, col)
-        col.other:hit(self, 8)
-    end
-}
-
-EnemyRock.Throw.collide_enemy_rock = {
-    type = 'cross',
-    func = EnemyRock.Throw.collide_enemy.func
+EnemyRock.Throw.collisions = {
+    enemy = {
+        type = 'cross',
+        func = function(self, col)
+            col.other:hit(self, 8)
+        end
+    -- },
+    -- enemy_rock = {
+    --     type = 'cross',
+    --     func = EnemyRock.Throw.collisions.enemy.func
+    }
 }
 
 function EnemyRock.Throw:enteredState()

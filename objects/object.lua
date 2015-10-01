@@ -19,6 +19,8 @@ Object:
     :draw()
 ]]--
 
+Object.collisions = {}
+
 function Object:initialize(world, x, y, w, h)
     self.tags = {}
     table.insert(self.tags, Object.name)
@@ -35,10 +37,11 @@ end
 
 function Object:collide()
     local cols, len, col, other
+    local collisions = self.class.collisions
     self.x, self.y, cols, len = self.world:move(self, self.x, self.y, function(item, other)
         for i = #other.tags, 1, -1 do
-            if self['collide_'..other.tags[i]] then
-                return self['collide_'..other.tags[i]].type
+            if collisions[other.tags[i]] then
+                return collisions[other.tags[i]].type
             end
         end
         return 'cross'
@@ -46,8 +49,8 @@ function Object:collide()
 	for i = 1, len do
 		col = cols[i]
         for j = #col.other.tags, 1, -1 do
-            if self['collide_'..col.other.tags[j]] then
-                self['collide_'..col.other.tags[j]].func(self, col)
+            if collisions[col.other.tags[j]] then
+                collisions[col.other.tags[j]].func(self, col)
                 break
             end
         end

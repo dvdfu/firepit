@@ -2,40 +2,40 @@ local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Enemy = Class('enemy', Object)
 
-Enemy.collide_block = {
-    type = 'slide',
-    func = function(self, col)
-        if col.normal.y ~= 0 then
-            self.vy = 0
-            if col.normal.y == -1 then
-                self.ground = col.other
+Enemy.collisions = {
+    block = {
+        type = 'slide',
+        func = function(self, col)
+            if col.normal.y ~= 0 then
+                self.vy = 0
+                if col.normal.y == -1 then
+                    self.ground = col.other
+                end
+            end
+            if col.normal.x ~= 0 then
+                self.vx = -self.vx
             end
         end
-        if col.normal.x ~= 0 then
-            self.vx = -self.vx
+    },
+    platform = {
+        type = 'cross',
+        func = function(self, col)
+            if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
+    			self.vy = 0
+                self.y = col.other.y - self.h
+                self.world:update(self, self.x, self.y)
+    			self.ground = col.other
+    		end
         end
-    end
-}
-
-Enemy.collide_platform = {
-    type = 'cross',
-    func = function(self, col)
-        if col.normal.y == -1 and self.y+self.h-self.vy <= col.other.y then
-			self.vy = 0
-            self.y = col.other.y - self.h
-            self.world:update(self, self.x, self.y)
-			self.ground = col.other
-		end
-    end
-}
-
-Enemy.collide_lava = {
-    type = 'cross',
-    func = function(self, col)
-        col.other:touch(self.x, false)
-        self:gotoState('Dead')
-        self.deadTimer = 60
-    end
+    },
+    lava = {
+        type = 'cross',
+        func = function(self, col)
+            col.other:touch(self.x, false)
+            self:gotoState('Dead')
+            self.deadTimer = 60
+        end
+    }
 }
 
 function Enemy:initialize(world, x, y, w, h)
