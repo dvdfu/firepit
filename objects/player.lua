@@ -114,8 +114,11 @@ Player.collisions = {
 }
 
 function Player:initialize(world, x, y)
-    Object.initialize(self, world, x, y, 8, 20)
-    table.insert(self.tags, Player.name)
+    Object.initialize(self, world:addRectangle(x, y, 8, 20))
+    self.x, self.y = x, y
+    self.vx, self.vy = 0, 0
+    self.w, self.h = 8, 20
+    -- table.insert(self.tags, Player.name)
 
     self.ground = nil
     self.direction = self.vx > 0 and 1 or -1
@@ -254,7 +257,7 @@ function Player:update(dt)
     self.x = self.x + self.vx
     self.y = self.y + self.vy
     self.ground = nil
-    self:collide()
+    -- self:collide()
 
     for key, bullet in pairs(self.bullets) do
         bullet:update(dt)

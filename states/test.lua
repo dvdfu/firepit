@@ -4,7 +4,7 @@ local Camera = require 'camera'
 local HC = require 'modules/hardon-collider'
 local Object = require 'objects/object'
 local Solid = require 'objects/solid'
-local Player = require 'objects/player'
+local Player = require 'objects/guy'
 local Powerup = require 'powerup'
 local Lava = require 'objects/lava'
 
@@ -14,7 +14,7 @@ local sh = 360
 
 function collisionStart(dt, shapeA, shapeB, dx, dy)
     shapeA.object:collide(dt, shapeB.object, dx, dy)
-    -- shapeB.object:collide(dt, shapeA.object, -dx, -dy)
+    shapeB.object:collide(dt, shapeA.object, -dx, -dy)
 end
 
 function collisionEnd(dt, shapeA, shapeB) end
@@ -24,7 +24,7 @@ function Game:enter()
     solids = {}
     addSolids()
 
-    -- p = Player:new(collider, 32, 0)
+    p = Player:new(collider, 32, 0)
     -- p:setPower(Powerup.names.jumpGlide)
     -- p:setPower(Powerup.names.coldFeet)
     -- p:setPower(Powerup.names.bubble)
@@ -56,21 +56,21 @@ function addSolids()
 end
 
 function Game:update(dt)
-    collider:update(dt)
-    -- cx = cx + (sw/2 + (p.x+p.w/2 - sw/2)/4 - cx)/20
-    -- cy = cy + (p.y+p.h/2 - cy)/20
-    -- if cs > 0 then
-    --     cam:lookAt(math.floor(cx+0.5) + math.random(-cs/2, cs/2), math.floor(cy+0.5) + math.random(-cs/2, cs/2))
-    --     cs = cs-1
-    -- else
-    --     cam:lookAt(math.floor(cx+0.5), math.floor(cy+0.5))
-    -- end
+    cx = cx + (sw/2 + (p:getPosition().x - sw/2)/4 - cx)/20
+    cy = cy + (p:getPosition().y - cy)/20
+    if cs > 0 then
+        cam:lookAt(math.floor(cx+0.5) + math.random(-cs/2, cs/2), math.floor(cy+0.5) + math.random(-cs/2, cs/2))
+        cs = cs-1
+    else
+        cam:lookAt(math.floor(cx+0.5), math.floor(cy+0.5))
+    end
     -- TODO: add functionality to camera class
 
-    -- p:update(dt)
+    p:update(dt)
     for _, solid in pairs(solids) do
         solid:update(dt)
     end
+    collider:update(dt)
     -- l:update(dt)
 end
 
@@ -90,7 +90,8 @@ function Game:draw()
         for _, solid in pairs(solids) do
             Object.draw(solid)
         end
-        -- p:draw()
+        p:draw()
+        Object.draw(p)
         -- l:draw()
     end)
     -- gui:draw()
