@@ -6,14 +6,10 @@ local Solid = Class('solid', Object)
 Solid.static.sprTerrain = love.graphics.newImage('assets/images/stage/terrain.png')
 Solid.static.sprTop = love.graphics.newImage('assets/images/stage/terrain_top.png')
 
-function Solid:initialize(world, x, y, w, h, color, platform)
-    Object.initialize(self, world, x, y, w, h)
-    table.insert(self.tags, Solid.name)
-    if platform then
-        table.insert(self.tags, 'platform')
-    else
-        table.insert(self.tags, 'block')
-    end
+function Solid:initialize(collider, x, y, w, h, color, platform)
+    Object.initialize(self, collider, collider:addRectangle(x, y, w, h))
+    self.x, self.y = x, y
+    self.w, self.h = w, h
     self.color = color or { r = 104, g = 96, b = 160 }
     self:render()
 

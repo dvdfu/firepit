@@ -5,7 +5,7 @@ love.mouse.setVisible(false)
 
 Input = require 'input'
 Gamestate = require 'gamestate'
-Game = require 'states/game'
+Game = require 'states/test'
 scale = 0
 
 function love.load()
