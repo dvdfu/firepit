@@ -51,7 +51,7 @@ function addSolids()
     addSolid(sw-128, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, true) -- 2r
     addSolid(sw/2-128, sh-64, 256, 64) --1
 
-    -- addSolid(-64, -96, 64, sh+96) --wl
+    addSolid(-128, sh-256, 128, 256) --wl
     addSolid(sw, sh-256, 128, 256) --wr
 end
 
@@ -88,11 +88,7 @@ function Game:draw()
         for _, solid in pairs(solids) do
             solid:draw()
         end
-        for _, solid in pairs(solids) do
-            Object.draw(solid)
-        end
         p:draw()
-        Object.draw(p)
         -- l:draw()
     end)
     -- gui:draw()

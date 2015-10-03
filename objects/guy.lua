@@ -27,15 +27,12 @@ function Player:update(dt)
     self:move()
 end
 
-function Player:draw()
-end
-
 Player.static.collisions = {
     solid = function(self, dt, other, x, y)
         self.pos = Vector(x, y)
     end,
     platform = function(self, dt, other, x, y)
-        if y < self.pos.y and self.vel.y > 0 and self.pos.y - self.vel.y <= other.pos.y then
+        if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
             self.vel.y = 0
             self.pos.y = y
         end

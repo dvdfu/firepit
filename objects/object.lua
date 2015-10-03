@@ -7,15 +7,20 @@ local Vector = require('vector')
 
 function Object:initialize(body)
     self.body = body
-    self.body.object = self
-    self.offset = Vector(0, 0)
+    self.body.object = self --body reference to self
+    self.offset = Vector(0, 0) --origin relative to body center
     self.pos = Vector(0, 0)
     self.vel = Vector(0, 0)
-    self.tags = {}
+    self.tags = {} --collision categories
 end
 
 function Object:update(dt)
     self:move()
+end
+
+function Object:move() --update body to position
+    local dp = self.pos - self.offset
+    self.body:moveTo(dp:unpack())
 end
 
 function Object:draw()
@@ -30,21 +35,17 @@ function Object:draw()
     love.graphics.setColor(255, 255, 255)
 end
 
-function Object:move()
-    local dp = self.pos - self.offset
-    self.body:moveTo(dp:unpack())
-end
-
-function Object:collide(dt, other, dx, dy)
-    local tags = other.tags
-    for _, tag in ipairs(tags) do
+function Object:collide(dt, other, dx, dy) --called by HC callback
+    local x = self.pos.x + dx or 0
+    local y = self.pos.y + dy or 0
+    for _, tag in ipairs(other.tags) do
         if self.class.collisions[tag] then
-            self.class.collisions[tag](self, dt, other, self.pos.x + dx or 0, self.pos.y + dy or 0)
+            self.class.collisions[tag](self, dt, other, x, y)
         end
     end
     self:move()
 end
 
-Object.static.collisions = {}
+Object.static.collisions = {} --collision logic by category
 
 return Object

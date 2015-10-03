@@ -29,6 +29,8 @@ function Solid:update(dt)
     end
 end
 
+function Solid:move() end
+
 function Solid:draw()
     love.graphics.draw(self.image, self.pos:unpack())
     for i = 0, #self.tiles do
