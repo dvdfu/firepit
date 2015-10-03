@@ -8,13 +8,14 @@ local Vector = require('vector')
 function Object:initialize(body)
     self.body = body
     self.body.object = self --body reference to self
-    self.offset = Vector(0, 0) --origin relative to body center
-    self.pos = Vector(0, 0)
-    self.vel = Vector(0, 0)
+    self.offset = self.offset or Vector(0, 0) --origin relative to body center
+    self.pos = self.pos or Vector(0, 0)
+    self.vel = self.vel or Vector(0, 0)
     self.tags = {} --collision categories
 end
 
-function Object:update(dt)
+function Object:update(dt) --invoke this after velocity is set
+    self.pos = self.pos + self.vel
     self:move()
 end
 

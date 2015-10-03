@@ -9,6 +9,8 @@ function Player:initialize(collider, x, y)
     Object.initialize(self, collider:addRectangle(x, y, self.size:unpack()))
     self.pos = Vector(x, y)
     self.offset.y = self.size.y/2
+
+    self.grounded = false
 end
 
 function Player:update(dt)
@@ -20,11 +22,11 @@ function Player:update(dt)
     else
         self.vel.x = 0
     end
-    if Input:pressed('up') then
+    if self.grounded and Input:pressed('up') then
         self.vel.y = -5
     end
-    self.pos = self.pos + self.vel
-    self:move()
+    self.grounded = false
+    Object.update(self, dt)
 end
 
 Player.static.collisions = {
@@ -35,7 +37,12 @@ Player.static.collisions = {
         if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
             self.vel.y = 0
             self.pos.y = y
+            self.grounded = true
         end
+    end,
+    lava = function(self, dt, other, x, y)
+        self.pos.y = y
+        self.vel.y = -7
     end
 }
 

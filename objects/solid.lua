@@ -10,6 +10,7 @@ Solid.static.sprTop = love.graphics.newImage('assets/images/stage/terrain_top.pn
 
 function Solid:initialize(collider, x, y, w, h, color, platform)
     Object.initialize(self, collider:addRectangle(x, y, w, h))
+    collider:setPassive(self.body)
     self.tags = platform and { 'platform' } or { 'solid', 'platform' }
     self.pos = Vector(x, y)
     self.size = Vector(w, h)
@@ -36,6 +37,7 @@ function Solid:draw()
     for i = 0, #self.tiles do
         self.tiles[i]:draw()
     end
+    Object.draw(self)
 end
 
 -- function Solid:setState(state, x)

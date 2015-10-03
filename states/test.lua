@@ -28,7 +28,7 @@ function Game:enter()
     -- p:setPower(Powerup.names.jumpGlide)
     -- p:setPower(Powerup.names.coldFeet)
     -- p:setPower(Powerup.names.bubble)
-    -- l = Lava:new(collider, sh)
+    l = Lava:new(collider, sh)
     -- gui = GUI:new(p)
     cx, cy = sw/2, sh/2
     cs = 0
@@ -42,7 +42,7 @@ function addSolids()
     local function addSolid(x, y, w, h, color, platform)
         local s = Solid:new(collider, x, y, w, h, color, platform)
         table.insert(solids, s)
-        collider:addToGroup('solids', s.body)
+        -- collider:addToGroup('solids', s.body)
         return s
     end
     addSolid(sw/2-128, sh-256, 128, 256, { r = 40, g = 48, b = 80 }, true) -- 4
@@ -70,9 +70,8 @@ function Game:update(dt)
     for _, solid in pairs(solids) do
         solid:update(dt)
     end
-    p:move()
     collider:update(dt)
-    -- l:update(dt)
+    l:update(dt)
 end
 
 local function camDraw(func)
@@ -89,7 +88,7 @@ function Game:draw()
             solid:draw()
         end
         p:draw()
-        -- l:draw()
+        l:draw()
     end)
     -- gui:draw()
 end
