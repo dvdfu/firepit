@@ -28,12 +28,6 @@ EnemyRock.static.collisions = {
     lava = function(self, dt, other, x, y)
         self.pos.y = y
         self.vel.y = -7
-    -- end,
-    -- player = function(self, dt, other, x, y)
-    --     if y > self.pos.y and other.vel.y > 0 and other.pos.y < self.pos.y then
-    --         other.vel.y = -5
-    --         self:stomp()
-    --     end
     end
 }
 
@@ -77,7 +71,7 @@ function EnemyRock:update(dt)
 end
 
 function EnemyRock:draw()
-    self.dust:setPosition(self.pos.x+self.size.x/2, self.pos.y+self.size.y)
+    self.dust:setPosition(self.pos.x, self.pos.y)
     self.dust:update(1/60)
     love.graphics.draw(self.dust)
 
@@ -99,17 +93,6 @@ function EnemyRock:release() end
 
 EnemyRock.Move = EnemyRock:addState('Move')
 
--- EnemyRock.Move.collisions = {
---     lava = {
---         type = 'cross',
---         func = function(self, col)
---             col.other:touch(self.pos.x, true)
---             self:gotoState('Dead')
---             self.deadTimer = 60
---         end
---     }
--- }
-
 function EnemyRock.Move:enteredState()
     self.sprite = self.animMove
     self.sprite.speed = 1
@@ -117,13 +100,6 @@ end
 
 function EnemyRock.Move:update(dt)
     self.vel.x = EnemyRock.moveVel * self.direction
-    -- if self.ground and self.ground.class.name == 'solid' then
-    --     if self.ground:getState(self.pos.x+self.size.x/2) == Tile.state.iced then
-    --         self.vel.x = EnemyRock.moveVel/4 * self.direction
-    --     else
-    --         self.vel.x = EnemyRock.moveVel * self.direction
-    --     end
-    -- end
     EnemyRock.update(self, dt)
 end
 
@@ -175,9 +151,8 @@ EnemyRock.Hold = EnemyRock:addState('Hold')
 function EnemyRock.Hold:enteredState()
     self.sprite = self.animStun
     self.sprite.speed = 0
-    self.size.holdTimer = 0
-    self.vel.x = 0
-    self.vel.y = 0
+    self.holdTimer = 20
+    self.vel = Vector(0, 0)
 end
 
 function EnemyRock.Hold:exitedState()
@@ -187,15 +162,12 @@ function EnemyRock.Hold:exitedState()
 end
 
 function EnemyRock.Hold:update(dt)
-    if self.size.holdTimer < 20 then
-        local dx = self.player.pos.x-self.pos.x
-        local dy = self.player.pos.y-self.pos.y-self.player.size.y
-        self.pos.x = self.pos.x + dx*self.size.holdTimer/20
-        self.pos.y = self.pos.y + dy*self.size.holdTimer/20
-        self.size.holdTimer = self.size.holdTimer + 1
-    else
-        self.pos.x, self.pos.y = self.player.pos.x, self.player.pos.y-self.player.size.y
+    local target = self.player.pos:clone() - Vector(0, self.player.size.y)
+    if self.holdTimer > 0 then
+        self.holdTimer = self.holdTimer - 1
+        target = target - (target-self.pos)*self.holdTimer/20
     end
+    self.pos = target
     self:move()
 end
 
@@ -211,21 +183,8 @@ end
 
 EnemyRock.Throw = EnemyRock:addState('Throw')
 
-EnemyRock.Throw.collisions = {
-    enemy = {
-        type = 'cross',
-        func = function(self, col)
-            col.other:hit(self, 8)
-        end
-    -- },
-    -- enemy_rock = {
-    --     type = 'cross',
-    --     func = EnemyRock.Throw.collisions.enemy.func
-    }
-}
-
 function EnemyRock.Throw:enteredState()
-    self.throwTimer = 0
+    self.throwTimer = 30
 end
 
 function EnemyRock.Throw:update(dt)
@@ -236,25 +195,23 @@ function EnemyRock.Throw:update(dt)
         self.vel.x = self.vel.x * 0.99
     end
 
-    EnemyRock.update(self, dt)
     self.sprite.speed = math.abs(self.vel.x)
 
     if self.ground then
         self.dust:emit(self.sprite.speed)
-        if self.throwTimer == 0 then
-            cs = 10
-        end
-        if self.throwTimer < 30 and math.abs(self.vel.x) > 0.1 then
-            self.throwTimer = self.throwTimer + 1
+        if self.throwTimer > 0 and math.abs(self.vel.x) > 0.1 then
+            self.throwTimer = self.throwTimer - 1
         else
             self:gotoState('Stun')
         end
     end
+
+    EnemyRock.update(self, dt)
 end
 
 function EnemyRock.Throw:stomp() end
 
---[[======== Hit STATE ========]]
+--[[======== HIT STATE ========]]
 
 EnemyRock.Hit = EnemyRock:addState('Hit')
 

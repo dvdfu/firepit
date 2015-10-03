@@ -5,6 +5,10 @@ local Player = Class('player', Object)
 local Vector = require('vector')
 require('AnAL')
 
+Player.Normal = Player:addState('Normal')
+Player.Lift = Player:addState('Lift')
+Player.Hurt = Player:addState('Hurt')
+
 Player.static.sprIdle = love.graphics.newImage('assets/images/player/dragon_idle.png')
 Player.static.sprRun = love.graphics.newImage('assets/images/player/dragon_move.png')
 Player.static.sprJump = love.graphics.newImage('assets/images/player/dragon_jump.png')
@@ -30,6 +34,7 @@ function Player:initialize(collider, x, y)
     self.ground = nil
     self.jumpTimer = 0
     self.direction = 1
+    self.health = 6
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/16, 0)
@@ -172,59 +177,33 @@ end
 
 --[[======== NORMAL STATE ========]]
 
-Player.Normal = Player:addState('Normal')
-
--- Player.Normal.collisions = {
---     enemy_rock = {
---         type = 'cross',
---         func = function(self, col)
---             Player.collisions.enemy_rock.func(self, col)
---             if Input:isDown(Player.keyB) then
---                 if col.other:grab(self) then
---                     self.hold = col.other
---                     self:gotoState('Lift')
---                 end
---             end
---         end
---     }
--- }
-
 function Player.Normal:update(dt)
     Player.update(self, dt)
-    if not self.ground then
-        self.sprite = self.vel.y < 0 and self.animJump or self.animFall
-    end
 end
 
 --[[======== LIFT STATE ========]]
 
-Player.Lift = Player:addState('Lift')
-
 function Player.Lift:exitedState()
-    -- self.hold:release()
-    -- self.hold = nil
+    self.hold:release()
+    self.hold = nil
 end
 
 function Player.Lift:update(dt)
     Player.update(self, dt)
-    -- if not self.ground then
-    --     self.sprite = self.vel.y < 0 and self.animJumpLift or self.animFallLift
-    -- end
-
-    -- if self.hold and self.hold.holdTimer >= 20 and Input:pressed(Player.keyB) then
-    --     local rx, ry = 0, 0
-    --     if Input:isDown(Player.keyLeft) then rx = rx - 7 end
-    --     if Input:isDown(Player.keyRight) then rx = rx + 7 end
-    --     if Input:isDown(Player.keyUp) then ry = ry - 7 end
-    --     if Input:isDown(Player.keyDown) then ry = ry + 7 end
-    --     self.hold.vel.x, self.hold.vel.y = rx, ry
-    --     self:gotoState('Normal')
-    -- end
+    if self.hold then
+        if Input:pressed(self.keyB) then
+            local vel = Vector(0, 0)
+            if Input:isDown(self.keyLeft) then vel.x = vel.x - 7 end
+            if Input:isDown(self.keyRight) then vel.x = vel.x + 7 end
+            if Input:isDown(self.keyUp) then vel.y = vel.y - 7 end
+            if Input:isDown(self.keyDown) then vel.y = vel.y + 7 end
+            self.hold.vel = vel
+            self:gotoState('Normal')
+        end
+    end
 end
 
 --[[======== HURT STATE ========]]
-
-Player.Hurt = Player:addState('Hurt')
 
 function Player.Hurt:enteredState()
     self.hurtTimer = 60
@@ -234,18 +213,13 @@ function Player.Hurt:enteredState()
 end
 
 function Player.Hurt:update(dt)
-    Player.update(self, dt)
-    if not self.ground then
-        self.sprite = self.vel.y < 0 and self.animJump or self.animFall
-    end
     if self.hurtTimer > 0 then
         self.hurtTimer = self.hurtTimer - 1
     else
         self:gotoState('Normal')
     end
-    if self.hurtTimer % 2 == 0 then
-        self.fire:emit(1)
-    end
+    self.fire:emit(self.hurtTimer % 2 == 0)
+    Player.update(self, dt)
 end
 
 function Player.Hurt:draw()
