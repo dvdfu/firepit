@@ -45,7 +45,7 @@ function EnemyRock:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(16, 16)
     Enemy.initialize(self, collider:addRectangle(x, y, self.size:unpack()))
-    self.tags = { 'enemyRock' }
+    self.tags = { 'enemy_rock' }
     self.offset.y = self.size.y/2
 
     self.health = 3
@@ -175,7 +175,7 @@ EnemyRock.Hold = EnemyRock:addState('Hold')
 function EnemyRock.Hold:enteredState()
     self.sprite = self.animStun
     self.sprite.speed = 0
-    self.size.yoldTimer = 0
+    self.size.holdTimer = 0
     self.vel.x = 0
     self.vel.y = 0
 end
@@ -187,15 +187,16 @@ function EnemyRock.Hold:exitedState()
 end
 
 function EnemyRock.Hold:update(dt)
-    if self.size.yoldTimer < 20 then
-        local dx, dy = (self.player.x+self.player.w/2-self.size.x/2)-self.pos.x, (self.player.y-self.size.y)-self.pos.y
-        self.pos.x = self.pos.x + dx*self.size.yoldTimer/20
-        self.pos.y = self.pos.y + dy*self.size.yoldTimer/20
-        self.size.yoldTimer = self.size.yoldTimer + 1
+    if self.size.holdTimer < 20 then
+        local dx = self.player.pos.x-self.pos.x
+        local dy = self.player.pos.y-self.pos.y-self.player.size.y
+        self.pos.x = self.pos.x + dx*self.size.holdTimer/20
+        self.pos.y = self.pos.y + dy*self.size.holdTimer/20
+        self.size.holdTimer = self.size.holdTimer + 1
     else
-        self.pos.x, self.pos.y = self.player.x+self.player.w/2-self.size.x/2, self.player.y-self.size.y
+        self.pos.x, self.pos.y = self.player.pos.x, self.player.pos.y-self.player.size.y
     end
-    self.size.xorld:update(self, self.pos.x, self.pos.y)
+    self:move()
 end
 
 function EnemyRock.Hold:stomp() end

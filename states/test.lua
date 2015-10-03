@@ -96,7 +96,6 @@ function Game:draw()
         end
         p:draw()
         e:draw()
-        Object.draw(e)
         l:draw()
     end)
     -- gui:draw()

@@ -42,6 +42,7 @@ function Player:initialize(collider, x, y)
     self.keyUp = 'up'
     self.keyDown = 'down'
     self.keyA = 'z'
+    self.keyB = 'x'
 
     self.dust = love.graphics.newParticleSystem(Player.sprParticle)
     self.dust:setParticleLifetime(0.1, 0.3)
@@ -123,7 +124,6 @@ function Player:draw()
     self.sprite:update(1/60)
     self.sprite.speed = math.abs(self.vel.x/Player.moveVel)
     self.sprite:draw(self.pos.x, self.pos.y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
-    -- Object.draw(self)
 end
 
 Player.static.collisions = {
@@ -140,7 +140,122 @@ Player.static.collisions = {
     lava = function(self, dt, other, x, y)
         self.pos.y = y
         self.vel.y = -7
+    end,
+    enemy_rock = function(self, dt, other, x, y)
+        if y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
+            self.vel.y = -Player.jumpVel
+            self.y = y
+            other:stomp()
+        else
+            if Input:isDown(self.keyB) then
+                if other:grab(self) then
+                    self.hold = other
+                    self:gotoState('Lift')
+                end
+            end
+            -- self:getHit(other)
+        end
     end
 }
+
+function Player:getHit(other)
+    if other:isHarmful() then
+        self:gotoState('Hurt')
+        if self.x > other.x then
+            self.px = 5
+        else
+            self.px = -5
+        end
+        self.py = -4
+    end
+end
+
+--[[======== NORMAL STATE ========]]
+
+Player.Normal = Player:addState('Normal')
+
+-- Player.Normal.collisions = {
+--     enemy_rock = {
+--         type = 'cross',
+--         func = function(self, col)
+--             Player.collisions.enemy_rock.func(self, col)
+--             if Input:isDown(Player.keyB) then
+--                 if col.other:grab(self) then
+--                     self.hold = col.other
+--                     self:gotoState('Lift')
+--                 end
+--             end
+--         end
+--     }
+-- }
+
+function Player.Normal:update(dt)
+    Player.update(self, dt)
+    if not self.ground then
+        self.sprite = self.vel.y < 0 and self.animJump or self.animFall
+    end
+end
+
+--[[======== LIFT STATE ========]]
+
+Player.Lift = Player:addState('Lift')
+
+function Player.Lift:exitedState()
+    -- self.hold:release()
+    -- self.hold = nil
+end
+
+function Player.Lift:update(dt)
+    Player.update(self, dt)
+    -- if not self.ground then
+    --     self.sprite = self.vel.y < 0 and self.animJumpLift or self.animFallLift
+    -- end
+
+    -- if self.hold and self.hold.holdTimer >= 20 and Input:pressed(Player.keyB) then
+    --     local rx, ry = 0, 0
+    --     if Input:isDown(Player.keyLeft) then rx = rx - 7 end
+    --     if Input:isDown(Player.keyRight) then rx = rx + 7 end
+    --     if Input:isDown(Player.keyUp) then ry = ry - 7 end
+    --     if Input:isDown(Player.keyDown) then ry = ry + 7 end
+    --     self.hold.vel.x, self.hold.vel.y = rx, ry
+    --     self:gotoState('Normal')
+    -- end
+end
+
+--[[======== HURT STATE ========]]
+
+Player.Hurt = Player:addState('Hurt')
+
+function Player.Hurt:enteredState()
+    self.hurtTimer = 60
+    if self.health > 0 then
+        self.health = self.health - 1
+    end
+end
+
+function Player.Hurt:update(dt)
+    Player.update(self, dt)
+    if not self.ground then
+        self.sprite = self.vel.y < 0 and self.animJump or self.animFall
+    end
+    if self.hurtTimer > 0 then
+        self.hurtTimer = self.hurtTimer - 1
+    else
+        self:gotoState('Normal')
+    end
+    if self.hurtTimer % 2 == 0 then
+        self.fire:emit(1)
+    end
+end
+
+function Player.Hurt:draw()
+    if self.hurtTimer % 4 < 2 then
+        love.graphics.setColor(255, 73, 73)
+    end
+    Player.draw(self)
+    love.graphics.setColor(255, 255, 255)
+end
+
+function Player.Hurt:getHit() end
 
 return Player
