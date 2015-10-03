@@ -37,7 +37,6 @@ function Solid:draw()
     for i = 0, #self.tiles do
         self.tiles[i]:draw()
     end
-    Object.draw(self)
 end
 
 -- function Solid:setState(state, x)

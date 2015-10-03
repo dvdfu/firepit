@@ -96,7 +96,6 @@ function Lava:draw()
     love.graphics.draw(self.image, self.pos.x, self.pos.y-8)
     -- love.graphics.draw(Lava.sprLava, self.pos.x, self.pos.y-13, 0, self.size.x/16, self.size.y/16)
     love.graphics.setShader(oldShader)
-    Object.draw(self)
 end
 
 function Lava:render()
