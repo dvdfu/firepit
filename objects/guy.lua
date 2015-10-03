@@ -9,23 +9,25 @@ Player.static.sprIdle = love.graphics.newImage('assets/images/player/dragon_idle
 Player.static.sprRun = love.graphics.newImage('assets/images/player/dragon_move.png')
 Player.static.sprJump = love.graphics.newImage('assets/images/player/dragon_jump.png')
 Player.static.sprFall = love.graphics.newImage('assets/images/player/dragon_fall.png')
+Player.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
 Player.static.moveVel = 2
 Player.static.moveAccAir = 0.2
-Player.static.moveAccGround = 0.35
+Player.static.moveAccGround = 0.3
 Player.static.jumpVel = 4.5
 Player.static.jumpTimerMax = 10
 Player.static.fallVel = 7
 Player.static.fallAcc = 0.3
 
 function Player:initialize(collider, x, y)
-    self.size = Vector(8, 20)
+    self.size = Vector(10, 22)
     Object.initialize(self, collider:addRectangle(x, y, self.size:unpack()))
+    self.tags = { 'player' }
     self.pos = Vector(x, y)
     self.offset.y = self.size.y/2
 
     self.mx = 0
-    self.grounded = false
+    self.ground = nil
     self.jumpTimer = 0
     self.direction = 1
 
@@ -40,24 +42,39 @@ function Player:initialize(collider, x, y)
     self.keyUp = 'up'
     self.keyDown = 'down'
     self.keyA = 'z'
+
+    self.dust = love.graphics.newParticleSystem(Player.sprParticle)
+    self.dust:setParticleLifetime(0.1, 0.3)
+    self.dust:setDirection(-math.pi/2)
+    self.dust:setSpread(math.pi/2)
+    self.dust:setAreaSpread('normal', 4, 0)
+    self.dust:setSpeed(0, 100)
+    self.dust:setColors(208, 190, 209)
+    self.dust:setSizes(1, 0)
 end
 
 function Player:update(dt)
     self.vel.y = self.vel.y + Player.fallAcc
 
-    local moveAcc = self.grounded and Player.moveAccGround or Player.moveAccAir
-    if Input:isDown(self.keyLeft) then
+    local moveAcc = self.ground and Player.moveAccGround or Player.moveAccAir
+    if Input:isDown(self.keyLeft) and not Input:isDown(self.keyRight) then
         self.mx = self.mx - moveAcc
-        if self.grounded then
+        if self.ground then
             self.sprite = self.animRun
             self.direction = -1
+            if self.vel.x >= -moveAcc then
+                self.dust:emit(1)
+            end
         end
     end
-    if Input:isDown(self.keyRight) then
+    if Input:isDown(self.keyRight) and not Input:isDown(self.keyLeft) then
         self.mx = self.mx + moveAcc
-        if self.grounded then
+        if self.ground then
             self.sprite = self.animRun
             self.direction = 1
+            if self.vel.x <= moveAcc then
+                self.dust:emit(1)
+            end
         end
     end
     if Input:isDown(self.keyLeft) == Input:isDown(self.keyRight) then
@@ -77,10 +94,11 @@ function Player:update(dt)
     end
     self.vel.x = self.mx
 
-    if self.grounded then
+    if self.ground then
         if Input:pressed(self.keyA) then
             self.vel.y = -Player.jumpVel
             self.jumpTimer = Player.jumpTimerMax
+            self.dust:emit(8)
         end
     else
         if self.jumpTimer > 0 then
@@ -93,14 +111,19 @@ function Player:update(dt)
         self.sprite = self.vel.y < 0 and self.animJump or self.animFall
     end
 
-    self.grounded = false
+    self.ground = nil
     Object.update(self, dt)
 end
 
 function Player:draw()
+    self.dust:setPosition(self.pos.x, self.pos.y)
+    self.dust:update(1/60)
+    love.graphics.draw(self.dust)
+
     self.sprite:update(1/60)
     self.sprite.speed = math.abs(self.vel.x/Player.moveVel)
     self.sprite:draw(self.pos.x, self.pos.y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+    -- Object.draw(self)
 end
 
 Player.static.collisions = {
@@ -111,7 +134,7 @@ Player.static.collisions = {
         if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
             self.vel.y = 0
             self.pos.y = y
-            self.grounded = true
+            self.ground = other
         end
     end,
     lava = function(self, dt, other, x, y)

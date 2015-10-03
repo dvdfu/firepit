@@ -11,7 +11,7 @@ function Object:initialize(body)
     self.offset = self.offset or Vector(0, 0) --origin relative to body center
     self.pos = self.pos or Vector(0, 0)
     self.vel = self.vel or Vector(0, 0)
-    self.tags = {} --collision categories
+    self.tags = self.tags or {} --collision categories
 end
 
 function Object:update(dt) --invoke this after velocity is set
@@ -45,6 +45,10 @@ function Object:collide(dt, other, dx, dy) --called by HC callback
         end
     end
     self:move()
+end
+
+function Object:addTag(tag)
+    table.insert(self.tags, tag)
 end
 
 Object.static.collisions = {} --collision logic by category

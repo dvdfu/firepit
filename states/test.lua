@@ -5,7 +5,9 @@ local HC = require 'modules/hardon-collider'
 local Object = require 'objects/object'
 local Solid = require 'objects/solid'
 local Player = require 'objects/guy'
-local Powerup = require 'powerup'
+local EnemyRock = require 'objects/enemy-rock'
+local EnemyFloat = require 'objects/enemy-float'
+-- local Powerup = require 'powerup'
 local Lava = require 'objects/lava'
 
 local collider = {}
@@ -30,6 +32,10 @@ function Game:enter()
     -- p:setPower(Powerup.names.bubble)
     l = Lava:new(collider, sh)
     -- gui = GUI:new(p)
+
+    enemies = {}
+    e = EnemyRock:new(collider, 100, 100)
+
     cx, cy = sw/2, sh/2
     cs = 0
     cam = Camera(cx, cy)
@@ -67,6 +73,7 @@ function Game:update(dt)
     -- TODO: add functionality to camera class
 
     p:update(dt)
+    e:update(dt)
     for _, solid in pairs(solids) do
         solid:update(dt)
     end
@@ -88,6 +95,8 @@ function Game:draw()
             solid:draw()
         end
         p:draw()
+        e:draw()
+        Object.draw(e)
         l:draw()
     end)
     -- gui:draw()
