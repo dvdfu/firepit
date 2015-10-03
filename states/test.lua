@@ -42,7 +42,7 @@ function addSolids()
     local function addSolid(x, y, w, h, color, platform)
         local s = Solid:new(collider, x, y, w, h, color, platform)
         table.insert(solids, s)
-        collider:addToGroup("solids", s.body)
+        collider:addToGroup('solids', s.body)
         return s
     end
     addSolid(sw/2-128, sh-256, 128, 256, { r = 40, g = 48, b = 80 }, true) -- 4
@@ -56,8 +56,8 @@ function addSolids()
 end
 
 function Game:update(dt)
-    cx = cx + (sw/2 + (p:getPosition().x - sw/2)/4 - cx)/20
-    cy = cy + (p:getPosition().y - cy)/20
+    cx = cx + (sw/2 + (p.pos.x - sw/2)/4 - cx)/20
+    cy = cy + (p.pos.y - cy)/20
     if cs > 0 then
         cam:lookAt(math.floor(cx+0.5) + math.random(-cs/2, cs/2), math.floor(cy+0.5) + math.random(-cs/2, cs/2))
         cs = cs-1
@@ -70,6 +70,7 @@ function Game:update(dt)
     for _, solid in pairs(solids) do
         solid:update(dt)
     end
+    p:move()
     collider:update(dt)
     -- l:update(dt)
 end
