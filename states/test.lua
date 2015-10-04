@@ -31,7 +31,7 @@ function Game:enter()
     -- p:setPower(Powerup.names.coldFeet)
     -- p:setPower(Powerup.names.bubble)
     l = Lava:new(collider, sh)
-    -- gui = GUI:new(p)
+    gui = GUI:new(p)
 
     enemies = {}
     timer = 0
@@ -122,7 +122,7 @@ function Game:draw()
         end
         l:draw()
     end)
-    -- gui:draw()
+    gui:draw()
 end
 
 return Game

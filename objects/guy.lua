@@ -2,6 +2,7 @@ local Class = require('middleclass')
 local Object = require 'objects/object'
 local Player = Class('player', Object)
 
+local Powerup = require('powerup')
 local Particles = require('objects/particles')
 local Vector = require('vector')
 require('AnAL')
@@ -33,9 +34,16 @@ function Player:initialize(collider, x, y)
     self.moveVel = Vector(0, 0)
     self.pushVel = Vector(0, 0)
     self.ground = nil
+    self.hold = nil
     self.jumpTimer = 0
     self.direction = 1
-    self.health = 6
+    self.maxHealth = 6
+    self.health = self.maxHealth
+    self.activePower = Powerup:new()
+    self.staticPowers = {
+        [1] = Powerup:new(),
+        [2] = Powerup:new()
+    }
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/16, 0)
@@ -158,7 +166,7 @@ Player.collisions = {
         self:gotoState('Hurt')
     end,
     enemyRock = function(self, dt, other, x, y)
-        if Input:isDown(self.keyB) then
+        if Input:isDown(self.keyB) and not self.hold then
             if other:grab(self) then
                 self.hold = other
                 self:gotoState('Lift')
