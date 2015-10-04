@@ -43,19 +43,19 @@ end
 
 function addSolids()
     love.graphics.setBackgroundColor(16, 24, 40)
-    local function addSolid(x, y, w, h, color, platform)
-        local s = Solid:new(collider, x, y, w, h, color, platform)
+    local function addSolid(x, y, w, h, color, solid)
+        local s = Solid:new(collider, x, y, w, h, color, solid)
         table.insert(solids, s)
         return s
     end
-    addSolid(sw/2-128, sh-256, 128, 256, { r = 40, g = 48, b = 80 }, true) -- 4
-    addSolid(sw/2, sh-192, 128, 192, { r = 60, g = 64, b = 104 }, true) -- 3
-    addSolid(0, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, true) -- 2l
-    addSolid(sw-128, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, true) -- 2r
-    addSolid(sw/2-128, sh-64, 256, 64) --1
+    addSolid(sw/2-128, sh-256, 128, 256, { r = 40, g = 48, b = 80 }, false) -- 4
+    addSolid(sw/2, sh-192, 128, 192, { r = 60, g = 64, b = 104 }, false) -- 3
+    addSolid(0, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, false) -- 2l
+    addSolid(sw-128, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, false) -- 2r
+    addSolid(sw/2-128, sh-64, 256, 64, nil, true) --1
 
-    addSolid(-128, sh-256, 128, 256) --wl
-    addSolid(sw, sh-256, 128, 256) --wr
+    addSolid(-128, sh-256, 128, 256, nil, true) --wl
+    addSolid(sw, sh-256, 128, 256, nil, true) --wr
 end
 
 function addEnemy(x, y)

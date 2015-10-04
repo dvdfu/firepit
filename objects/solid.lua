@@ -8,10 +8,12 @@ local Vector = require('vector')
 Solid.static.sprTerrain = love.graphics.newImage('assets/images/stage/terrain.png')
 Solid.static.sprTop = love.graphics.newImage('assets/images/stage/terrain_top.png')
 
-function Solid:initialize(collider, x, y, w, h, color, platform)
+function Solid:initialize(collider, x, y, w, h, color, solid)
     Object.initialize(self, collider, collider:addRectangle(x, y, w, h))
     collider:setPassive(self.body)
-    self.tags = platform and { 'platform' } or { 'solid', 'platform' }
+    self:addTag('tiled')
+    self:addTag('platform')
+    if solid then self:addTag('solid') end
     self.pos = Vector(x, y)
     self.size = Vector(w, h)
     self.offset = -self.size / 2
