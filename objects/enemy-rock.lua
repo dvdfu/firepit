@@ -11,33 +11,6 @@ EnemyRock.static.sprMove = love.graphics.newImage('assets/images/enemies/rock_mo
 EnemyRock.static.sprStun = love.graphics.newImage('assets/images/enemies/rock_stun.png')
 EnemyRock.static.sprStar = love.graphics.newImage('assets/images/enemies/star.png')
 
-EnemyRock.collisions = {
-    solid = function(self, dt, other, x, y)
-        if math.abs(x-self.pos.x) > 0.1 then
-            self.vel.x = -self.vel.x
-        end
-        self.pos = Vector(x, y)
-    end,
-    platform = function(self, dt, other, x, y)
-        if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
-            self.vel.y = 0
-            self.pos.y = y
-            self.ground = other
-        end
-    end,
-    lava = function(self, dt, other, x, y)
-        other:touch(self.pos.x, true)
-        self:hit(nil, -1)
-    end
-}
-
--- function EnemyRock:collide_solid(other, x, y)
---     if self.pos.x ~= x then
---         self.direction = self.direction * -1
---     end
---     self.pos = Vector(x, y)
--- end
-
 EnemyRock.static.fallVel = 7
 EnemyRock.static.fallAcc = 0.4
 EnemyRock.static.moveVel = 0.4
@@ -53,7 +26,7 @@ function EnemyRock:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(16, 16)
     Enemy.initialize(self, collider, collider:addRectangle(x, y, self.size:unpack()))
-    self:addTag('enemyRock')
+    self:addTag('enemy_rock')
     self.offset.y = self.size.y/2
 
     self.health = 3
@@ -75,6 +48,27 @@ function EnemyRock:update(dt)
     end
     self.ground = nil
     Enemy.update(self, dt)
+end
+
+function EnemyRock:collide_solid(other, x, y)
+    if math.abs(x-self.pos.x) > 0.1 then
+        self.vel.x = -self.vel.x
+    end
+    self.pos = Vector(x, y)
+end
+
+function EnemyRock:collide_platform(other, x, y)
+    if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
+        self.vel.y = 0
+        self.pos.y = y
+        self.ground = other
+    end
+end
+
+function EnemyRock:collide_lava(other, x, y)
+    other:touch(self.pos.x, true)
+    self:hit(nil, -1)
+    self.deadTimer = 0
 end
 
 function EnemyRock:draw()
@@ -152,6 +146,7 @@ end
 --[[======== HOLD STATE ========]]
 
 function EnemyRock.Hold:enteredState()
+    self.collider:setGhost(self.body)
     self.sprite = self.animStun
     self.sprite.speed = 0
     self.holdTimer = 20
@@ -159,6 +154,7 @@ function EnemyRock.Hold:enteredState()
 end
 
 function EnemyRock.Hold:exitedState()
+    self.collider:setSolid(self.body)
     if self.player and self.player.hold == self then
         self.player.hold = nil
     end
@@ -208,6 +204,27 @@ function EnemyRock.Throw:update(dt)
     EnemyRock.update(self, dt)
 end
 
+function EnemyRock.Throw:collide_enemy(other, x, y)
+    other:hit(self, 8)
+end
+
+function EnemyRock.Throw:collide_lava(other, x, y)
+    other:touch(self.pos.x, false)
+    self:hit(nil, -1)
+    self.deadTimer = 0
+end
+
+function EnemyRock.Throw:collide_platform(other, x, y)
+    if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
+        if self.vel.y > 1 then
+            cs = 10
+        end
+        self.vel.y = 0
+        self.pos.y = y
+        self.ground = other
+    end
+end
+
 function EnemyRock.Throw:stomp() end
 
 --[[======== HIT STATE ========]]
@@ -235,8 +252,8 @@ function EnemyRock.Hit:hit() end
 --[[======== DEAD STATE ========]]
 
 function EnemyRock.Dead:enteredState()
-    self.deadTimer = 60
     self.collider:setGhost(self.body)
+    self.deadTimer = 60
     self.vel.y = -4
 end
 
@@ -246,7 +263,7 @@ function EnemyRock.Dead:update(dt)
     end
     self.vel.y = self.vel.y + EnemyRock.static.fallAcc
     self.vel.x = self.vel.x * 0.98
-    self:move()
+    Enemy.update(self, dt)
 end
 
 function EnemyRock.Dead:hit() end

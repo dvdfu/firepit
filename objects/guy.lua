@@ -16,6 +16,38 @@ Player.static.sprRun = love.graphics.newImage('assets/images/player/dragon_move.
 Player.static.sprJump = love.graphics.newImage('assets/images/player/dragon_jump.png')
 Player.static.sprFall = love.graphics.newImage('assets/images/player/dragon_fall.png')
 
+function Player:collide_solid(other, x, y)
+    self.pos = Vector(x, y)
+end
+
+function Player:collide_platform(other, x, y)
+    if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
+        self.vel.y = 0
+        self.pos.y = y
+        self.ground = other
+    end
+end
+
+function Player:collide_lava(other, x, y)
+    self.pos.y = y
+    self.vel.y = -7
+    self:gotoState('Hurt')
+end
+
+function Player:collide_enemy_rock(other, x, y)
+    if y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
+        self.vel.y = -Player.jumpVel
+        self.y = y
+        other:stomp()
+    else
+        self:getHit(other)
+    end
+end
+
+function Player:collide_enemy_float(other, x, y)
+    self:getHit(other)
+end
+
 Player.static.moveVel = 2
 Player.static.moveAccAir = 0.2
 Player.static.moveAccGround = 0.3
@@ -149,42 +181,6 @@ function Player:draw()
     self.sprite:draw(x, y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
-Player.collisions = {
-    solid = function(self, dt, other, x, y)
-        self.pos = Vector(x, y)
-    end,
-    platform = function(self, dt, other, x, y)
-        if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
-            self.vel.y = 0
-            self.pos.y = y
-            self.ground = other
-        end
-    end,
-    lava = function(self, dt, other, x, y)
-        self.pos.y = y
-        self.vel.y = -7
-        self:gotoState('Hurt')
-    end,
-    enemyRock = function(self, dt, other, x, y)
-        if Input:isDown(self.keyB) and not self.hold then
-            if other:grab(self) then
-                self.hold = other
-                self:gotoState('Lift')
-            end
-        end
-        if y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
-            self.vel.y = -Player.jumpVel
-            self.y = y
-            other:stomp()
-        else
-            self:getHit(other)
-        end
-    end,
-    enemyFloat = function(self, dt, other, x, y)
-        self:getHit(other)
-    end
-}
-
 function Player:getHit(other)
     if not other:isHarmful() then return end
     if self.pos.x > other.pos.x then
@@ -200,6 +196,14 @@ end
 
 function Player.Neutral:update(dt)
     Player.update(self, dt)
+end
+
+function Player.Neutral:collide_enemy_rock(other, x, y)
+    if Input:isDown(self.keyB) and other:grab(self) then
+        self.hold = other
+        self:gotoState('Lift')
+    end
+    Player.collide_enemy_rock(self, other, x, y)
 end
 
 --[[======== LIFT STATE ========]]

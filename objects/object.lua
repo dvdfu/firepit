@@ -42,8 +42,8 @@ function Object:collide(dt, other, dx, dy) --called by HC callback
     local x = self.pos.x + dx or 0
     local y = self.pos.y + dy or 0
     for _, tag in ipairs(other.tags) do
-        if self.class.collisions[tag] then
-            self.class.collisions[tag](self, dt, other, x, y)
+        if self['collide_'..tag] then
+            self['collide_'..tag](self, other, x, y)
         end
     end
     self:move()
@@ -53,6 +53,6 @@ function Object:addTag(tag)
     table.insert(self.tags, tag)
 end
 
-Object.collisions = {} --collision logic by category
+-- Object.collisions = {} --collision logic by category
 
 return Object
