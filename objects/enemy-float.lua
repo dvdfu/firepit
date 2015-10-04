@@ -31,6 +31,11 @@ EnemyFloat.Move = EnemyFloat:addState('Move')
 EnemyFloat.Hit = EnemyFloat:addState('Hit')
 EnemyFloat.Dead = EnemyFloat:addState('Dead')
 
+EnemyFloat.static.fallVel = 7
+EnemyFloat.static.fallAcc = 0.02
+EnemyFloat.static.moveVel = 0.4
+EnemyFloat.static.jumpVel = 0.7
+
 function EnemyFloat:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(10, 10)
@@ -40,9 +45,6 @@ function EnemyFloat:initialize(collider, x, y)
 
     self.player = nil
     self.health = 1
-    self.fallVel = 7
-    self.fallAcc = 0.02
-    self.moveVel = 0.4
 
     self.moveTimer = 0
     self.stompTimer = 0
@@ -70,9 +72,9 @@ function EnemyFloat:initialize(collider, x, y)
 end
 
 function EnemyFloat:update(dt)
-    self.vel.y = self.vel.y + self.fallAcc
-    if self.vel.y > self.fallVel then
-        self.vel.y = self.fallVel
+    self.vel.y = self.vel.y + EnemyFloat.fallAcc
+    if self.vel.y > EnemyFloat.fallVel then
+        self.vel.y = EnemyFloat.fallVel
     end
     if self.ground and self.ground:getState(self.pos.x) == Tile.state.iced then
         self:gotoState('Dead')
@@ -90,7 +92,7 @@ end
 
 function EnemyFloat:collide_platform(other, x, y)
     if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
-        self.vel.y = -0.7
+        self.vel.y = -EnemyFloat.jumpVel
         self.pos.y = y
         self.ground = other
     end
@@ -119,7 +121,8 @@ function EnemyFloat:draw()
 
     if self.sprite ~= self.animDead or self.sprite:getCurrentFrame() < self.sprite:getSize() then
         self.sprite:update(1/60)
-        self.sprite:draw(self.pos.x, self.pos.y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
+        local x, y = math.floor(self.pos.x+0.5), math.floor(self.pos.y+0.5)
+        self.sprite:draw(x, y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     end
 end
 
@@ -134,7 +137,7 @@ function EnemyFloat.Move:enteredState()
     self.speck:setEmissionRate(50)
     self.sprite = self.animMove
     self.sprite.speed = 1
-    self.vel.x = self.moveVel * self.direction
+    self.vel.x = EnemyFloat.moveVel * self.direction
 end
 
 function EnemyFloat.Move:update(dt)

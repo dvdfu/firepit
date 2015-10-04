@@ -183,6 +183,10 @@ function Player:collide_enemy_rock(other, x, y)
         self.vel.y = -Player.jumpVel
         self.y = y
         other:stomp()
+        if Input:isDown(self.keyB) and other:grab(self) then
+            self.hold = other
+            self:gotoState('Lift')
+        end
     else
         self:getHit(other)
     end
@@ -297,15 +301,18 @@ function Player.Neutral:collide_enemy_rock(other, x, y)
     if Input:isDown(self.keyB) and other:grab(self) then
         self.hold = other
         self:gotoState('Lift')
+    else
+        Player.collide_enemy_rock(self, other, x, y)
     end
-    Player.collide_enemy_rock(self, other, x, y)
 end
 
 --[[======== LIFT STATE ========]]
 
 function Player.Lift:exitedState()
-    self.hold:release()
-    self.hold = nil
+    if self.hold then --TODO
+        self.hold:release()
+        self.hold = nil
+    end
 end
 
 function Player.Lift:update(dt)
@@ -348,6 +355,11 @@ function Player.Hurt:draw()
     end
     Player.draw(self)
     love.graphics.setColor(255, 255, 255)
+end
+
+function Player.Hurt:collide_lava(other, x, y)
+    self.pos.y = y
+    self.vel.y = -7
 end
 
 function Player.Hurt:getHit() end
