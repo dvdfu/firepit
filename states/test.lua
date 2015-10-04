@@ -4,10 +4,10 @@ local Camera = require 'camera'
 local HC = require 'modules/hardon-collider'
 local Object = require 'objects/object'
 local Solid = require 'objects/solid'
-local Player = require 'objects/guy'
+local Player = require 'objects/player'
 local EnemyRock = require 'objects/enemy-rock'
 local EnemyFloat = require 'objects/enemy-float'
--- local Powerup = require 'powerup'
+local Powerup = require 'powerup'
 local Lava = require 'objects/lava'
 
 local collider = {}
@@ -27,9 +27,9 @@ function Game:enter()
     addSolids()
 
     p = Player:new(collider, 32, 0)
-    -- p:setPower(Powerup.names.jumpGlide)
-    -- p:setPower(Powerup.names.coldFeet)
-    -- p:setPower(Powerup.names.bubble)
+    p:setPower(Powerup.names.jumpGlide)
+    p:setPower(Powerup.names.coldFeet)
+    p:setPower(Powerup.names.star)
     l = Lava:new(collider, sh)
     gui = GUI:new(p)
 
