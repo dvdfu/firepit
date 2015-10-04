@@ -50,6 +50,7 @@ function Player:initialize(collider, x, y)
     self.animJump = newAnimation(Player.sprJump, 24, 24, 1/8, 0)
     self.animFall = newAnimation(Player.sprFall, 24, 24, 1/8, 0)
     self.sprite = self.animFall
+    self:gotoState('Neutral')
 
     self.keyLeft = 'left'
     self.keyRight = 'right'

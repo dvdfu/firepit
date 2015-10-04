@@ -60,7 +60,7 @@ end
 
 function addEnemy(x, y)
     local e = {}
-    if math.random() > 0.5 then
+    if math.random() > 0 then
         e = EnemyRock:new(collider, x, y)
     else
         e = EnemyFloat:new(collider, x, y)
@@ -74,6 +74,7 @@ function Game:update(dt)
         timer = timer - 1
     else
         timer = 2*60
+        addEnemy(128, 0)
         addEnemy(128, 0)
     end
 

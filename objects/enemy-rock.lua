@@ -67,7 +67,7 @@ function EnemyRock:collide_platform(other, x, y)
 end
 
 function EnemyRock:collide_lava(other, x, y)
-    other:touch(self.pos.x, true)
+    other:touch(self.pos.x, false)
     self:hit(nil, -1)
     self.deadTimer = 0
 end
@@ -106,6 +106,12 @@ function EnemyRock.Move:update(dt)
     end
     self.direction = self.vel.x > 0 and 1 or -1
     EnemyRock.update(self, dt)
+end
+
+function EnemyRock.Move:collide_lava(other, x, y)
+    other:touch(self.pos.x, true)
+    self:hit(nil, -1)
+    self.deadTimer = 0
 end
 
 function EnemyRock.Move:isHarmful()
@@ -210,12 +216,6 @@ end
 
 function EnemyRock.Throw:collide_enemy(other, x, y)
     other:hit(self, 8)
-end
-
-function EnemyRock.Throw:collide_lava(other, x, y)
-    other:touch(self.pos.x, false)
-    self:hit(nil, -1)
-    self.deadTimer = 0
 end
 
 function EnemyRock.Throw:collide_platform(other, x, y)
