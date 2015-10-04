@@ -291,7 +291,6 @@ end
 --[[======== LIFT STATE ========]]
 
 function Player.Lift:exitedState()
-    if not self.hold then return end --TODO
     self.hold:release()
     self.hold = nil
 end

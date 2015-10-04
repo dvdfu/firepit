@@ -95,7 +95,6 @@ function Bullet:draw()
         local sprite = self.info.sprite
         love.graphics.draw(sprite, self.pos.x, self.pos.y, 0, 1, 1, sprite:getWidth()/2, sprite:getHeight()/2)
     end
-    Object.draw(self)
 end
 
 function Bullet:isDead()

@@ -195,7 +195,6 @@ function EnemyFloat.Dead:hit() end
 
 function EnemyFloat.Dead:isDead()
     return self.deadTimer == 0
-    -- return self.sprite:getCurrentFrame() == self.sprite:getSize()
 end
 
 function EnemyFloat.Dead:stomp() end
