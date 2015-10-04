@@ -26,7 +26,7 @@ function love.load()
     next_time = love.timer.getTime()
 
     Gamestate.switch(Game)
-    setScale(1)
+    setScale(2)
 end
 
 function love.update(dt)
@@ -63,10 +63,8 @@ function love.draw()
 end
 
 function setScale(s)
-    if scale == s then return end
-    if s <= 0 then return end
+    if scale == s or s <= 0 then return end
     scale = s
     love.window.setMode(480*s, 360*s)
     scaleShader:send('scale', s)
-    Gamestate.current():redraw()
 end

@@ -2,6 +2,9 @@ local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Lava = Class('lava', Object)
 
+local Particles = require('objects/particles')
+local Vector = require('vector')
+
 Lava.static.sprLava = love.graphics.newImage('assets/images/stage/lava.png')
 Lava.static.sprLavaTop = love.graphics.newImage('assets/images/stage/lava_top.png')
 Lava.static.sprGlow = love.graphics.newImage('assets/images/stage/lava_glow.png')
@@ -33,41 +36,28 @@ Lava.static.glowShader = love.graphics.newShader[[
     }
 ]]
 
-function Lava:initialize(world, y)
-    Object.initialize(self, world, -128, y, 480+256, 176)
-    table.insert(self.tags, Lava.name)
-    self.level = self.y
+function Lava:initialize(collider, y)
+    self.pos = Vector(-128, y)
+    self.size = Vector(480+256, 256)
+    self.offset = -self.size / 2
+    Object.initialize(self, collider, collider:addRectangle(self.pos.x, y, self.size:unpack()))
+    collider:setPassive(self.body)
+    self.tags = { 'lava' }
+    self.level = y
+    self:render()
 
-    self.image = love.graphics.newCanvas(self.w, self.h)
-    self:redraw()
-
-    self.fire = love.graphics.newParticleSystem(Lava.sprParticle)
-    self.fire:setParticleLifetime(0.3, 1)
-    self.fire:setDirection(-math.pi/2)
-    self.fire:setSpread(math.pi/4)
-    self.fire:setAreaSpread('normal', 8, 0)
-    self.fire:setSpeed(50, 200)
-    self.fire:setLinearAcceleration(0, 200)
-    self.fire:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
-    self.fire:setSizes(2, 0)
-
-    self.speck = love.graphics.newParticleSystem(Lava.sprParticle)
+    self.fire = Particles.newFire()
+    self.speck = Particles.newFireSpeck()
+    self.speck:setAreaSpread('uniform', self.size.x/2, 0)
     self.speck:setEmissionRate(100)
-    self.speck:setParticleLifetime(0, 1)
-    self.speck:setDirection(-math.pi/2)
-    self.speck:setSpread(math.pi/6)
-    self.speck:setAreaSpread('uniform', self.w/2, 0)
-    self.speck:setSpeed(50, 200)
-    self.speck:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
-    self.speck:setSizes(0.5, 0)
 end
 
 function Lava:update(dt)
-    if self.y > self.level + 0.1 then
-        local dy = self.level - self.y
-        self.y = self.y + dy/30
+    if self.pos.y > self.level + 0.1 then
+        local dy = self.level - self.pos.y
+        self.pos.y = self.pos.y + dy/30
     else
-        self.y = self.level
+        self.pos.y = self.level
     end
     Object.update(self, dt)
 end
@@ -76,7 +66,7 @@ function Lava:draw()
     self.fire:update(1/60)
     love.graphics.draw(self.fire)
 
-    self.speck:setPosition(self.x+self.w/2, self.y)
+    self.speck:setPosition(self.pos.x+self.size.x/2, self.pos.y)
     self.speck:update(1/60)
     love.graphics.draw(self.speck)
 
@@ -86,20 +76,20 @@ function Lava:draw()
 
     love.graphics.setShader(Lava.glowShader)
     love.graphics.setBlendMode('additive')
-    love.graphics.draw(Lava.sprGlow, self.x, self.y-96, 0, self.w/16, 96/16)
+    love.graphics.draw(Lava.sprGlow, self.pos.x, self.pos.y-96, 0, self.size.x/16, 96/16)
     love.graphics.setBlendMode('alpha')
     love.graphics.setShader(Lava.lavaShader)
-    love.graphics.draw(self.image, self.x, self.y-8)
-    -- love.graphics.draw(Lava.sprLava, self.x, self.y-13, 0, self.w/16, self.h/16)
+    love.graphics.draw(self.image, self.pos.x, self.pos.y-8)
+    -- love.graphics.draw(Lava.sprLava, self.pos.x, self.pos.y-13, 0, self.size.x/16, self.size.y/16)
     love.graphics.setShader(oldShader)
 end
 
-function Lava:redraw()
-    self.image:clear()
+function Lava:render()
+    local image = love.graphics.newCanvas(self.size.x, self.size.y)
     local oldCanvas = love.graphics.getCanvas()
-    love.graphics.setCanvas(self.image)
-    for i = 0, self.w, Lava.sprLava:getWidth() do
-        for j = 0, self.h, Lava.sprLava:getHeight() do
+    love.graphics.setCanvas(image)
+    for i = 0, self.size.x, Lava.sprLava:getWidth() do
+        for j = 0, self.size.y, Lava.sprLava:getHeight() do
             if j == 0 then
                 love.graphics.draw(Lava.sprLavaTop, i, j)
             else
@@ -108,11 +98,12 @@ function Lava:redraw()
         end
     end
     love.graphics.setCanvas(oldCanvas)
+    self.image = love.graphics.newImage(image:getImageData())
 end
 
 function Lava:touch(x, feed)
-    self.fire:setPosition(x, self.y)
-    self.fire:emit(10)
+    self.fire:setPosition(x, self.pos.y)
+    self.fire:emit(16)
     if feed then
         self.level = self.level - 16
     end

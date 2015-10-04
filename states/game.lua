@@ -1,44 +1,50 @@
 local Game = {}
 local GUI = require 'gui'
 local Camera = require 'camera'
-local Bump = require 'bump'
+local HC = require 'modules/hardon-collider'
+local Object = require 'objects/object'
 local Solid = require 'objects/solid'
 local Player = require 'objects/player'
 local EnemyRock = require 'objects/enemy-rock'
 local EnemyFloat = require 'objects/enemy-float'
 local Powerup = require 'powerup'
-local Item = require 'objects/item'
 local Lava = require 'objects/lava'
 
-local world = {}
+local collider = {}
 local sw = 480
 local sh = 360
 
+function collisionStart(dt, shapeA, shapeB, dx, dy)
+    shapeA.object:collide(dt, shapeB.object, dx, dy)
+    shapeB.object:collide(dt, shapeA.object, -dx, -dy)
+end
+
+function collisionEnd(dt, shapeA, shapeB) end
+
 function Game:enter()
-    world = Bump.newWorld(64)
+    collider = HC(64, collisionStart, collisionEnd)
     solids = {}
     addSolids()
 
-    p = Player:new(world, 32, 0)
+    p = Player:new(collider, 32, 0)
     p:setPower(Powerup.names.jumpGlide)
     p:setPower(Powerup.names.coldFeet)
     p:setPower(Powerup.names.bubble)
-    l = Lava:new(world, sh)
+    l = Lava:new(collider, sh)
     gui = GUI:new(p)
+
+    enemies = {}
+    timer = 0
+
     cx, cy = sw/2, sh/2
     cs = 0
     cam = Camera(cx, cy)
-
-    enemies = {}
-    items = {}
 end
-
-timer = 0
 
 function addSolids()
     love.graphics.setBackgroundColor(16, 24, 40)
     local function addSolid(x, y, w, h, color, platform)
-        local s = Solid:new(world, x, y, w, h, color, platform)
+        local s = Solid:new(collider, x, y, w, h, color, platform)
         table.insert(solids, s)
         return s
     end
@@ -48,37 +54,31 @@ function addSolids()
     addSolid(sw-128, sh-128, 128, 128, { r = 72, g = 72, b = 128 }, true) -- 2r
     addSolid(sw/2-128, sh-64, 256, 64) --1
 
-    -- addSolid(-64, -96, 64, sh+96) --wl
+    addSolid(-128, sh-256, 128, 256) --wl
     addSolid(sw, sh-256, 128, 256) --wr
 end
 
 function addEnemy(x, y)
     local e = {}
     if math.random() > 0.5 then
-        e = EnemyRock:new(world, x, y)
+        e = EnemyRock:new(collider, x, y)
     else
-        e = EnemyFloat:new(world, x, y)
+        e = EnemyFloat:new(collider, x, y)
     end
-    e.dropItem = addItem
     table.insert(enemies, e)
     return e
 end
 
-function addItem(x, y)
-    local i = Item:new(world, x, y)
-    table.insert(items, i)
-    return i
-end
-
 function Game:update(dt)
-    if timer < 2 then
-        timer = timer + dt
+    if timer > 0 then
+        timer = timer - 1
     else
-        timer = 0
-        addEnemy(150, 0)
+        timer = 2*60
+        addEnemy(128, 0)
     end
-    cx = cx + (sw/2 + (p.x+p.w/2 - sw/2)/4 - cx)/20
-    cy = cy + (p.y+p.h/2 - cy)/20
+
+    cx = cx + (sw/2 + (p.pos.x - sw/2)/4 - cx)/20
+    cy = cy + (p.pos.y - cy)/20
     if cs > 0 then
         cam:lookAt(math.floor(cx+0.5) + math.random(-cs/2, cs/2), math.floor(cy+0.5) + math.random(-cs/2, cs/2))
         cs = cs-1
@@ -91,18 +91,14 @@ function Game:update(dt)
     for key, enemy in pairs(enemies) do
         enemy:update(dt)
         if enemy:isDead() then
+            collider:remove(enemy.body)
             enemies[key] = nil
-        end
-    end
-    for key, item in pairs(items) do
-        item:update(dt)
-        if item:isDead() then
-            items[key] = nil
         end
     end
     for _, solid in pairs(solids) do
         solid:update(dt)
     end
+    collider:update(dt)
     l:update(dt)
 end
 
@@ -123,31 +119,9 @@ function Game:draw()
         for _, enemy in pairs(enemies) do
             enemy:draw()
         end
-        for key, item in pairs(items) do
-            item:draw()
-        end
         l:draw()
-
-        -- for _, solid in pairs(solids) do
-        --     solid:drawDebug()
-        -- end
-        -- p:drawDebug()
-        -- for _, enemy in pairs(enemies) do
-        --     enemy:drawDebug()
-        -- end
-        -- for key, item in pairs(items) do
-        --     item:drawDebug()
-        -- end
-        -- l:drawDebug()
     end)
     gui:draw()
-end
-
-function Game:redraw()
-    l:redraw()
-    for _, solid in pairs(solids) do
-        solid:redraw()
-    end
 end
 
 return Game

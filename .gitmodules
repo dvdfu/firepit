@@ -16,3 +16,9 @@
 [submodule "modules/secs"]
 	path = modules/secs
 	url = git@github.com:ecbambrick/SimpleEntityComponentSystem.git
+[submodule "modules/hardon-collider"]
+	path = modules/hardon-collider
+	url = git@github.com:vrld/HardonCollider.git
+[submodule "modules/anim8"]
+	path = modules/anim8
+	url = git@github.com:kikito/anim8.git

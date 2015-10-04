@@ -1,5 +1,7 @@
 local Class = require 'middleclass'
 local Tile = Class('tile')
+local Vector = require('vector')
+local Particles = require('objects/particles')
 
 Tile.static.sprParticle = love.graphics.newImage('assets/images/particles/diamond.png')
 Tile.static.sprIce = love.graphics.newImage('assets/images/stage/tile_ice.png')
@@ -8,21 +10,13 @@ Tile.static.state = {
 }
 
 function Tile:initialize(x, y)
-    self.x, self.y = x, y
-    self.w = 16
+    self.pos = Vector(x, y)
+    self.width = 16
     self.state = ''
     self.stateTimer = 0
 
-    self.frost = love.graphics.newParticleSystem(Tile.sprParticle)
-    self.frost:setParticleLifetime(0.1, 0.5)
-    self.frost:setDirection(-math.pi/2)
-    self.frost:setSpread(math.pi/2)
-    self.frost:setAreaSpread('normal', 4, 0)
-    self.frost:setSpeed(0, 50)
-    self.frost:setColors(255, 255, 255, 255, 120, 180, 255, 255)
-    self.frost:setSizes(1, 0)
-    self.frost:setPosition(self.x+self.w/2, self.y)
-    self.frost:setEmissionRate(2)
+    self.frost = Particles.newFrost()
+    self.frost:setPosition(self.pos.x + self.width/2, self.pos.y)
 end
 
 function Tile:update(dt)
@@ -37,12 +31,8 @@ end
 function Tile:draw()
     if self.state == Tile.state.iced then
         self.frost:update(1/60)
-        -- if self.stateTimer < 10 then
-        --     love.graphics.setColor(255, 255, 255, 255*self.stateTimer/10)
-        -- end
         love.graphics.draw(self.frost)
-        love.graphics.draw(Tile.sprIce, self.x, self.y)
-        -- love.graphics.setColor(255, 255, 255, 255)
+        love.graphics.draw(Tile.sprIce, self.pos.x, self.pos.y)
     end
 end
 
