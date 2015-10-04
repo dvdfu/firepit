@@ -61,10 +61,10 @@ end
 
 function addEnemy(x, y)
     local e = {}
-    if math.random() > 0 then
+    if math.random() > 1 then
         e = EnemyRock:new(collider, x, y)
     else
-        -- e = EnemyFloat:new(world, x, y)
+        e = EnemyFloat:new(collider, x, y)
     end
     table.insert(enemies, e)
     return e

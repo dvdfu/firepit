@@ -49,6 +49,7 @@ function Lava:initialize(collider, y)
     self.fire = Particles.newFire()
     self.speck = Particles.newFireSpeck()
     self.speck:setAreaSpread('uniform', self.size.x/2, 0)
+    self.speck:setEmissionRate(100)
 end
 
 function Lava:update(dt)

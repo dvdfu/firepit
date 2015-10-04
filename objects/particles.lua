@@ -28,7 +28,6 @@ end
 
 function Particles.newFireSpeck()
     local part = love.graphics.newParticleSystem(Particles.sprDot)
-    part:setEmissionRate(100)
     part:setParticleLifetime(0, 1)
     part:setDirection(-math.pi/2)
     part:setSpread(math.pi/6)

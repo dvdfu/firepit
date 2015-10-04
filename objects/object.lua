@@ -12,6 +12,7 @@ function Object:initialize(collider, body)
     self.offset = self.offset or Vector(0, 0) --origin relative to body center
     self.pos = self.pos or Vector(0, 0)
     self.vel = self.vel or Vector(0, 0)
+    self.size = self.size or Vector(0, 0)
     self.tags = self.tags or {} --collision categories
 end
 

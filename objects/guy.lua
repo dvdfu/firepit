@@ -179,6 +179,9 @@ Player.collisions = {
         else
             self:getHit(other)
         end
+    end,
+    enemyFloat = function(self, dt, other, x, y)
+        self:getHit(other)
     end
 }
 

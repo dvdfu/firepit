@@ -13,7 +13,7 @@ EnemyRock.static.sprStar = love.graphics.newImage('assets/images/enemies/star.pn
 
 EnemyRock.collisions = {
     solid = function(self, dt, other, x, y)
-        if self.pos.x ~= x then
+        if math.abs(x-self.pos.x) > 0.1 then
             self.vel.x = -self.vel.x
         end
         self.pos = Vector(x, y)
@@ -53,7 +53,7 @@ function EnemyRock:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(16, 16)
     Enemy.initialize(self, collider, collider:addRectangle(x, y, self.size:unpack()))
-    self.tags = { 'enemyRock' }
+    self:addTag('enemyRock')
     self.offset.y = self.size.y/2
 
     self.health = 3
