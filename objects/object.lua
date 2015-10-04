@@ -5,7 +5,8 @@ Object:include(Stateful)
 
 local Vector = require('vector')
 
-function Object:initialize(body)
+function Object:initialize(collider, body)
+    self.collider = collider
     self.body = body
     self.body.object = self --body reference to self
     self.offset = self.offset or Vector(0, 0) --origin relative to body center
@@ -51,6 +52,6 @@ function Object:addTag(tag)
     table.insert(self.tags, tag)
 end
 
-Object.static.collisions = {} --collision logic by category
+Object.collisions = {} --collision logic by category
 
 return Object

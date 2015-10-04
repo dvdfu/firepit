@@ -2,6 +2,7 @@ local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Lava = Class('lava', Object)
 
+local Particles = require('objects/particles')
 local Vector = require('vector')
 
 Lava.static.sprLava = love.graphics.newImage('assets/images/stage/lava.png')
@@ -39,31 +40,15 @@ function Lava:initialize(collider, y)
     self.pos = Vector(-128, y)
     self.size = Vector(480+256, 176)
     self.offset = -self.size / 2
-    Object.initialize(self, collider:addRectangle(self.pos.x, y, self.size:unpack()))
+    Object.initialize(self, collider, collider:addRectangle(self.pos.x, y, self.size:unpack()))
     collider:setPassive(self.body)
     self.tags = { 'lava' }
     self.level = y
     self:render()
 
-    self.fire = love.graphics.newParticleSystem(Lava.sprParticle)
-    self.fire:setParticleLifetime(0.3, 1)
-    self.fire:setDirection(-math.pi/2)
-    self.fire:setSpread(math.pi/4)
-    self.fire:setAreaSpread('normal', 8, 0)
-    self.fire:setSpeed(50, 200)
-    self.fire:setLinearAcceleration(0, 200)
-    self.fire:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
-    self.fire:setSizes(2, 0)
-
-    self.speck = love.graphics.newParticleSystem(Lava.sprParticle)
-    self.speck:setEmissionRate(100)
-    self.speck:setParticleLifetime(0, 1)
-    self.speck:setDirection(-math.pi/2)
-    self.speck:setSpread(math.pi/6)
+    self.fire = Particles.newFire()
+    self.speck = Particles.newFireSpeck()
     self.speck:setAreaSpread('uniform', self.size.x/2, 0)
-    self.speck:setSpeed(50, 200)
-    self.speck:setColors(255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
-    self.speck:setSizes(0.5, 0)
 end
 
 function Lava:update(dt)
@@ -117,7 +102,7 @@ end
 
 function Lava:touch(x, feed)
     self.fire:setPosition(x, self.pos.y)
-    self.fire:emit(10)
+    self.fire:emit(16)
     if feed then
         self.level = self.level - 16
     end

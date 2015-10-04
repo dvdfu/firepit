@@ -2,10 +2,11 @@ local Class = require('middleclass')
 local Object = require 'objects/object'
 local Player = Class('player', Object)
 
+local Particles = require('objects/particles')
 local Vector = require('vector')
 require('AnAL')
 
-Player.Normal = Player:addState('Normal')
+Player.Neutral = Player:addState('Neutral')
 Player.Lift = Player:addState('Lift')
 Player.Hurt = Player:addState('Hurt')
 
@@ -13,7 +14,6 @@ Player.static.sprIdle = love.graphics.newImage('assets/images/player/dragon_idle
 Player.static.sprRun = love.graphics.newImage('assets/images/player/dragon_move.png')
 Player.static.sprJump = love.graphics.newImage('assets/images/player/dragon_jump.png')
 Player.static.sprFall = love.graphics.newImage('assets/images/player/dragon_fall.png')
-Player.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
 
 Player.static.moveVel = 2
 Player.static.moveAccAir = 0.2
@@ -24,13 +24,14 @@ Player.static.fallVel = 7
 Player.static.fallAcc = 0.3
 
 function Player:initialize(collider, x, y)
-    self.size = Vector(10, 22)
-    Object.initialize(self, collider:addRectangle(x, y, self.size:unpack()))
+    self.size = Vector(12, 22)
+    Object.initialize(self, collider, collider:addRectangle(x, y, self.size:unpack()))
     self.tags = { 'player' }
     self.pos = Vector(x, y)
     self.offset.y = self.size.y/2
 
-    self.mx = 0
+    self.moveVel = Vector(0, 0)
+    self.pushVel = Vector(0, 0)
     self.ground = nil
     self.jumpTimer = 0
     self.direction = 1
@@ -49,14 +50,8 @@ function Player:initialize(collider, x, y)
     self.keyA = 'z'
     self.keyB = 'x'
 
-    self.dust = love.graphics.newParticleSystem(Player.sprParticle)
-    self.dust:setParticleLifetime(0.1, 0.3)
-    self.dust:setDirection(-math.pi/2)
-    self.dust:setSpread(math.pi/2)
-    self.dust:setAreaSpread('normal', 4, 0)
-    self.dust:setSpeed(0, 100)
-    self.dust:setColors(208, 190, 209)
-    self.dust:setSizes(1, 0)
+    self.dust = Particles.newDust()
+    self.fire = Particles.newFire()
 end
 
 function Player:update(dt)
@@ -64,7 +59,7 @@ function Player:update(dt)
 
     local moveAcc = self.ground and Player.moveAccGround or Player.moveAccAir
     if Input:isDown(self.keyLeft) and not Input:isDown(self.keyRight) then
-        self.mx = self.mx - moveAcc
+        self.moveVel.x = self.moveVel.x - moveAcc
         if self.ground then
             self.sprite = self.animRun
             self.direction = -1
@@ -74,7 +69,7 @@ function Player:update(dt)
         end
     end
     if Input:isDown(self.keyRight) and not Input:isDown(self.keyLeft) then
-        self.mx = self.mx + moveAcc
+        self.moveVel.x = self.moveVel.x + moveAcc
         if self.ground then
             self.sprite = self.animRun
             self.direction = 1
@@ -84,21 +79,20 @@ function Player:update(dt)
         end
     end
     if Input:isDown(self.keyLeft) == Input:isDown(self.keyRight) then
-        if self.mx > moveAcc then
-            self.mx = self.mx - moveAcc
-        elseif self.mx < -moveAcc then
-            self.mx = self.mx + moveAcc
+        if self.moveVel.x > moveAcc then
+            self.moveVel.x = self.moveVel.x - moveAcc
+        elseif self.moveVel.x < -moveAcc then
+            self.moveVel.x = self.moveVel.x + moveAcc
         else
-            self.mx = 0
+            self.moveVel.x = 0
         end
         self.sprite = self.animIdle
     end
-    if self.mx < -Player.moveVel then
-        self.mx = -Player.moveVel
-    elseif self.mx > Player.moveVel then
-        self.mx = Player.moveVel
+    if self.moveVel.x < -Player.moveVel then
+        self.moveVel.x = -Player.moveVel
+    elseif self.moveVel.x > Player.moveVel then
+        self.moveVel.x = Player.moveVel
     end
-    self.vel.x = self.mx
 
     if self.ground then
         if Input:pressed(self.keyA) then
@@ -117,6 +111,17 @@ function Player:update(dt)
         self.sprite = self.vel.y < 0 and self.animJump or self.animFall
     end
 
+    if self.pushVel.y ~= 0 then
+        self.vel.y = self.pushVel.y
+        self.pushVel.y = 0
+    end
+    if math.abs(self.pushVel.x) > 0.1 then
+        self.pushVel.x = self.pushVel.x * 0.9
+    else
+        self.pushVel.x = 0
+    end
+
+    self.vel.x = self.moveVel.x + self.pushVel.x
     self.ground = nil
     Object.update(self, dt)
 end
@@ -126,12 +131,17 @@ function Player:draw()
     self.dust:update(1/60)
     love.graphics.draw(self.dust)
 
+    self.fire:setPosition(self.body:center())
+    self.fire:update(1/60)
+    love.graphics.draw(self.fire)
+
     self.sprite:update(1/60)
     self.sprite.speed = math.abs(self.vel.x/Player.moveVel)
-    self.sprite:draw(self.pos.x, self.pos.y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+    local x, y = math.floor(self.pos.x+0.5), math.floor(self.pos.y+0.5)
+    self.sprite:draw(x, y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
-Player.static.collisions = {
+Player.collisions = {
     solid = function(self, dt, other, x, y)
         self.pos = Vector(x, y)
     end,
@@ -145,51 +155,51 @@ Player.static.collisions = {
     lava = function(self, dt, other, x, y)
         self.pos.y = y
         self.vel.y = -7
+        self:gotoState('Hurt')
     end,
-    enemy_rock = function(self, dt, other, x, y)
+    enemyRock = function(self, dt, other, x, y)
+        if Input:isDown(self.keyB) then
+            if other:grab(self) then
+                self.hold = other
+                self:gotoState('Lift')
+            end
+        end
         if y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
             self.vel.y = -Player.jumpVel
             self.y = y
             other:stomp()
         else
-            if Input:isDown(self.keyB) then
-                if other:grab(self) then
-                    self.hold = other
-                    self:gotoState('Lift')
-                end
-            end
-            -- self:getHit(other)
+            self:getHit(other)
         end
     end
 }
 
 function Player:getHit(other)
-    if other:isHarmful() then
-        self:gotoState('Hurt')
-        if self.x > other.x then
-            self.px = 5
-        else
-            self.px = -5
-        end
-        self.py = -4
+    if not other:isHarmful() then return end
+    if self.pos.x > other.pos.x then
+        self.pushVel.x = 5
+    else
+        self.pushVel.x = -5
     end
+    self.pushVel.y = -4
+    self:gotoState('Hurt')
 end
 
---[[======== NORMAL STATE ========]]
+--[[======== NEUTRAL STATE ========]]
 
-function Player.Normal:update(dt)
+function Player.Neutral:update(dt)
     Player.update(self, dt)
 end
 
 --[[======== LIFT STATE ========]]
 
 function Player.Lift:exitedState()
+    if not self.hold then return end --TODO
     self.hold:release()
     self.hold = nil
 end
 
 function Player.Lift:update(dt)
-    Player.update(self, dt)
     if self.hold then
         if Input:pressed(self.keyB) then
             local vel = Vector(0, 0)
@@ -198,9 +208,10 @@ function Player.Lift:update(dt)
             if Input:isDown(self.keyUp) then vel.y = vel.y - 7 end
             if Input:isDown(self.keyDown) then vel.y = vel.y + 7 end
             self.hold.vel = vel
-            self:gotoState('Normal')
+            self:gotoState('Neutral')
         end
     end
+    Player.update(self, dt)
 end
 
 --[[======== HURT STATE ========]]
@@ -216,9 +227,9 @@ function Player.Hurt:update(dt)
     if self.hurtTimer > 0 then
         self.hurtTimer = self.hurtTimer - 1
     else
-        self:gotoState('Normal')
+        self:gotoState('Neutral')
     end
-    self.fire:emit(self.hurtTimer % 2 == 0)
+    self.fire:emit(self.hurtTimer % 2)
     Player.update(self, dt)
 end
 

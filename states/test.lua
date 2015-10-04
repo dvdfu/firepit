@@ -34,14 +34,12 @@ function Game:enter()
     -- gui = GUI:new(p)
 
     enemies = {}
-    e = EnemyRock:new(collider, 100, 100)
+    timer = 0
 
     cx, cy = sw/2, sh/2
     cs = 0
     cam = Camera(cx, cy)
 end
-
-timer = 0
 
 function addSolids()
     love.graphics.setBackgroundColor(16, 24, 40)
@@ -61,7 +59,25 @@ function addSolids()
     addSolid(sw, sh-256, 128, 256) --wr
 end
 
+function addEnemy(x, y)
+    local e = {}
+    if math.random() > 0 then
+        e = EnemyRock:new(collider, x, y)
+    else
+        -- e = EnemyFloat:new(world, x, y)
+    end
+    table.insert(enemies, e)
+    return e
+end
+
 function Game:update(dt)
+    if timer > 0 then
+        timer = timer - 1
+    else
+        timer = 2*60
+        addEnemy(128, 0)
+    end
+
     cx = cx + (sw/2 + (p.pos.x - sw/2)/4 - cx)/20
     cy = cy + (p.pos.y - cy)/20
     if cs > 0 then
@@ -73,7 +89,13 @@ function Game:update(dt)
     -- TODO: add functionality to camera class
 
     p:update(dt)
-    e:update(dt)
+    for key, enemy in pairs(enemies) do
+        enemy:update(dt)
+        if enemy:isDead() then
+            collider:remove(enemy.body)
+            enemies[key] = nil
+        end
+    end
     for _, solid in pairs(solids) do
         solid:update(dt)
     end
@@ -95,7 +117,9 @@ function Game:draw()
             solid:draw()
         end
         p:draw()
-        e:draw()
+        for _, enemy in pairs(enemies) do
+            enemy:draw()
+        end
         l:draw()
     end)
     -- gui:draw()
