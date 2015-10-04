@@ -53,6 +53,7 @@ end
 function EnemyRock:collide_solid(other, x, y)
     if math.abs(x-self.pos.x) > 0.1 then
         self.vel.x = -self.vel.x
+        self.direction = self.vel.x > 0 and 1 or -1
     end
     self.pos = Vector(x, y)
 end
@@ -96,10 +97,13 @@ end
 function EnemyRock.Move:enteredState()
     self.sprite = self.animMove
     self.sprite.speed = 1
-    self.vel.x = EnemyRock.moveVel * self.direction
 end
 
 function EnemyRock.Move:update(dt)
+    self.vel.x = EnemyRock.moveVel * self.direction
+    if self.ground and self.ground:getState(self.pos.x) == Tile.state.iced then
+        self.vel.x = EnemyRock.moveVel/4 * self.direction
+    end
     self.direction = self.vel.x > 0 and 1 or -1
     EnemyRock.update(self, dt)
 end

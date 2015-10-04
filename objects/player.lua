@@ -3,6 +3,7 @@ local Object = require 'objects/object'
 local Player = Class('player', Object)
 
 local Powerup = require('powerup')
+local Tile = require('objects/tile')
 local Bullet = require 'objects/bullet'
 local Particles = require('objects/particles')
 local Vector = require('vector')
@@ -16,38 +17,6 @@ Player.static.sprIdle = love.graphics.newImage('assets/images/player/dragon_idle
 Player.static.sprRun = love.graphics.newImage('assets/images/player/dragon_move.png')
 Player.static.sprJump = love.graphics.newImage('assets/images/player/dragon_jump.png')
 Player.static.sprFall = love.graphics.newImage('assets/images/player/dragon_fall.png')
-
-function Player:collide_solid(other, x, y)
-    self.pos = Vector(x, y)
-end
-
-function Player:collide_platform(other, x, y)
-    if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
-        self.vel.y = 0
-        self.pos.y = y
-        self.ground = other
-    end
-end
-
-function Player:collide_lava(other, x, y)
-    self.pos.y = y
-    self.vel.y = -7
-    self:gotoState('Hurt')
-end
-
-function Player:collide_enemy_rock(other, x, y)
-    if y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
-        self.vel.y = -Player.jumpVel
-        self.y = y
-        other:stomp()
-    else
-        self:getHit(other)
-    end
-end
-
-function Player:collide_enemy_float(other, x, y)
-    self:getHit(other)
-end
 
 Player.static.moveVel = 2
 Player.static.moveAccAir = 0.2
@@ -74,10 +43,7 @@ function Player:initialize(collider, x, y)
     self.health = self.maxHealth
     self.bullets = {}
     self.activePower = Powerup:new()
-    self.staticPowers = {
-        [1] = Powerup:new(),
-        [2] = Powerup:new()
-    }
+    self.staticPowers = { [1] = Powerup:new(), [2] = Powerup:new() }
 
     self.animIdle = newAnimation(Player.sprIdle, 24, 24, 1/8, 0)
     self.animRun = newAnimation(Player.sprRun, 24, 24, 1/16, 0)
@@ -101,6 +67,9 @@ function Player:update(dt)
     self.vel.y = self.vel.y + Player.fallAcc
 
     local moveAcc = self.ground and Player.moveAccGround or Player.moveAccAir
+    if self:hasPower(Powerup.names.coldFeet) and self.ground then
+        moveAcc = moveAcc * 0.2
+    end
     if Input:isDown(self.keyLeft) and not Input:isDown(self.keyRight) then
         self.moveVel.x = self.moveVel.x - moveAcc
         if self.ground then
@@ -183,6 +152,49 @@ function Player:update(dt)
     self.vel.x = self.moveVel.x + self.pushVel.x
     self.ground = nil
     Object.update(self, dt)
+end
+
+function Player:collide_solid(other, x, y)
+    self.pos = Vector(x, y)
+end
+
+function Player:collide_platform(other, x, y)
+    if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
+        self.vel.y = 0
+        self.pos.y = y
+        self.ground = other
+        if self:hasPower(Powerup.names.coldFeet) then
+            other:setState(Tile.state.iced, self.pos.x)
+            other:setState(Tile.state.iced, self.pos.x+16)
+            other:setState(Tile.state.iced, self.pos.x-16)
+        end
+    end
+end
+
+function Player:collide_lava(other, x, y)
+    self.pos.y = y
+    self.vel.y = -7
+    self:gotoState('Hurt')
+end
+
+function Player:collide_enemy_rock(other, x, y)
+    if y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
+        self.vel.y = -Player.jumpVel
+        self.y = y
+        other:stomp()
+    else
+        self:getHit(other)
+    end
+end
+
+function Player:collide_enemy_float(other, x, y)
+    if self:hasPower(Powerup.names.coldFeet) and y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
+        other:hit(self, -1)
+        self.vel.y = -Player.jumpVel
+        self.y = y
+    else
+        self:getHit(other)
+    end
 end
 
 function Player:draw()

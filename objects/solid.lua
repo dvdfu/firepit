@@ -19,8 +19,8 @@ function Solid:initialize(collider, x, y, w, h, color, platform)
     self:render()
 
     self.tiles = {}
-    for i = 0, self.size.x/16-1, 1 do
-        self.tiles[i] = Tile:new(self.size.x+i*16, self.size.y)
+    for i = 0, self.size.x/16 - 1, 1 do
+        self.tiles[i] = Tile:new(self.pos.x+i*16, self.pos.y)
     end
 end
 
@@ -39,23 +39,23 @@ function Solid:draw()
     end
 end
 
--- function Solid:setState(state, x)
---     local i = math.floor((x-self.x)/16)
---     if i < 0 then
---         i = 0
---     elseif i > #self.tiles then
---         i = #self.tiles
---     end
---     self.tiles[i]:setState(state)
--- end
---
--- function Solid:getState(x)
---     local i = math.floor((x-self.x)/16)
---     if i < 0 or i > #self.tiles then
---         return nil
---     end
---     return self.tiles[i]:getState()
--- end
+function Solid:setState(state, x)
+    local i = math.floor((x-self.pos.x)/16)
+    if i < 0 then
+        i = 0
+    elseif i > #self.tiles then
+        i = #self.tiles
+    end
+    self.tiles[i]:setState(state)
+end
+
+function Solid:getState(x)
+    local i = math.floor((x-self.pos.x)/16)
+    if i < 0 or i > #self.tiles then
+        return nil
+    end
+    return self.tiles[i]:getState()
+end
 
 function Solid:render()
     local image = love.graphics.newCanvas(self.size:unpack())

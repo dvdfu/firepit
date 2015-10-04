@@ -1,9 +1,9 @@
-local Tile = require 'objects/tile'
 local Class = require 'middleclass'
 local Enemy = require 'objects/enemy'
 local EnemyFloat = Class('enemy_float', Enemy)
 local Object = require 'objects/object'
 
+local Tile = require 'objects/tile'
 local Particles = require('objects/particles')
 local Vector = require('vector')
 require 'AnAL'
@@ -74,11 +74,11 @@ function EnemyFloat:update(dt)
     if self.vel.y > self.fallVel then
         self.vel.y = self.fallVel
     end
-    self.ground = nil
-    Enemy.update(self, dt)
-    if self.ground and self.ground:getState(self.pos.x+self.size.x/2) == Tile.state.iced then
+    if self.ground and self.ground:getState(self.pos.x) == Tile.state.iced then
         self:gotoState('Dead')
     end
+    self.ground = nil
+    Enemy.update(self, dt)
 end
 
 function EnemyFloat:collide_solid(other, x, y)
@@ -90,7 +90,7 @@ end
 
 function EnemyFloat:collide_platform(other, x, y)
     if y <= self.pos.y and self.vel.y >= 0 and self.pos.y - self.vel.y <= other.pos.y then
-        self.vel.y = 0
+        self.vel.y = -0.7
         self.pos.y = y
         self.ground = other
     end

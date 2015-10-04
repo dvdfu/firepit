@@ -46,7 +46,6 @@ function addSolids()
     local function addSolid(x, y, w, h, color, platform)
         local s = Solid:new(collider, x, y, w, h, color, platform)
         table.insert(solids, s)
-        -- collider:addToGroup('solids', s.body)
         return s
     end
     addSolid(sw/2-128, sh-256, 128, 256, { r = 40, g = 48, b = 80 }, true) -- 4
