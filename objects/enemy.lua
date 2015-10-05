@@ -8,7 +8,6 @@ function Enemy:initialize(collider, body)
 
     self.health = 1
     self.ground = nil
-    self.direction = 1
 end
 
 function Enemy:hit(other, damage)

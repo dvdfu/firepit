@@ -13,6 +13,7 @@ function Object:initialize(collider, body)
     self.pos = self.pos or Vector(0, 0)
     self.vel = self.vel or Vector(0, 0)
     self.size = self.size or Vector(0, 0)
+    self.direction = self.diection or Vector(1, 1)
     self.tags = self.tags or {} --collision categories
 end
 

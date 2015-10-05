@@ -63,12 +63,18 @@ Bullet.Bubble = Bullet:addState('Bubble')
 Bullet.Star = Bullet:addState('Star')
 Bullet.MiniStar = Bullet:addState('MiniStar')
 
-function Bullet:initialize(name, parent, pool)
+function Bullet:initialize(name, parent, pool, override)
     self.name = name
     self.parent = parent
     self.pool = pool
     self.collider = parent.collider
     local info = Bullet.info[name]
+
+    if override then
+        for k, v in pairs(override) do
+            info[k] = v
+        end
+    end
 
     self.sprite = nil
     self.animated = info.animated or false
@@ -100,7 +106,7 @@ function Bullet:initialize(name, parent, pool)
             angle = info.angle
         end
     end
-    if parent and parent.direction == -1 then
+    if parent and parent.direction.x == -1 then
         angle = 180 - angle
     end
 
@@ -129,7 +135,7 @@ function Bullet:update(dt)
     self.vel = self.vel:permul(self.damp)
     self.vel = self.vel + self.acc
     self.pos = self.pos + self.vel
-    self.direction = self.vel.x < 0 and -1 or 1
+    self.direction.x = self.vel.x < 0 and -1 or 1
     if self.timer > 0 then
         self.timer = self.timer - 1
     elseif not self.dead then
@@ -156,8 +162,8 @@ function Bullet:draw()
     end
 end
 
-function Bullet:create(type)
-    local b = Bullet:new(type, self, self.pool)
+function Bullet:create(type, override)
+    local b = Bullet:new(type, self, self.pool, override)
     table.insert(self.pool, b)
 end
 
@@ -188,7 +194,9 @@ end
 
 function Bullet.Star:die()
     for i = 1, 24 do
-        self:create(Bullet.names.miniStar)
+        self:create(Bullet.names.miniStar, {
+            angle = 360*i/24
+        })
     end
     Bullet.die(self)
 end

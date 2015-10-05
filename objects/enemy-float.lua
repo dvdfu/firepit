@@ -41,7 +41,7 @@ function EnemyFloat:initialize(collider, x, y)
     self.size = Vector(10, 10)
     Enemy.initialize(self, collider, collider:addCircle(x, y, 10))
     self:addTag('enemy_float')
-    self.direction = -1
+    self.direction.x = -1
 
     self.player = nil
     self.health = 1
@@ -122,7 +122,7 @@ function EnemyFloat:draw()
     if self.sprite ~= self.animDead or self.sprite:getCurrentFrame() < self.sprite:getSize() then
         self.sprite:update(1/60)
         local x, y = math.floor(self.pos.x+0.5), math.floor(self.pos.y+0.5)
-        self.sprite:draw(x, y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
+        self.sprite:draw(x, y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     end
 end
 
@@ -137,12 +137,12 @@ function EnemyFloat.Move:enteredState()
     self.speck:setEmissionRate(50)
     self.sprite = self.animMove
     self.sprite.speed = 1
-    self.vel.x = EnemyFloat.moveVel * self.direction
+    self.vel.x = EnemyFloat.moveVel * self.direction.x
 end
 
 function EnemyFloat.Move:update(dt)
     self.moveTimer = self.moveTimer + 1
-    self.direction = self.vel.x > 0 and 1 or -1
+    self.direction.x = self.vel.x > 0 and 1 or -1
     EnemyFloat.update(self, dt)
 end
 

@@ -53,7 +53,7 @@ end
 function EnemyRock:collide_solid(other, x, y)
     if math.abs(x-self.pos.x) > 0.1 then
         self.vel.x = -self.vel.x
-        self.direction = self.vel.x > 0 and 1 or -1
+        self.direction.x = self.vel.x > 0 and 1 or -1
     end
     self.pos = Vector(x, y)
 end
@@ -79,7 +79,7 @@ function EnemyRock:draw()
 
     self.sprite:update(1/60)
     local x, y = math.floor(self.pos.x+0.5), math.floor(self.pos.y+0.5)
-    self.sprite:draw(x, y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+    self.sprite:draw(x, y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
 function EnemyRock:grab(player)
@@ -100,11 +100,11 @@ function EnemyRock.Move:enteredState()
 end
 
 function EnemyRock.Move:update(dt)
-    self.vel.x = EnemyRock.moveVel * self.direction
+    self.vel.x = EnemyRock.moveVel * self.direction.x
     if self.ground and self.ground:getState(self.pos.x) == Tile.state.iced then
-        self.vel.x = EnemyRock.moveVel/4 * self.direction
+        self.vel.x = EnemyRock.moveVel/4 * self.direction.x
     end
-    self.direction = self.vel.x > 0 and 1 or -1
+    self.direction.x = self.vel.x > 0 and 1 or -1
     EnemyRock.update(self, dt)
 end
 
@@ -193,7 +193,7 @@ function EnemyRock.Throw:enteredState()
 end
 
 function EnemyRock.Throw:update(dt)
-    self.direction = self.vel.x > 0 and 1 or -1
+    self.direction.x = self.vel.x > 0 and 1 or -1
     if self.ground then
         self.vel.x = self.vel.x * 0.9
     else

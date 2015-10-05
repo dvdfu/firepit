@@ -38,7 +38,6 @@ function Player:initialize(collider, x, y)
     self.ground = nil
     self.hold = nil
     self.jumpTimer = 0
-    self.direction = 1
     self.maxHealth = 6
     self.health = self.maxHealth
     self.activePower = Powerup:new()
@@ -70,26 +69,6 @@ function Player:update(dt)
     if self:hasPower(Powerup.names.coldFeet) and self.ground then
         moveAcc = moveAcc * 0.2
     end
-    if Input:isDown(self.keyLeft) and not Input:isDown(self.keyRight) then
-        self.moveVel.x = self.moveVel.x - moveAcc
-        self.direction = -1
-        if self.ground then
-            self.sprite = self.animRun
-            if self.vel.x >= -moveAcc then
-                self.dust:emit(1)
-            end
-        end
-    end
-    if Input:isDown(self.keyRight) and not Input:isDown(self.keyLeft) then
-        self.moveVel.x = self.moveVel.x + moveAcc
-        self.direction = 1
-        if self.ground then
-            self.sprite = self.animRun
-            if self.vel.x <= moveAcc then
-                self.dust:emit(1)
-            end
-        end
-    end
     if Input:isDown(self.keyLeft) == Input:isDown(self.keyRight) then
         if self.moveVel.x > moveAcc then
             self.moveVel.x = self.moveVel.x - moveAcc
@@ -99,6 +78,24 @@ function Player:update(dt)
             self.moveVel.x = 0
         end
         self.sprite = self.animIdle
+    elseif Input:isDown(self.keyLeft) then
+        self.moveVel.x = self.moveVel.x - moveAcc
+        self.direction.x = -1
+        if self.ground then
+            self.sprite = self.animRun
+            if self.vel.x >= -moveAcc then
+                self.dust:emit(1)
+            end
+        end
+    elseif Input:isDown(self.keyRight) then
+        self.moveVel.x = self.moveVel.x + moveAcc
+        self.direction.x = 1
+        if self.ground then
+            self.sprite = self.animRun
+            if self.vel.x <= moveAcc then
+                self.dust:emit(1)
+            end
+        end
     end
     if self.moveVel.x < -Player.moveVel then
         self.moveVel.x = -Player.moveVel
@@ -205,7 +202,7 @@ function Player:draw()
     self.sprite:update(1/60)
     self.sprite.speed = math.abs(self.vel.x/Player.moveVel)
     local x, y = math.floor(self.pos.x+0.5), math.floor(self.pos.y+0.5)
-    self.sprite:draw(x, y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+    self.sprite:draw(x, y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
 function Player:hasPower(power)
