@@ -1,9 +1,6 @@
 [submodule "modules/hump"]
 	path = modules/hump
 	url = git://github.com/vrld/hump
-[submodule "modules/bump"]
-	path = modules/bump
-	url = git://github.com/kikito/bump.lua.git
 [submodule "modules/middleclass"]
 	path = modules/middleclass
 	url = git://github.com/kikito/middleclass
@@ -13,12 +10,6 @@
 [submodule "modules/love-misc-libs"]
 	path = modules/love-misc-libs
 	url = git@github.com:bartbes/love-misc-libs.git
-[submodule "modules/secs"]
-	path = modules/secs
-	url = git@github.com:ecbambrick/SimpleEntityComponentSystem.git
 [submodule "modules/hardon-collider"]
 	path = modules/hardon-collider
 	url = git@github.com:vrld/HardonCollider.git
-[submodule "modules/anim8"]
-	path = modules/anim8
-	url = git@github.com:kikito/anim8.git

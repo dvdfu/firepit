@@ -28,7 +28,7 @@ Lava.static.glowShader = love.graphics.newShader[[
 
         vec2 hs = love_ScreenSize.xy;
         float disp = sin(24*texture_coords.x + 2*time);
-        texture_coords.y -= 12*(1+disp)/hs.y;
+        texture_coords.y -= 16*(1+disp)/hs.y;
 
         pixel.a = texture_coords.y*texture_coords.y;
         pixel.a = floor(pixel.a*5)/5;
