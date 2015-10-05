@@ -22,7 +22,7 @@ end
 function collisionEnd(dt, shapeA, shapeB) end
 
 function Game:enter()
-    collider = HC(64, collisionStart, collisionEnd)
+    collider = HC(128, collisionStart, collisionEnd)
     solids = {}
     bullets = {}
     addSolids()

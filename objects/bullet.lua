@@ -4,6 +4,11 @@ local Object = require 'objects/object'
 local Bullet = Class('bullet', Object)
 local Vector = require('vector')
 
+Bullet.sprBubble = love.graphics.newImage('assets/images/bullets/bubble.png')
+Bullet.sprBubblePop = love.graphics.newImage('assets/images/bullets/bubble_pop.png')
+Bullet.sprStar = love.graphics.newImage('assets/images/bullets/star.png')
+Bullet.sprStarSmall = love.graphics.newImage('assets/images/enemies/star.png')
+
 Bullet.static.names = {
     bubble = 'Bubble',
     star = 'Star',
@@ -13,47 +18,50 @@ Bullet.static.names = {
 Bullet.static.info = {
     ['Bubble'] = {
         name = 'Bubble',
-        sprite = love.graphics.newImage('assets/images/bullets/bubble.png'),
-        spritePop = love.graphics.newImage('assets/images/bullets/bubble_pop.png'),
+        sprite = Bullet.sprBubble,
+        spritePop = Bullet.sprBubblePop,
         animated = true,
         makeBody = function(collider, x, y)
             return collider:addCircle(x, y, 4)
         end,
         offset = Vector(0, -16),
         damage = 1,
-        speed = {1, 3},
+        speed = {3, 5},
         angle = {0, 10},
         damp = Vector(0.98, 0.99),
-        time = {30, 80}
+        time = {20, 60}
     },
     ['Star'] = {
         name = 'Star',
-        sprite = love.graphics.newImage('assets/images/bullets/star.png'),
+        sprite = Bullet.sprStar,
         animated = true,
         makeBody = function(collider, x, y)
             return collider:addCircle(x, y, 10)
         end,
         offset = Vector(0, -16),
-        damage = 8,
+        damage = 4,
         speed = 6,
         time = 80
     },
     ['MiniStar'] = {
         name = 'MiniStar',
-        sprite = love.graphics.newImage('assets/images/bullets/bubble.png'),
+        sprite = Bullet.sprStarSmall,
+        animated = true,
         makeBody = function(collider, x, y)
             return collider:addCircle(x, y, 4)
         end,
         offset = Vector(0, 0),
         damage = 2,
-        speed = {2, 4},
+        speed = {1, 4},
         angle = {0, 180},
         damp = Vector(0.95, 0.95),
         time = {5, 40}
     }
 }
 
-Bullet.Dead = Bullet:addState('Dead')
+Bullet.Bubble = Bullet:addState('Bubble')
+Bullet.Star = Bullet:addState('Star')
+Bullet.MiniStar = Bullet:addState('MiniStar')
 
 function Bullet:initialize(name, parent, pool)
     self.name = name
@@ -112,6 +120,9 @@ function Bullet:initialize(name, parent, pool)
 
     self.vel.x = speed*math.cos(angle/180*math.pi)-- + parent.vel.x
     self.vel.y = -speed*math.sin(angle/180*math.pi)
+
+    self:gotoState(self.name)
+    self.dead = false
 end
 
 function Bullet:update(dt)
@@ -121,19 +132,19 @@ function Bullet:update(dt)
     self.direction = self.vel.x < 0 and -1 or 1
     if self.timer > 0 then
         self.timer = self.timer - 1
-    else
-        self:gotoState('Dead')
+    elseif not self.dead then
+        self:die()
     end
     self:move()
 end
 
 function Bullet:collide_enemy(other, x, y)
-    self:gotoState('Dead')
+    self:die()
     other:hit(self, self.damage)
 end
 
 function Bullet:collide_solid(other, x, y)
-    self:gotoState('Dead')
+    self:die()
 end
 
 function Bullet:draw()
@@ -150,36 +161,40 @@ function Bullet:create(type)
     table.insert(self.pool, b)
 end
 
+function Bullet:die()
+    self.dead = true
+    self.timer = 0
+end
+
 function Bullet:isDead()
-    return false
+    return self.timer == 0
 end
 
---[[======== DEAD STATE ========]]
+--[[======== BUBBLE STATE ========]]
 
-function Bullet.Dead:enteredState()
-    self.collider:setGhost(self.body)
-    self.deadTimer = 0
-    if self.name == Bullet.names.bubble then
-        self.deadTimer = 5
-        local sprite = Bullet.info.Bubble.spritePop
-        self.sprite = newAnimation(sprite, sprite:getHeight(), sprite:getHeight(), 1/60, 0)
-        self.sprite:setMode('once')
-    elseif self.name == Bullet.names.star then
-        for i = 1, 18 do
-            self:create(Bullet.names.miniStar)
-        end
+function Bullet.Bubble:die()
+    self.dead = true
+    self.timer = 5
+    local sprite = Bullet.info.Bubble.spritePop
+    self.sprite = newAnimation(sprite, sprite:getHeight(), sprite:getHeight(), 1/60, 0)
+    self.sprite:setMode('once')
+end
+
+function Bullet.Bubble:isDead()
+    return self.dead and self.timer == 0
+end
+
+--[[======== STAR STATE ========]]
+
+function Bullet.Star:die()
+    for i = 1, 24 do
+        self:create(Bullet.names.miniStar)
     end
+    Bullet.die(self)
 end
 
-function Bullet.Dead:update(dt)
-    self.deadTimer = self.deadTimer - 1
-end
+--[[======== MINISTAR STATE ========]]
 
-function Bullet.Dead:isDead()
-    if self.name == Bullet.names.bubble then
-        return self.deadTimer == 0
-    end
-    return true
-end
+function Bullet.MiniStar:collide_solid(other, x, y) end
 
 return Bullet

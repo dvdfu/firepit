@@ -39,7 +39,7 @@ Powerup.static.info = {
         static = false,
         icon = love.graphics.newImage('assets/images/powers/bubble.png'),
         uses = -1,
-        cooldown = 6,
+        cooldown = 3,
         updates = true
     },
     ['Star Cannon'] = {
@@ -47,7 +47,7 @@ Powerup.static.info = {
         static = false,
         icon = love.graphics.newImage('assets/images/powers/star.png'),
         uses = -1,
-        cooldown = 40,
+        cooldown = 12,
         updates = true
     }
 }
