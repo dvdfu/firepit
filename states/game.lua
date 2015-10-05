@@ -24,12 +24,14 @@ function collisionEnd(dt, shapeA, shapeB) end
 function Game:enter()
     collider = HC(64, collisionStart, collisionEnd)
     solids = {}
+    bullets = {}
     addSolids()
 
     p = Player:new(collider, 32, 0)
+    p.bullets = bullets
     p:setPower(Powerup.names.jumpGlide)
     p:setPower(Powerup.names.coldFeet)
-    p:setPower(Powerup.names.bubble)
+    p:setPower(Powerup.names.star)
     l = Lava:new(collider, sh)
     gui = GUI:new(p)
 
@@ -95,6 +97,13 @@ function Game:update(dt)
             enemies[key] = nil
         end
     end
+    for key, bullet in pairs(bullets) do
+        bullet:update(dt)
+        if bullet:isDead() then
+            collider:remove(bullet.body)
+            bullets[key] = nil
+        end
+    end
     for _, solid in pairs(solids) do
         solid:update(dt)
     end
@@ -118,6 +127,9 @@ function Game:draw()
         p:draw()
         for _, enemy in pairs(enemies) do
             enemy:draw()
+        end
+        for _, bullet in pairs(bullets) do
+            bullet:draw()
         end
         l:draw()
     end)

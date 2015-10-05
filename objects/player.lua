@@ -41,7 +41,6 @@ function Player:initialize(collider, x, y)
     self.direction = 1
     self.maxHealth = 6
     self.health = self.maxHealth
-    self.bullets = {}
     self.activePower = Powerup:new()
     self.staticPowers = { [1] = Powerup:new(), [2] = Powerup:new() }
 
@@ -73,9 +72,9 @@ function Player:update(dt)
     end
     if Input:isDown(self.keyLeft) and not Input:isDown(self.keyRight) then
         self.moveVel.x = self.moveVel.x - moveAcc
+        self.direction = -1
         if self.ground then
             self.sprite = self.animRun
-            self.direction = -1
             if self.vel.x >= -moveAcc then
                 self.dust:emit(1)
             end
@@ -83,9 +82,9 @@ function Player:update(dt)
     end
     if Input:isDown(self.keyRight) and not Input:isDown(self.keyLeft) then
         self.moveVel.x = self.moveVel.x + moveAcc
+        self.direction = 1
         if self.ground then
             self.sprite = self.animRun
-            self.direction = 1
             if self.vel.x <= moveAcc then
                 self.dust:emit(1)
             end
@@ -141,14 +140,6 @@ function Player:update(dt)
     self.staticPowers[1]:update()
     self.staticPowers[2]:update()
     self.activePower:update()
-
-    for key, bullet in pairs(self.bullets) do
-        bullet:update(dt)
-        if bullet:isDead() then
-            self.collider:remove(bullet.body)
-            self.bullets[key] = nil
-        end
-    end
 
     self.vel.x = self.moveVel.x + self.pushVel.x
     self.ground = nil
@@ -215,10 +206,6 @@ function Player:draw()
     self.sprite.speed = math.abs(self.vel.x/Player.moveVel)
     local x, y = math.floor(self.pos.x+0.5), math.floor(self.pos.y+0.5)
     self.sprite:draw(x, y, 0, self.direction, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
-
-    for key, bullet in pairs(self.bullets) do
-        bullet:draw()
-    end
 end
 
 function Player:hasPower(power)
@@ -276,7 +263,7 @@ function Player:useActivePower()
 end
 
 function Player:createBullet(type)
-    local b = Bullet:new(type, self)
+    local b = Bullet:new(type, self, self.bullets)
     table.insert(self.bullets, b)
 end
 

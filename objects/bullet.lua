@@ -6,7 +6,8 @@ local Vector = require('vector')
 
 Bullet.static.names = {
     bubble = 'Bubble',
-    star = 'Star'
+    star = 'Star',
+    miniStar = 'MiniStar'
 }
 
 Bullet.static.info = {
@@ -20,13 +21,10 @@ Bullet.static.info = {
         end,
         offset = Vector(0, -16),
         damage = 1,
-        speed = 1,
-        speedMax = 3,
-        angle = 0,
-        angleSpread = 10,
+        speed = {1, 3},
+        angle = {0, 10},
         damp = Vector(0.98, 0.99),
-        time = 30,
-        timeMax = 80
+        time = {30, 80}
     },
     ['Star'] = {
         name = 'Star',
@@ -38,47 +36,89 @@ Bullet.static.info = {
         offset = Vector(0, -16),
         damage = 8,
         speed = 6,
-        speedMax = 6,
-        angle = 0,
-        angleSpread = 0,
-        damp = Vector(1, 1),
-        time = 80,
-        timeMax = 80
+        time = 80
+    },
+    ['MiniStar'] = {
+        name = 'MiniStar',
+        sprite = love.graphics.newImage('assets/images/bullets/bubble.png'),
+        makeBody = function(collider, x, y)
+            return collider:addCircle(x, y, 4)
+        end,
+        offset = Vector(0, 0),
+        damage = 2,
+        speed = {2, 4},
+        angle = {0, 180},
+        damp = Vector(0.95, 0.95),
+        time = {5, 40}
     }
 }
 
-function Bullet:collide_enemy(other, x, y)
-    self:gotoState('Dead')
-    other:hit(self, self.info.damage)
-end
-
-function Bullet:collide_solid(other, x, y)
-    self:gotoState('Dead')
-end
-
 Bullet.Dead = Bullet:addState('Dead')
 
-function Bullet:initialize(name, parent)
-    self.info = Bullet.info[name]
-    self.pos = parent.pos + self.info.offset
-    Object.initialize(self, parent.collider, self.info.makeBody(parent.collider, self.pos:unpack()))
+function Bullet:initialize(name, parent, pool)
+    self.name = name
+    self.parent = parent
+    self.pool = pool
+    self.collider = parent.collider
+    local info = Bullet.info[name]
+
+    self.sprite = nil
+    self.animated = info.animated or false
+    if self.animated then
+        self.sprite = newAnimation(info.sprite, info.sprite:getHeight(), info.sprite:getHeight(), 1/8, 0)
+    else
+        self.sprite = info.sprite
+    end
+
+    self.damage = info.damage or 0
+    self.spawnOffset = info.offset or Vector(0, 0)
+    self.acc = info.acc or Vector(0, 0)
+    self.damp = info.damp or Vector(1, 1)
+
+    local speed = 0
+    if info.speed then
+        if type(info.speed) == 'table' then
+            speed = info.speed[1] + (info.speed[2] - info.speed[1]) * math.random()
+        else
+            speed = info.speed
+        end
+    end
+
+    local angle = 0
+    if info.angle then
+        if type(info.angle) == 'table' then
+            angle = info.angle[1] - info.angle[2] + 2 * info.angle[2] * math.random()
+        else
+            angle = info.angle
+        end
+    end
+    if parent and parent.direction == -1 then
+        angle = 180 - angle
+    end
+
+    self.timer = 0
+    if info.time then
+        if type(info.time) == 'table' then
+            self.timer = info.time[1] + (info.time[2] - info.time[1]) * math.random()
+        else
+            self.timer = info.time
+        end
+    end
+
+    self.pos = parent.pos + self.spawnOffset
+    self.body = info.makeBody(self.collider, self.pos:unpack())
+    Object.initialize(self, self.collider, self.body)
     self:addTag('bullet')
 
-    self.anim = nil
-    if self.info.animated then
-        self.anim = newAnimation(self.info.sprite, self.info.sprite:getHeight(), self.info.sprite:getHeight(), 1/8, 0)
-    end
-    self.angle = (parent.direction == 1 and 0 or 180) + self.info.angleSpread*2*math.random()-self.info.angleSpread
-    local speed = self.info.speed + (self.info.speedMax-self.info.speed)*math.random()
-    self.vel.x = parent.vel.x + speed * math.cos(self.angle/180*math.pi)
-    self.vel.y = speed * math.sin(self.angle/180*math.pi)
-    self.timer = self.info.time + (self.info.timeMax-self.info.time)*math.random()
-    self.deadTimer = 0
+    self.vel.x = speed*math.cos(angle/180*math.pi)-- + parent.vel.x
+    self.vel.y = -speed*math.sin(angle/180*math.pi)
 end
 
 function Bullet:update(dt)
-    self.vel = self.vel:permul(self.info.damp)
+    self.vel = self.vel:permul(self.damp)
+    self.vel = self.vel + self.acc
     self.pos = self.pos + self.vel
+    self.direction = self.vel.x < 0 and -1 or 1
     if self.timer > 0 then
         self.timer = self.timer - 1
     else
@@ -87,14 +127,27 @@ function Bullet:update(dt)
     self:move()
 end
 
+function Bullet:collide_enemy(other, x, y)
+    self:gotoState('Dead')
+    other:hit(self, self.damage)
+end
+
+function Bullet:collide_solid(other, x, y)
+    self:gotoState('Dead')
+end
+
 function Bullet:draw()
-    if self.info.animated then
-        self.anim:update(1/60)
-        self.anim:draw(self.pos.x, self.pos.y, 0, 1, 1, self.anim:getWidth()/2, self.anim:getHeight()/2)
+    if self.animated then
+        self.sprite:update(1/60)
+        self.sprite:draw(self.pos.x, self.pos.y, 0, 1, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     else
-        local sprite = self.info.sprite
-        love.graphics.draw(sprite, self.pos.x, self.pos.y, 0, 1, 1, sprite:getWidth()/2, sprite:getHeight()/2)
+        love.graphics.draw(self.sprite, self.pos.x, self.pos.y, 0, 1, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     end
+end
+
+function Bullet:create(type)
+    local b = Bullet:new(type, self, self.pool)
+    table.insert(self.pool, b)
 end
 
 function Bullet:isDead()
@@ -105,11 +158,16 @@ end
 
 function Bullet.Dead:enteredState()
     self.collider:setGhost(self.body)
-    if self.info.name == Bullet.names.bubble then
+    self.deadTimer = 0
+    if self.name == Bullet.names.bubble then
         self.deadTimer = 5
         local sprite = Bullet.info.Bubble.spritePop
-        self.anim = newAnimation(sprite, sprite:getHeight(), sprite:getHeight(), 1/60, 0)
-        self.anim:setMode('once')
+        self.sprite = newAnimation(sprite, sprite:getHeight(), sprite:getHeight(), 1/60, 0)
+        self.sprite:setMode('once')
+    elseif self.name == Bullet.names.star then
+        for i = 1, 18 do
+            self:create(Bullet.names.miniStar)
+        end
     end
 end
 
@@ -118,7 +176,7 @@ function Bullet.Dead:update(dt)
 end
 
 function Bullet.Dead:isDead()
-    if self.info.name == Bullet.names.bubble then
+    if self.name == Bullet.names.bubble then
         return self.deadTimer == 0
     end
     return true

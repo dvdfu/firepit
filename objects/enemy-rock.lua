@@ -258,7 +258,7 @@ function EnemyRock.Hit:hit() end
 function EnemyRock.Dead:enteredState()
     self.collider:setGhost(self.body)
     self.deadTimer = 60
-    self.vel.y = -4
+    self.vel.y = -5
 end
 
 function EnemyRock.Dead:update(dt)
