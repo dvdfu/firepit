@@ -6,8 +6,8 @@ local Vector = require('vector')
 
 Bullet.sprBubble = love.graphics.newImage('assets/images/bullets/bubble.png')
 Bullet.sprBubblePop = love.graphics.newImage('assets/images/bullets/bubble_pop.png')
-Bullet.sprStar = love.graphics.newImage('assets/images/bullets/star.png')
-Bullet.sprStarSmall = love.graphics.newImage('assets/images/enemies/star.png')
+Bullet.sprEnergy = love.graphics.newImage('assets/images/bullets/energy.png')
+Bullet.sprStarSmall = love.graphics.newImage('assets/images/bullets/star.png')
 
 Bullet.static.names = {
     bubble = 'Bubble',
@@ -33,14 +33,15 @@ Bullet.static.info = {
     },
     ['Star'] = {
         name = 'Star',
-        sprite = Bullet.sprStar,
-        animated = true,
+        sprite = Bullet.sprEnergy,
         makeBody = function(collider, x, y)
             return collider:addCircle(x, y, 10)
         end,
+        angle = {45, 8},
         offset = Vector(0, -16),
+        acc = Vector(0, 0.5),
         damage = 4,
-        speed = 6,
+        speed = 9,
         time = 80
     },
     ['MiniStar'] = {
@@ -54,7 +55,8 @@ Bullet.static.info = {
         damage = 2,
         speed = {1, 4},
         angle = {0, 180},
-        damp = Vector(0.95, 0.95),
+        -- damp = Vector(0.95, 0.95),
+        acc = Vector(0, 0.1),
         time = {5, 40}
     }
 }
@@ -156,15 +158,19 @@ end
 function Bullet:draw()
     if self.animated then
         self.sprite:update(1/60)
-        self.sprite:draw(self.pos.x, self.pos.y, 0, 1, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
+        self.sprite:draw(self.pos.x, self.pos.y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     else
-        love.graphics.draw(self.sprite, self.pos.x, self.pos.y, 0, 1, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
+        love.graphics.draw(self.sprite, self.pos.x, self.pos.y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     end
 end
 
 function Bullet:create(type, override)
     local b = Bullet:new(type, self, self.pool, override)
     table.insert(self.pool, b)
+end
+
+function Bullet:getAngle()
+    return self.vel:angleTo(Vector(1, 0))
 end
 
 function Bullet:die()
@@ -192,10 +198,15 @@ end
 
 --[[======== STAR STATE ========]]
 
+function Bullet.Star:draw()
+    love.graphics.draw(self.sprite, self.pos.x, self.pos.y, self:getAngle(), 1, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
+end
+
 function Bullet.Star:die()
-    for i = 1, 24 do
+    cs = 10
+    for i = 1, 16 do
         self:create(Bullet.names.miniStar, {
-            angle = 360*i/24
+            angle = 360*i/16
         })
     end
     Bullet.die(self)
