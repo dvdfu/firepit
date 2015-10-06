@@ -255,9 +255,7 @@ function Player:useActivePower()
         if power.timer == 0 then
             power:use()
             self:createBullet(Bullet.names.star)
-            if self:getAimDirection(true).y == 1 then
-                self.vel.y = -Player.jumpVel
-            end
+            self.pushVel = self:getAimDirection(true) * -5
         end
     end
 end

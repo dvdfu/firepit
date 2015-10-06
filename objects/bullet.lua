@@ -29,7 +29,8 @@ Bullet.static.info = {
         speed = {3, 5},
         angle = {0, 10},
         damp = Vector(0.98, 0.99),
-        time = {20, 60}
+        time = {20, 60},
+        symmetrical = true
     },
     ['Star'] = {
         name = 'Star',
@@ -190,14 +191,16 @@ function Bullet:die()
 end
 
 function Bullet:isDead()
-    return self.timer == 0
+    return self.dead or self.timer == 0
 end
 
 --[[======== BUBBLE STATE ========]]
 
 function Bullet.Bubble:die()
+    if self.dead then return end
     self.dead = true
     self.timer = 5
+    self.vel = Vector(0, 0)
     local sprite = Bullet.info.Bubble.spritePop
     self.sprite = newAnimation(sprite, sprite:getHeight(), sprite:getHeight(), 1/60, 0)
     self.sprite:setMode('once')

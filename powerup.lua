@@ -47,7 +47,7 @@ Powerup.static.info = {
         static = false,
         icon = love.graphics.newImage('assets/images/powers/star.png'),
         uses = -1,
-        cooldown = 40,
+        cooldown = 60,
         updates = true
     }
 }
