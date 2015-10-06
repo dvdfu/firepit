@@ -255,6 +255,9 @@ function Player:useActivePower()
         if power.timer == 0 then
             power:use()
             self:createBullet(Bullet.names.star)
+            if self:getAimDirection(true).y == 1 then
+                self.vel.y = -Player.jumpVel
+            end
         end
     end
 end
@@ -273,6 +276,30 @@ function Player:getHit(other)
     end
     self.pushVel.y = -4
     self:gotoState('Hurt')
+end
+
+function Player:getAimDirection(fixed)
+    local dir = Vector(0, 0)
+    if fixed then
+        dir.x = self.direction.x
+    end
+    if Input:isDown(self.keyLeft) and not Input:isDown(self.keyRight) then
+        dir.x = -1
+    elseif Input:isDown(self.keyRight) then
+        dir.x = 1
+    end
+    if Input:isDown(self.keyUp) and not Input:isDown(self.keyDown) then
+        dir.y = -1
+        if fixed then
+            dir.x = 0
+        end
+    elseif Input:isDown(self.keyDown) then
+        dir.y = 1
+        if fixed then
+            dir.x = 0
+        end
+    end
+    return dir
 end
 
 --[[======== NEUTRAL STATE ========]]
@@ -302,12 +329,7 @@ end
 function Player.Lift:update(dt)
     if self.hold then
         if Input:pressed(self.keyB) then
-            local vel = Vector(0, 0)
-            if Input:isDown(self.keyLeft) then vel.x = vel.x - 7 end
-            if Input:isDown(self.keyRight) then vel.x = vel.x + 7 end
-            if Input:isDown(self.keyUp) then vel.y = vel.y - 7 end
-            if Input:isDown(self.keyDown) then vel.y = vel.y + 7 end
-            self.hold.vel = vel
+            self.hold.vel = self:getAimDirection() * 7
             self:gotoState('Neutral')
         end
     end

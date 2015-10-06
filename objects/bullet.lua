@@ -37,12 +37,11 @@ Bullet.static.info = {
         makeBody = function(collider, x, y)
             return collider:addCircle(x, y, 10)
         end,
-        angle = {45, 8},
         offset = Vector(0, -16),
-        acc = Vector(0, 0.5),
         damage = 4,
         speed = 9,
-        time = 80
+        time = 80,
+        angular = true
     },
     ['MiniStar'] = {
         name = 'MiniStar',
@@ -53,11 +52,9 @@ Bullet.static.info = {
         end,
         offset = Vector(0, 0),
         damage = 2,
-        speed = {1, 4},
-        angle = {0, 180},
-        -- damp = Vector(0.95, 0.95),
-        acc = Vector(0, 0.1),
-        time = {5, 40}
+        speed = {1, 9},
+        damp = Vector(0.9, 0.9),
+        time = {20, 40}
     }
 }
 
@@ -90,6 +87,8 @@ function Bullet:initialize(name, parent, pool, override)
     self.spawnOffset = info.offset or Vector(0, 0)
     self.acc = info.acc or Vector(0, 0)
     self.damp = info.damp or Vector(1, 1)
+    self.symmetrical = info.symmetrical or false
+    self.angular = info.angular or false
 
     local speed = 0
     if info.speed then
@@ -108,7 +107,7 @@ function Bullet:initialize(name, parent, pool, override)
             angle = info.angle
         end
     end
-    if parent and parent.direction.x == -1 then
+    if self.symmetrical and parent and parent.direction.x == -1 then
         angle = 180 - angle
     end
 
@@ -127,7 +126,7 @@ function Bullet:initialize(name, parent, pool, override)
     self:addTag('bullet')
 
     self.vel.x = speed*math.cos(angle/180*math.pi)-- + parent.vel.x
-    self.vel.y = -speed*math.sin(angle/180*math.pi)
+    self.vel.y = speed*math.sin(angle/180*math.pi)
 
     self:gotoState(self.name)
     self.dead = false
@@ -155,12 +154,20 @@ function Bullet:collide_solid(other, x, y)
     self:die()
 end
 
+function Bullet:collide_platform(other, x, y)
+    if y <= self.pos.y and self.vel.y > 0 and self.pos.y - self.vel.y <= other.pos.y then
+        self:die()
+    end
+end
+
 function Bullet:draw()
+    local xScale = self.symmetrical and self.direction.x or 1
+    local angle = self.angular and self:getAngle() or 0
     if self.animated then
         self.sprite:update(1/60)
-        self.sprite:draw(self.pos.x, self.pos.y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
+        self.sprite:draw(self.pos.x, self.pos.y, angle, xScale, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     else
-        love.graphics.draw(self.sprite, self.pos.x, self.pos.y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
+        love.graphics.draw(self.sprite, self.pos.x, self.pos.y, angle, xScale, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     end
 end
 
@@ -170,7 +177,11 @@ function Bullet:create(type, override)
 end
 
 function Bullet:getAngle()
-    return self.vel:angleTo(Vector(1, 0))
+    return self.vel:clone():angleTo(Vector(1, 0))
+end
+
+function Bullet:getAngleDeg()
+    return self:getAngle()*180/math.pi
 end
 
 function Bullet:die()
@@ -198,15 +209,15 @@ end
 
 --[[======== STAR STATE ========]]
 
-function Bullet.Star:draw()
-    love.graphics.draw(self.sprite, self.pos.x, self.pos.y, self:getAngle(), 1, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
+function Bullet.Star:enteredState()
+    self.vel = self.parent:getAimDirection(true) * Bullet.info[self.name].speed
 end
 
 function Bullet.Star:die()
     cs = 10
     for i = 1, 16 do
         self:create(Bullet.names.miniStar, {
-            angle = 360*i/16
+            angle = i*360/16 --self:getAngleDeg()+ (i-8)*3
         })
     end
     Bullet.die(self)
@@ -215,5 +226,7 @@ end
 --[[======== MINISTAR STATE ========]]
 
 function Bullet.MiniStar:collide_solid(other, x, y) end
+
+function Bullet.MiniStar:collide_platform(other, x, y) end
 
 return Bullet
