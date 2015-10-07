@@ -74,10 +74,10 @@ Bullet.static.info = {
         name = 'Explosion',
         sprite = Bullet.sprExplosion,
         makeBody = function(collider, x, y)
-            return collider:addCircle(x, y, 56)
+            return collider:addCircle(x, y, 1)
         end,
         damage = 4,
-        time = 8
+        time = 12
     }
 }
 
@@ -210,6 +210,7 @@ function Bullet:getAngleDeg()
 end
 
 function Bullet:die()
+    self.collider:setGhost(self.body)
     self.dead = true
     self.timer = 0
 end
@@ -288,7 +289,7 @@ function Bullet.Explosion:enteredState()
     cs = 20
     self.smoke = Particles.newSmoke()
     self.smoke:setPosition(self.pos:unpack())
-    self.smoke:emit(20)
+    self.smoke:emit(10)
 end
 
 function Bullet.Explosion:collide_enemy(other, x, y)
@@ -300,6 +301,12 @@ function Bullet.Explosion:collide_solid(other, x, y) end
 function Bullet.Explosion:collide_platform(other, x, y) end
 
 function Bullet.Explosion:draw()
+    local scale = 64*(12-self.timer)/12
+    local x, y, r = self.body:outcircle()
+    if scale > 0 then
+        self.body:scale(scale/r)
+    end
+    
     self.smoke:update(1/60)
     love.graphics.draw(self.smoke)
     if self.dead then return end
@@ -307,8 +314,7 @@ function Bullet.Explosion:draw()
         love.graphics.setColor(0, 0, 0)
     end
     if self.timer % 4 < 3 then
-        -- Bullet.draw(self)
-        love.graphics.circle('fill', self.pos.x, self.pos.y, 56, 56)
+        love.graphics.circle('fill', self.pos.x, self.pos.y, r, r)
     end
     love.graphics.setColor(255, 255, 255)
 end

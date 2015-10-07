@@ -88,6 +88,11 @@ function Game:update(dt)
         cam:lookAt(math.floor(cx+0.5), math.floor(cy+0.5))
     end
     -- TODO: add functionality to camera class
+    
+    
+    if Input:pressed('q') then p:setPower(Powerup.names.bubble) end
+    if Input:pressed('w') then p:setPower(Powerup.names.star) end
+    if Input:pressed('e') then p:setPower(Powerup.names.flower) end
 
     p:update(dt)
     for key, enemy in pairs(enemies) do

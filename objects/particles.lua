@@ -1,5 +1,6 @@
 local Particles = {
     sprDot = love.graphics.newImage('assets/images/particles/dot.png'),
+    sprBigDot = love.graphics.newImage('assets/images/particles/big_dot.png'),
     sprDiamond = love.graphics.newImage('assets/images/particles/diamond.png')
 }
 
@@ -52,14 +53,14 @@ function Particles.newFrost()
 end
 
 function Particles.newSmoke()
-    local part = love.graphics.newParticleSystem(Particles.sprDot)
+    local part = love.graphics.newParticleSystem(Particles.sprBigDot)
     part:setParticleLifetime(0, 3)
     part:setDirection(0)
     part:setSpread(math.pi*2)
-    part:setAreaSpread('normal', 12, 12)
+    part:setAreaSpread('normal', 6, 6)
     part:setSpeed(0, 30)
-    part:setColors(146, 36, 36, 255, 20, 15, 10, 255)
-    part:setSizes(6, 0)
+    part:setColors(72, 18, 18, 255)
+    part:setSizes(1, 0)
     part:setLinearAcceleration(0, -20)
     return part
 end
