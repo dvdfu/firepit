@@ -6,7 +6,8 @@ Powerup.static.names = {
     jumpGlide = 'Jump Glide',
     apple = 'Apple',
     bubble = 'Bubble Blower',
-    star = 'Star Cannon'
+    star = 'Star Cannon',
+    flower = 'Flower Bomb'
 }
 
 Powerup.static.info = {
@@ -48,6 +49,14 @@ Powerup.static.info = {
         icon = love.graphics.newImage('assets/images/powers/star.png'),
         uses = -1,
         cooldown = 60,
+        updates = true
+    },
+    ['Flower Bomb'] = {
+        name = 'Flower Bomb',
+        static = false,
+        icon = love.graphics.newImage('assets/images/powers/star.png'),
+        uses = -1,
+        cooldown = 10,
         updates = true
     }
 }

@@ -8,11 +8,15 @@ Bullet.sprBubble = love.graphics.newImage('assets/images/bullets/bubble.png')
 Bullet.sprBubblePop = love.graphics.newImage('assets/images/bullets/bubble_pop.png')
 Bullet.sprEnergy = love.graphics.newImage('assets/images/bullets/energy.png')
 Bullet.sprStarSmall = love.graphics.newImage('assets/images/bullets/star.png')
+Bullet.sprFlower = love.graphics.newImage('assets/images/bullets/flower.png')
+Bullet.sprExplosion = love.graphics.newImage('assets/images/bullets/explosion.png')
 
 Bullet.static.names = {
     bubble = 'Bubble',
     star = 'Star',
-    miniStar = 'MiniStar'
+    miniStar = 'MiniStar',
+    flower = 'FlowerBomb',
+    explosion = 'Explosion'
 }
 
 Bullet.static.info = {
@@ -51,17 +55,36 @@ Bullet.static.info = {
         makeBody = function(collider, x, y)
             return collider:addCircle(x, y, 4)
         end,
-        offset = Vector(0, 0),
         damage = 2,
         speed = {1, 9},
         damp = Vector(0.9, 0.9),
         time = {20, 40}
+    },
+    ['FlowerBomb'] = {
+        name = 'FlowerBomb',
+        sprite = Bullet.sprFlower,
+        makeBody = function(collider, x, y)
+            return collider:addRectangle(x, y, 16, 16)
+        end,
+        acc = Vector(0, 0.3),
+        time = 30*60
+    },
+    ['Explosion'] = {
+        name = 'Explosion',
+        sprite = Bullet.sprExplosion,
+        makeBody = function(collider, x, y)
+            return collider:addCircle(x, y, 64)
+        end,
+        damage = 4,
+        time = 8
     }
 }
 
 Bullet.Bubble = Bullet:addState('Bubble')
 Bullet.Star = Bullet:addState('Star')
 Bullet.MiniStar = Bullet:addState('MiniStar')
+Bullet.FlowerBomb = Bullet:addState('FlowerBomb')
+Bullet.Explosion = Bullet:addState('Explosion')
 
 function Bullet:initialize(name, parent, pool, override)
     self.name = name
@@ -231,5 +254,51 @@ end
 function Bullet.MiniStar:collide_solid(other, x, y) end
 
 function Bullet.MiniStar:collide_platform(other, x, y) end
+
+--[[======== FLOWERBOMB STATE ========]]
+
+function Bullet.FlowerBomb:collide_solid(other, x, y)
+    self.pos = Vector(x, y)
+end
+
+function Bullet.FlowerBomb:collide_platform(other, x, y)
+    if y <= self.pos.y and self.vel.y > 0 and self.pos.y - self.vel.y <= other.pos.y then
+        self.pos.y = y
+        self.vel.y = 0
+    end
+end
+
+function Bullet.FlowerBomb:collide_lava(other, x, y)
+    self:die()
+end
+
+function Bullet.FlowerBomb:die()
+    self:create(Bullet.names.explosion)
+    Bullet.die(self)
+end
+
+--[[======== EXPLOSION STATE ========]]
+
+function Bullet.Explosion:enteredState()
+    cs = 20
+end
+
+function Bullet.Explosion:collide_enemy(other, x, y)
+    other:hit(self, self.damage)
+end
+
+function Bullet.Explosion:collide_solid(other, x, y) end
+
+function Bullet.Explosion:collide_platform(other, x, y) end
+
+function Bullet.Explosion:draw()
+    if self.timer % 4 == 0 then
+        love.graphics.setColor(255, 255, 0)
+    end
+    if self.timer % 4 < 3 then
+        Bullet.draw(self)
+    end
+    love.graphics.setColor(255, 255, 255)
+end
 
 return Bullet
