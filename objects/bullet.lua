@@ -242,6 +242,7 @@ function Bullet.Star:enteredState()
 end
 
 function Bullet.Star:die()
+    if self.dead then return end
     cs = 10
     for i = 1, 16 do
         self:create(Bullet.names.miniStar, {
