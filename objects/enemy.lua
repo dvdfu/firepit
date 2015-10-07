@@ -18,6 +18,7 @@ function Enemy:hit(other, damage)
         self.health = self.health - damage
         self:pushState('Hit')
     else
+        self.health = 0
         self:gotoState('Dead')
     end
 end

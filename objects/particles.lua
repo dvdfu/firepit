@@ -51,4 +51,17 @@ function Particles.newFrost()
     return part
 end
 
+function Particles.newSmoke()
+    local part = love.graphics.newParticleSystem(Particles.sprDot)
+    part:setParticleLifetime(0, 3)
+    part:setDirection(0)
+    part:setSpread(math.pi*2)
+    part:setAreaSpread('normal', 12, 12)
+    part:setSpeed(0, 30)
+    part:setColors(146, 36, 36, 255, 20, 15, 10, 255)
+    part:setSizes(6, 0)
+    part:setLinearAcceleration(0, -20)
+    return part
+end
+
 return Particles

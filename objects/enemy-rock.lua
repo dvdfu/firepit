@@ -86,6 +86,14 @@ function EnemyRock:grab(player)
     return false
 end
 
+function EnemyRock:hit(other, damage)
+    Enemy.hit(self, other, damage)
+    if self.health <= 0 and other then
+        self.vel = (self.pos - other.pos):normalized() * 6
+        self.vel.y = -6
+    end
+end
+
 function EnemyRock:release() end
 
 function EnemyRock:stomp()
@@ -258,7 +266,6 @@ function EnemyRock.Hit:hit() end
 function EnemyRock.Dead:enteredState()
     self.collider:setGhost(self.body)
     self.deadTimer = 60
-    self.vel.y = -5
 end
 
 function EnemyRock.Dead:update(dt)

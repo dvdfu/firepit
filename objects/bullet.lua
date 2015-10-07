@@ -3,6 +3,7 @@ local Class = require 'middleclass'
 local Object = require 'objects/object'
 local Bullet = Class('bullet', Object)
 local Vector = require('vector')
+local Particles = require('objects/particles')
 
 Bullet.sprBubble = love.graphics.newImage('assets/images/bullets/bubble.png')
 Bullet.sprBubblePop = love.graphics.newImage('assets/images/bullets/bubble_pop.png')
@@ -73,7 +74,7 @@ Bullet.static.info = {
         name = 'Explosion',
         sprite = Bullet.sprExplosion,
         makeBody = function(collider, x, y)
-            return collider:addCircle(x, y, 64)
+            return collider:addCircle(x, y, 56)
         end,
         damage = 4,
         time = 8
@@ -272,6 +273,10 @@ function Bullet.FlowerBomb:collide_lava(other, x, y)
     self:die()
 end
 
+function Bullet.FlowerBomb:collide_bullet(other, x, y)
+    self:die()
+end
+
 function Bullet.FlowerBomb:die()
     self:create(Bullet.names.explosion)
     Bullet.die(self)
@@ -281,6 +286,9 @@ end
 
 function Bullet.Explosion:enteredState()
     cs = 20
+    self.smoke = Particles.newSmoke()
+    self.smoke:setPosition(self.pos:unpack())
+    self.smoke:emit(20)
 end
 
 function Bullet.Explosion:collide_enemy(other, x, y)
@@ -292,13 +300,27 @@ function Bullet.Explosion:collide_solid(other, x, y) end
 function Bullet.Explosion:collide_platform(other, x, y) end
 
 function Bullet.Explosion:draw()
+    self.smoke:update(1/60)
+    love.graphics.draw(self.smoke)
+    if self.dead then return end
     if self.timer % 4 == 0 then
-        love.graphics.setColor(255, 255, 0)
+        love.graphics.setColor(0, 0, 0)
     end
     if self.timer % 4 < 3 then
-        Bullet.draw(self)
+        -- Bullet.draw(self)
+        love.graphics.circle('fill', self.pos.x, self.pos.y, 56, 56)
     end
     love.graphics.setColor(255, 255, 255)
+end
+
+function Bullet.Explosion:die()
+    self.collider:setGhost(self.body)
+    self.timer = 3*60
+    self.dead = true
+end
+
+function Bullet.Explosion:isDead()
+    return self.dead and self.timer == 0
 end
 
 return Bullet
