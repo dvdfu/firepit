@@ -108,6 +108,7 @@ function Player:update(dt)
             self.vel.y = -Player.jumpVel
             self.jumpTimer = Player.jumpTimerMax
             self.dust:emit(8)
+            love.audio.play(Sound.jump)
         end
     else
         if self.jumpTimer > 0 then
@@ -258,7 +259,7 @@ function Player:useActivePower()
             self.pushVel = self:getAimDirection(true) * -5
         end
     elseif power.info.name == Powerup.names.flower then
-        if power.timer == 0 then
+        if power.timer == 0 and self.ground then
             power:use()
             self:createBullet(Bullet.names.flower)
         end

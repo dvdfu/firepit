@@ -9,6 +9,7 @@ local EnemyRock = require 'objects/enemy-rock'
 local EnemyFloat = require 'objects/enemy-float'
 local Powerup = require 'powerup'
 local Lava = require 'objects/lava'
+Sound = require('sound')
 
 local collider = {}
 local sw = 480
@@ -29,7 +30,7 @@ function Game:enter()
 
     p = Player:new(collider, 32, 0)
     p.bullets = bullets
-    -- p:setPower(Powerup.names.jumpGlide)
+    p:setPower(Powerup.names.chuckie)
     -- p:setPower(Powerup.names.coldFeet)
     p:setPower(Powerup.names.flower)
     l = Lava:new(collider, sh)
@@ -88,8 +89,8 @@ function Game:update(dt)
         cam:lookAt(math.floor(cx+0.5), math.floor(cy+0.5))
     end
     -- TODO: add functionality to camera class
-    
-    
+
+
     if Input:pressed('q') then p:setPower(Powerup.names.bubble) end
     if Input:pressed('w') then p:setPower(Powerup.names.star) end
     if Input:pressed('e') then p:setPower(Powerup.names.flower) end
