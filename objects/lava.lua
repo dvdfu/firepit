@@ -38,7 +38,7 @@ Lava.static.glowShader = love.graphics.newShader[[
 
 function Lava:initialize(collider, y)
     self.pos = Vector(-128, y)
-    self.size = Vector(480+256, 256)
+    self.size = Vector(512+256, 256)
     self.offset = -self.size / 2
     Object.initialize(self, collider, collider:rectangle(self.pos.x, y, self.size:unpack()))
     self.tags = { 'lava' }

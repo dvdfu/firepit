@@ -17,7 +17,7 @@ function GUI:initialize(cam, player, enemies)
     self.cam = cam
     self.player = player
     self.enemies = enemies
-    local w, h = 480, 320
+    local w, h = 512, 320
     self.canvas = love.graphics.newCanvas(w, h)
 end
 
@@ -104,7 +104,7 @@ function GUI:drawEnemyHealth(enemy)
     if enemy.health == 0 and enemy.healthTimer <= 30 then return end
     local x, y = (enemy.pos + enemy.healthOffset):unpack()
     local cx, cy = self.cam:pos()
-    x, y = x-cx + 240, y-cy + 180
+    x, y = x-cx + 512/2, y-cy + 360/2
     local w, h = 32, 6
     local damage = enemy.health
     if enemy.healthTimer > 50 then

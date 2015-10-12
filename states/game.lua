@@ -12,7 +12,7 @@ local Lava = require 'objects/lava'
 Sound = require('sound')
 
 local collider = {}
-local sw = 480
+local sw = 512
 local sh = 360
 
 function Game:enter()
@@ -141,6 +141,7 @@ function Game:draw()
         end
         for _, bullet in pairs(bullets) do
             bullet:draw()
+            -- Object.draw(bullet)
         end
         l:draw()
     end)

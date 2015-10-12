@@ -258,7 +258,7 @@ function Player:useActivePower()
             self.pushVel = self:getAimDirection(true) * -5
         end
     elseif power.info.name == Powerup.names.flower then
-        if power.timer == 0 and self.ground then
+        if power.timer == 0 then
             power:use()
             self:createBullet(Bullet.names.flower)
         end

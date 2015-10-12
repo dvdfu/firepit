@@ -65,6 +65,6 @@ end
 function setScale(s)
     if scale == s or s <= 0 then return end
     scale = s
-    love.window.setMode(480*s, 360*s)
+    love.window.setMode(512*s, 360*s)
     scaleShader:send('scale', s)
 end
