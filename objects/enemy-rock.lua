@@ -104,7 +104,7 @@ function EnemyRock:stomp()
     else
         self.vel.y = -6
     end
-    self:hit(nil, 3, 8)
+    self:hit(nil, 3, 4)
     return true
 end
 
@@ -232,7 +232,7 @@ function EnemyRock.Throw:update()
 end
 
 function EnemyRock.Throw:collide_enemy(other, x, y)
-    other:hit(self, 8, 8)
+    other:hit(self, 8, 4)
 end
 
 function EnemyRock.Throw:collide_platform(other, x, y)
@@ -268,9 +268,9 @@ function EnemyRock.Hit:update()
 end
 
 function EnemyRock.Hit:draw()
-    love.graphics.setColor(255, 128, 128)
+    love.graphics.setShader(Enemy.hitShader)
     EnemyRock.draw(self)
-    love.graphics.setColor(255, 255, 255)
+    love.graphics.setShader()
 end
 
 function EnemyRock.Hit:hit()

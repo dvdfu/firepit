@@ -129,7 +129,7 @@ function EnemyFloat:drawGlow()
 end
 
 function EnemyFloat:stomp()
-    self:hit(nil, 3, 8)
+    self:hit(nil, 3, 4)
     return true
 end
 
@@ -178,9 +178,9 @@ end
 
 function EnemyFloat.Hit:draw()
     self:drawGlow()
-    love.graphics.setColor(255, 128, 128)
+    love.graphics.setShader(Enemy.hitShader)
     EnemyFloat.draw(self)
-    love.graphics.setColor(255, 255, 255)
+    love.graphics.setShader()
 end
 
 function EnemyFloat.Hit:hit()

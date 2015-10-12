@@ -31,6 +31,7 @@ Bullet.static.info = {
         end,
         offset = Vector(0, -16),
         damage = 1,
+        hitstun = 2,
         speed = {3, 5},
         angle = {0, 10},
         damp = Vector(0.98, 0.99),
@@ -45,6 +46,7 @@ Bullet.static.info = {
         end,
         offset = Vector(0, -16),
         damage = 4,
+        hitstun = 4,
         speed = 9,
         time = 80,
         angular = true

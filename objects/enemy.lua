@@ -3,6 +3,14 @@ local Object = require('objects/object')
 local Enemy = Class('enemy', Object)
 local Vector = require('vector')
 
+Enemy.static.hitShader = love.graphics.newShader[[
+    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+        vec4 pixel = Texel(texture, texture_coords);
+        pixel.rgb = vec3(1.0);
+        return pixel * color;
+    }
+]]
+
 function Enemy:initialize(collider, body)
     Object.initialize(self, collider, body)
     self.tags = { 'enemy' }
