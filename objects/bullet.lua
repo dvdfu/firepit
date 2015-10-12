@@ -27,7 +27,7 @@ Bullet.static.info = {
         spritePop = Bullet.sprBubblePop,
         animated = true,
         makeBody = function(collider, x, y)
-            return collider:addCircle(x, y, 4)
+            return collider:circle(x, y, 4)
         end,
         offset = Vector(0, -16),
         damage = 1,
@@ -41,7 +41,7 @@ Bullet.static.info = {
         name = 'Star',
         sprite = Bullet.sprEnergy,
         makeBody = function(collider, x, y)
-            return collider:addCircle(x, y, 10)
+            return collider:circle(x, y, 10)
         end,
         offset = Vector(0, -16),
         damage = 4,
@@ -54,7 +54,7 @@ Bullet.static.info = {
         sprite = Bullet.sprStarSmall,
         animated = true,
         makeBody = function(collider, x, y)
-            return collider:addCircle(x, y, 4)
+            return collider:circle(x, y, 4)
         end,
         damage = 2,
         speed = {1, 9},
@@ -65,7 +65,7 @@ Bullet.static.info = {
         name = 'FlowerBomb',
         sprite = Bullet.sprFlower,
         makeBody = function(collider, x, y)
-            return collider:addRectangle(x, y, 16, 16)
+            return collider:rectangle(x, y, 16, 16)
         end,
         acc = Vector(0, 0.3),
         time = 30*60
@@ -74,7 +74,7 @@ Bullet.static.info = {
         name = 'Explosion',
         sprite = Bullet.sprExplosion,
         makeBody = function(collider, x, y)
-            return collider:addCircle(x, y, 1)
+            return collider:circle(x, y, 1)
         end,
         damage = 4,
         time = 12

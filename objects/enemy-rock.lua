@@ -26,7 +26,7 @@ function EnemyRock:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(16, 16)
     self.maxHealth = 5
-    Enemy.initialize(self, collider, collider:addRectangle(x, y, self.size:unpack()))
+    Enemy.initialize(self, collider, collider:rectangle(x, y, self.size:unpack()))
     self:addTag('enemy_rock')
     self.offset.y = self.size.y/2
 

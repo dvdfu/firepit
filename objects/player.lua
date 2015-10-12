@@ -28,7 +28,7 @@ Player.static.fallAcc = 0.3
 
 function Player:initialize(collider, x, y)
     self.size = Vector(12, 22)
-    Object.initialize(self, collider, collider:addRectangle(x, y, self.size:unpack()))
+    Object.initialize(self, collider, collider:rectangle(x, y, self.size:unpack()))
     self.tags = { 'player' }
     self.pos = Vector(x, y)
     self.offset.y = self.size.y/2

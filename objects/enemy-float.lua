@@ -40,7 +40,7 @@ function EnemyFloat:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(10, 10)
     self.maxHealth = 2
-    Enemy.initialize(self, collider, collider:addCircle(x, y, 10))
+    Enemy.initialize(self, collider, collider:circle(x, y, 10))
     self:addTag('enemy_float')
     self.direction.x = -1
 

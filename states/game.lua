@@ -1,7 +1,7 @@
 local Game = {}
 local GUI = require 'gui'
 local Camera = require 'camera'
-local HC = require 'modules/hardon-collider'
+local HC = require 'modules/HC'
 local Object = require 'objects/object'
 local Solid = require 'objects/solid'
 local Player = require 'objects/player'
@@ -15,15 +15,8 @@ local collider = {}
 local sw = 480
 local sh = 360
 
-function collisionStart(dt, shapeA, shapeB, dx, dy)
-    shapeA.object:collide(dt, shapeB.object, dx, dy)
-    shapeB.object:collide(dt, shapeA.object, -dx, -dy)
-end
-
-function collisionEnd(dt, shapeA, shapeB) end
-
 function Game:enter()
-    collider = HC(128, collisionStart, collisionEnd)
+    collider = HC(128)
     solids = {}
     bullets = {}
     addSolids()
@@ -113,7 +106,7 @@ function Game:update(dt)
     for _, solid in pairs(solids) do
         solid:update(dt)
     end
-    collider:update(dt)
+
     l:update(dt)
 end
 

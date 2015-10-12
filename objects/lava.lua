@@ -40,8 +40,7 @@ function Lava:initialize(collider, y)
     self.pos = Vector(-128, y)
     self.size = Vector(480+256, 256)
     self.offset = -self.size / 2
-    Object.initialize(self, collider, collider:addRectangle(self.pos.x, y, self.size:unpack()))
-    collider:setPassive(self.body)
+    Object.initialize(self, collider, collider:rectangle(self.pos.x, y, self.size:unpack()))
     self.tags = { 'lava' }
     self.level = y
     self:render()

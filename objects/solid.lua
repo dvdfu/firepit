@@ -9,8 +9,7 @@ Solid.static.sprTerrain = love.graphics.newImage('assets/images/stage/terrain.pn
 Solid.static.sprTop = love.graphics.newImage('assets/images/stage/terrain_top.png')
 
 function Solid:initialize(collider, x, y, w, h, color, solid)
-    Object.initialize(self, collider, collider:addRectangle(x, y, w, h))
-    collider:setPassive(self.body)
+    Object.initialize(self, collider, collider:rectangle(x, y, w, h))
     self:addTag('tiled')
     self:addTag('platform')
     if solid then self:addTag('solid') end
