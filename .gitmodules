@@ -10,6 +10,6 @@
 [submodule "modules/love-misc-libs"]
 	path = modules/love-misc-libs
 	url = git@github.com:bartbes/love-misc-libs.git
-[submodule "modules/hardon-collider"]
-	path = modules/hardon-collider
-	url = git@github.com:vrld/HardonCollider.git
+[submodule "modules/HC"]
+	path = modules/HC
+	url = git@github.com:vrld/HC.git
