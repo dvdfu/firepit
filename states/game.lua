@@ -30,11 +30,10 @@ function Game:enter()
 
     p = Player:new(collider, 32, 0)
     p.bullets = bullets
-    p:setPower(Powerup.names.chuckie)
+    -- p:setPower(Powerup.names.chuckie)
     -- p:setPower(Powerup.names.coldFeet)
     p:setPower(Powerup.names.flower)
     l = Lava:new(collider, sh)
-    gui = GUI:new(p)
 
     enemies = {}
     timer = 0
@@ -42,6 +41,7 @@ function Game:enter()
     cx, cy = sw/2, sh/2
     cs = 0
     cam = Camera(cx, cy)
+    gui = GUI:new(cam, p, enemies)
 end
 
 function addSolids()

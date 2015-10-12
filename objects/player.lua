@@ -108,7 +108,6 @@ function Player:update(dt)
             self.vel.y = -Player.jumpVel
             self.jumpTimer = Player.jumpTimerMax
             self.dust:emit(8)
-            love.audio.play(Sound.jump)
         end
     else
         if self.jumpTimer > 0 then

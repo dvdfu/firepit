@@ -25,11 +25,11 @@ EnemyRock.Dead = EnemyRock:addState('Dead')
 function EnemyRock:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(16, 16)
+    self.maxHealth = 5
     Enemy.initialize(self, collider, collider:addRectangle(x, y, self.size:unpack()))
     self:addTag('enemy_rock')
     self.offset.y = self.size.y/2
 
-    self.health = 3
     self.player = nil
 
     self.animMove = newAnimation(EnemyRock.sprMove, 24, 24, 1/8, 0)
@@ -80,6 +80,10 @@ function EnemyRock:draw()
     self.sprite:update(1/60)
     local x, y = math.floor(self.pos.x+0.5), math.floor(self.pos.y+0.5)
     self.sprite:draw(x, y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
+end
+
+function EnemyRock:drawHealth(cam)
+    Enemy.drawHealth(self, cam, self.pos.x, self.pos.y-32)
 end
 
 function EnemyRock:grab(player)

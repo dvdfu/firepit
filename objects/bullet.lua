@@ -307,7 +307,7 @@ function Bullet.Explosion:draw()
     if scale > 0 then
         self.body:scale(scale/r)
     end
-    
+
     self.smoke:update(1/60)
     love.graphics.draw(self.smoke)
     if self.dead then return end

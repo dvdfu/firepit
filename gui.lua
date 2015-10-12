@@ -12,15 +12,22 @@ GUI.static.dropShadowShader = love.graphics.newShader[[
     }
 ]]
 
-function GUI:initialize(player)
+function GUI:initialize(cam, player, enemies)
     love.graphics.setLineWidth(1)
+    self.cam = cam
     self.player = player
-    self.canvas = love.graphics.newCanvas(240, 80)
+    self.enemies = enemies
+    local w, h = love.graphics.getWidth(), love.graphics.getHeight()
+    self.canvas = love.graphics.newCanvas(w, h)
 end
 
 function GUI:draw()
     local bar = 12
     self:outline(function()
+        for _, enemy in pairs(self.enemies) do
+            enemy:drawHealth(self.cam)
+        end
+
         self:drawPower(self.player.staticPowers[1], 1)
         self:drawPower(self.player.staticPowers[2], 2)
         self:drawPower(self.player.activePower, 3)

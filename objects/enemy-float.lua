@@ -39,12 +39,12 @@ EnemyFloat.static.jumpVel = 0.7
 function EnemyFloat:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(10, 10)
+    self.maxHealth = 2
     Enemy.initialize(self, collider, collider:addCircle(x, y, 10))
     self:addTag('enemy_float')
     self.direction.x = -1
 
     self.player = nil
-    self.health = 1
 
     self.moveTimer = 0
     self.stompTimer = 0
@@ -124,6 +124,10 @@ function EnemyFloat:draw()
         local x, y = math.floor(self.pos.x+0.5), math.floor(self.pos.y+0.5)
         self.sprite:draw(x, y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight()/2)
     end
+end
+
+function EnemyFloat:drawHealth(cam)
+    Enemy.drawHealth(self, cam, self.pos.x, self.pos.y-16)
 end
 
 function EnemyFloat:stomp()
