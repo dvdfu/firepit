@@ -92,14 +92,12 @@ function Game:update(dt)
     for key, enemy in pairs(enemies) do
         enemy:update(dt)
         if enemy:isDead() then
-            collider:remove(enemy.body)
             enemies[key] = nil
         end
     end
     for key, bullet in pairs(bullets) do
         bullet:update(dt)
         if bullet:isDead() then
-            collider:remove(bullet.body)
             bullets[key] = nil
         end
     end
@@ -108,6 +106,20 @@ function Game:update(dt)
     end
 
     l:update(dt)
+
+    -- object removal
+    for key, enemy in pairs(enemies) do
+        if enemy:isDead() then
+            collider:remove(enemy.body)
+            enemies[key] = nil
+        end
+    end
+    for key, bullet in pairs(bullets) do
+        if bullet:isDead() then
+            collider:remove(bullet.body)
+            bullets[key] = nil
+        end
+    end
 end
 
 local function camDraw(func)

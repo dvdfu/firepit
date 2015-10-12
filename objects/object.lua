@@ -9,6 +9,7 @@ function Object:initialize(collider, body)
     self.collider = collider
     self.body = body
     self.body.object = self --body reference to self
+    self.activeBody = self.activeBody or true --should update self in collider
     self.offset = self.offset or Vector(0, 0) --origin relative to body center
     self.pos = self.pos or Vector(0, 0)
     self.vel = self.vel or Vector(0, 0)
@@ -20,6 +21,7 @@ end
 function Object:update(dt) --invoke this after velocity is set
     self.pos = self.pos + self.vel
     self:move()
+    self:collide()
 end
 
 function Object:move() --update body to position
@@ -39,12 +41,17 @@ function Object:draw()
     love.graphics.setColor(255, 255, 255)
 end
 
-function Object:collide(dt, other, dx, dy) --called by HC callback
-    local x = self.pos.x + dx or 0
-    local y = self.pos.y + dy or 0
-    for _, tag in ipairs(other.tags) do
-        if self['collide_'..tag] then
-            self['collide_'..tag](self, other, x, y)
+function Object:collide()
+    if not self.activeBody then return end
+    for other, d in pairs(self.collider:collisions(self.body)) do
+        other = other.object
+        d = d + self.pos
+        if other.activeBody then
+            for _, tag in ipairs(other.tags) do
+                if self['collide_'..tag] then
+                    self['collide_'..tag](self, other, d.x, d.y)
+                end
+            end
         end
     end
     self:move()

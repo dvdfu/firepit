@@ -179,12 +179,12 @@ function EnemyFloat.Hit:hit() end
 --[[======== DEAD STATE ========]]
 
 function EnemyFloat.Dead:enteredState()
-    self.collider:setGhost(self.body)
+    self.activeBody = false
+    self.vel = Vector(0, 0)
+    self.deadTimer = 60
     self.speck:setEmissionRate(0)
     self.explosion:emit(50)
     self.sprite = self.animDead
-    self.vel = Vector(0, 0)
-    self.deadTimer = 60
 end
 
 function EnemyFloat.Dead:update(dt)

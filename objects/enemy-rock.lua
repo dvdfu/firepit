@@ -101,7 +101,10 @@ end
 function EnemyRock:release() end
 
 function EnemyRock:stomp()
-    self:gotoState('Stun')
+    self:hit(nil, 3)
+    if self.health > 0 then
+        self:gotoState('Stun')
+    end
 end
 
 --[[======== MOVE STATE ========]]
@@ -168,7 +171,7 @@ end
 --[[======== HOLD STATE ========]]
 
 function EnemyRock.Hold:enteredState()
-    self.collider:setGhost(self.body)
+    self.activeBody = false
     self.sprite = self.animStun
     self.sprite.speed = 0
     self.holdTimer = 20
@@ -176,7 +179,7 @@ function EnemyRock.Hold:enteredState()
 end
 
 function EnemyRock.Hold:exitedState()
-    self.collider:setSolid(self.body)
+    self.activeBody = true
     if self.player and self.player.hold == self then
         self.player.hold = nil
     end
@@ -268,8 +271,9 @@ function EnemyRock.Hit:hit() end
 --[[======== DEAD STATE ========]]
 
 function EnemyRock.Dead:enteredState()
-    self.collider:setGhost(self.body)
+    self.activeBody = false
     self.deadTimer = 60
+    self.sprite = self.animStun
 end
 
 function EnemyRock.Dead:update(dt)

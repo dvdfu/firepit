@@ -56,7 +56,7 @@ Bullet.static.info = {
         makeBody = function(collider, x, y)
             return collider:circle(x, y, 4)
         end,
-        damage = 2,
+        damage = 1,
         speed = {1, 9},
         damp = Vector(0.9, 0.9),
         time = {20, 40}
@@ -160,14 +160,13 @@ end
 function Bullet:update(dt)
     self.vel = self.vel:permul(self.damp)
     self.vel = self.vel + self.acc
-    self.pos = self.pos + self.vel
     self.direction.x = self.vel.x < 0 and -1 or 1
     if self.timer > 0 then
         self.timer = self.timer - 1
     elseif not self.dead then
         self:die()
     end
-    self:move()
+    Object.update(self)
 end
 
 function Bullet:collide_enemy(other, x, y)
@@ -210,7 +209,8 @@ function Bullet:getAngleDeg()
 end
 
 function Bullet:die()
-    self.collider:setGhost(self.body)
+    if self.dead then return end
+    self.activeBody = false
     self.dead = true
     self.timer = 0
 end
@@ -223,6 +223,7 @@ end
 
 function Bullet.Bubble:die()
     if self.dead then return end
+    self.activeBody = false
     self.dead = true
     self.timer = 5
     self.vel = Vector(0, 0)
@@ -280,6 +281,7 @@ function Bullet.FlowerBomb:collide_bullet(other, x, y)
 end
 
 function Bullet.FlowerBomb:die()
+    if self.dead then return end
     self:create(Bullet.names.explosion)
     Bullet.die(self)
 end
@@ -321,7 +323,8 @@ function Bullet.Explosion:draw()
 end
 
 function Bullet.Explosion:die()
-    self.collider:setGhost(self.body)
+    if self.dead then return end
+    self.activeBody = false
     self.timer = 3*60
     self.dead = true
 end
