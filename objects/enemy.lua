@@ -9,18 +9,17 @@ function Enemy:initialize(collider, body)
     self.maxHealth = self.maxHealth or 1
     self.health = self.maxHealth
     self.healthTimer = 0
-    self.preHealth = 0
+    self.preHealth = self.maxHealth
     self.ground = nil
 end
 
-function Enemy:hit(other, damage)
+function Enemy:hit(other, damage, time)
     damage = damage or 0
+    self.hitTimer = time or 0
     if self.healthTimer == 0 then
         self.preHealth = self.health
     end
-    if damage < 0 then
-        self:gotoState('Dead')
-    elseif self.health > damage then
+    if damage >= 0 and self.health > damage then
         self.health = self.health - damage
         self:pushState('Hit')
     else
@@ -30,6 +29,7 @@ function Enemy:hit(other, damage)
     if damage ~= 0 then
         self.healthTimer = 60
     end
+    return true
 end
 
 function Enemy:drawHealth(cam, x, y)

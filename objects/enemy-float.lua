@@ -77,7 +77,7 @@ function EnemyFloat:update(dt)
         self.vel.y = EnemyFloat.fallVel
     end
     if self.ground and self.ground:getState(self.pos.x) == Tile.state.iced then
-        self:gotoState('Dead')
+        self:hit(nil, 1)
     end
     self.ground = nil
     Enemy.update(self, dt)
@@ -131,7 +131,11 @@ function EnemyFloat:drawHealth(cam)
 end
 
 function EnemyFloat:stomp()
-    self:gotoState('Dead')
+    self:hit(nil, 3)
+    if self.health > 0 then
+        self:gotoState('Stun')
+    end
+    return true
 end
 
 --[[======== MOVE STATE ========]]
@@ -156,10 +160,6 @@ end
 
 --[[======== HIT STATE ========]]
 
-function EnemyFloat.Hit:enteredState()
-    self.hitTimer = 2
-end
-
 function EnemyFloat.Hit:update(dt)
     if self.hitTimer == 0 then
         self:popState()
@@ -174,7 +174,9 @@ function EnemyFloat.Hit:draw()
     love.graphics.setColor(255, 255, 255)
 end
 
-function EnemyFloat.Hit:hit() end
+function EnemyFloat.Hit:hit()
+    return false
+end
 
 --[[======== DEAD STATE ========]]
 
@@ -198,12 +200,16 @@ function EnemyFloat.Dead:draw()
     EnemyFloat.draw(self)
 end
 
-function EnemyFloat.Dead:hit() end
+function EnemyFloat.Dead:hit()
+    return false
+end
 
 function EnemyFloat.Dead:isDead()
     return self.deadTimer == 0
 end
 
-function EnemyFloat.Dead:stomp() end
+function EnemyFloat.Dead:stomp()
+    return false
+end
 
 return EnemyFloat

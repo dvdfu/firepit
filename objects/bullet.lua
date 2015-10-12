@@ -76,7 +76,8 @@ Bullet.static.info = {
         makeBody = function(collider, x, y)
             return collider:circle(x, y, 1)
         end,
-        damage = 4,
+        damage = 10,
+        hitstun = 12,
         time = 12
     }
 }
@@ -109,6 +110,7 @@ function Bullet:initialize(name, parent, pool, override)
     end
 
     self.damage = info.damage or 0
+    self.hitstun = info.hitstun or 2
     self.spawnOffset = info.offset or Vector(0, 0)
     self.acc = info.acc or Vector(0, 0)
     self.damp = info.damp or Vector(1, 1)
@@ -170,8 +172,9 @@ function Bullet:update(dt)
 end
 
 function Bullet:collide_enemy(other, x, y)
-    self:die()
-    other:hit(self, self.damage)
+    if other:hit(self, self.damage, self.hitstun) then
+        self:die()
+    end
 end
 
 function Bullet:collide_solid(other, x, y)
@@ -296,7 +299,7 @@ function Bullet.Explosion:enteredState()
 end
 
 function Bullet.Explosion:collide_enemy(other, x, y)
-    other:hit(self, self.damage)
+    other:hit(self, self.damage, self.hitstun)
 end
 
 function Bullet.Explosion:collide_solid(other, x, y) end

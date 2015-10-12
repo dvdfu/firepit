@@ -96,6 +96,7 @@ function EnemyRock:hit(other, damage)
         self.vel = (self.pos - other.pos):normalized() * 6
         self.vel.y = -6
     end
+    return true
 end
 
 function EnemyRock:release() end
@@ -105,6 +106,7 @@ function EnemyRock:stomp()
     if self.health > 0 then
         self:gotoState('Stun')
     end
+    return true
 end
 
 --[[======== MOVE STATE ========]]
@@ -248,10 +250,6 @@ function EnemyRock.Throw:stomp() end
 
 --[[======== HIT STATE ========]]
 
-function EnemyRock.Hit:enteredState()
-    self.hitTimer = 2
-end
-
 function EnemyRock.Hit:update(dt)
     if self.hitTimer > 0 then
         self.hitTimer = self.hitTimer - 1
@@ -266,7 +264,9 @@ function EnemyRock.Hit:draw()
     love.graphics.setColor(255, 255, 255)
 end
 
-function EnemyRock.Hit:hit() end
+function EnemyRock.Hit:hit()
+    return false
+end
 
 --[[======== DEAD STATE ========]]
 
@@ -285,7 +285,9 @@ function EnemyRock.Dead:update(dt)
     Enemy.update(self, dt)
 end
 
-function EnemyRock.Dead:hit() end
+function EnemyRock.Dead:hit()
+    return false
+end
 
 function EnemyRock.Dead:isDead()
     return self.deadTimer == 0

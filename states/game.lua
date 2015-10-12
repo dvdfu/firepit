@@ -24,7 +24,7 @@ function Game:enter()
     p = Player:new(collider, 32, 0)
     p.bullets = bullets
     -- p:setPower(Powerup.names.chuckie)
-    -- p:setPower(Powerup.names.coldFeet)
+    p:setPower(Powerup.names.coldFeet)
     p:setPower(Powerup.names.flower)
     l = Lava:new(collider, sh)
 

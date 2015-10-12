@@ -182,9 +182,9 @@ end
 
 function Player:collide_enemy_float(other, x, y)
     if self:hasPower(Powerup.names.coldFeet) and y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
-        other:hit(self, -1)
         self.vel.y = -Player.jumpVel
         self.y = y
+        other:stomp()
     else
         self:getHit(other)
     end
