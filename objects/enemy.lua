@@ -24,17 +24,17 @@ end
 
 function Enemy:hit(other, damage, hitstun)
     damage = damage or 0
-    self.hitTimer = hitstun or 0
-    if self.healthTimer == 0 then
+    self.hitTimer = hitstun or 2
+    if self.healthTimer < 40 then
         self.preHealth = self.health
     end
     if damage >= 0 and self.health > damage then
         self.health = self.health - damage
-        self:pushState('Hit')
     else
         self.health = 0
         self:gotoState('Dead')
     end
+    self:pushState('Hit')
     if damage ~= 0 then
         self.healthTimer = 60
     end

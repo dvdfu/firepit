@@ -83,10 +83,6 @@ function EnemyRock:draw()
     self.sprite:draw(x, y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
-function EnemyRock:drawHealth(cam)
-    Enemy.drawHealth(self, cam, self.pos.x, self.pos.y-32)
-end
-
 function EnemyRock:grab(player)
     return false
 end
@@ -103,10 +99,12 @@ end
 function EnemyRock:release() end
 
 function EnemyRock:stomp()
-    self:hit(nil, 3)
-    if self.health > 0 then
+    if self.health > 3 then
         self:gotoState('Stun')
+    else
+        self.vel.y = -6
     end
+    self:hit(nil, 3, 8)
     return true
 end
 
@@ -234,7 +232,7 @@ function EnemyRock.Throw:update()
 end
 
 function EnemyRock.Throw:collide_enemy(other, x, y)
-    other:hit(self, 8)
+    other:hit(self, 8, 8)
 end
 
 function EnemyRock.Throw:collide_platform(other, x, y)
@@ -252,6 +250,14 @@ function EnemyRock.Throw:stomp() end
 
 --[[======== HIT STATE ========]]
 
+function EnemyRock.Hit:enteredState()
+    self.immobile = true
+end
+
+function EnemyRock.Hit:exitedState()
+    self.immobile = false
+end
+
 function EnemyRock.Hit:update()
     if self.hitTimer > 0 then
         self.hitTimer = self.hitTimer - 1
@@ -262,7 +268,7 @@ function EnemyRock.Hit:update()
 end
 
 function EnemyRock.Hit:draw()
-    love.graphics.setColor(255, 0, 0)
+    love.graphics.setColor(255, 128, 128)
     EnemyRock.draw(self)
     love.graphics.setColor(255, 255, 255)
 end

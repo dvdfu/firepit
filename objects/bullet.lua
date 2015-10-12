@@ -110,7 +110,7 @@ function Bullet:initialize(name, parent, pool, override)
     end
 
     self.damage = info.damage or 0
-    self.hitstun = info.hitstun or 2
+    self.hitstun = info.hitstun or 4
     self.spawnOffset = info.offset or Vector(0, 0)
     self.acc = info.acc or Vector(0, 0)
     self.damp = info.damp or Vector(1, 1)

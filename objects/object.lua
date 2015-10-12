@@ -10,6 +10,7 @@ function Object:initialize(collider, body)
     self.body = body
     self.body.object = self --body reference to self
     self.activeBody = self.activeBody or true --should update self in collider
+    self.immobile = self.immobile or false --should not move
     self.offset = self.offset or Vector(0, 0) --origin relative to body center
     self.pos = self.pos or Vector(0, 0)
     self.vel = self.vel or Vector(0, 0)
@@ -19,8 +20,10 @@ function Object:initialize(collider, body)
 end
 
 function Object:update() --invoke this after velocity is set
-    self.pos = self.pos + self.vel
-    self:move()
+    if not self.immobile then
+        self.pos = self.pos + self.vel
+        self:move()
+    end
     self:collide()
 end
 
