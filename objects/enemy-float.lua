@@ -40,6 +40,7 @@ function EnemyFloat:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(10, 10)
     self.maxHealth = 2
+    self.healthOffset = Vector(0, -24)
     Enemy.initialize(self, collider, collider:circle(x, y, 10))
     self:addTag('enemy_float')
     self.direction.x = -1
@@ -71,7 +72,7 @@ function EnemyFloat:initialize(collider, x, y)
     self:gotoState('Move')
 end
 
-function EnemyFloat:update(dt)
+function EnemyFloat:update()
     self.vel.y = self.vel.y + EnemyFloat.fallAcc
     if self.vel.y > EnemyFloat.fallVel then
         self.vel.y = EnemyFloat.fallVel
@@ -80,7 +81,7 @@ function EnemyFloat:update(dt)
         self:hit(nil, 1)
     end
     self.ground = nil
-    Enemy.update(self, dt)
+    Enemy.update(self)
 end
 
 function EnemyFloat:collide_solid(other, x, y)
@@ -148,10 +149,10 @@ function EnemyFloat.Move:enteredState()
     self.vel.x = EnemyFloat.moveVel * self.direction.x
 end
 
-function EnemyFloat.Move:update(dt)
+function EnemyFloat.Move:update()
     self.moveTimer = self.moveTimer + 1
     self.direction.x = self.vel.x > 0 and 1 or -1
-    EnemyFloat.update(self, dt)
+    EnemyFloat.update(self)
 end
 
 function EnemyFloat.Move:isHarmful()
@@ -160,12 +161,13 @@ end
 
 --[[======== HIT STATE ========]]
 
-function EnemyFloat.Hit:update(dt)
+function EnemyFloat.Hit:update()
     if self.hitTimer == 0 then
         self:popState()
     else
         self.hitTimer = self.hitTimer-1
     end
+    Enemy.update(self)
 end
 
 function EnemyFloat.Hit:draw()
@@ -189,10 +191,11 @@ function EnemyFloat.Dead:enteredState()
     self.sprite = self.animDead
 end
 
-function EnemyFloat.Dead:update(dt)
+function EnemyFloat.Dead:update()
     if self.deadTimer > 0 then
         self.deadTimer = self.deadTimer - 1
     end
+    Enemy.update(self)
 end
 
 function EnemyFloat.Dead:draw()

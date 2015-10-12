@@ -49,15 +49,15 @@ Powerup.static.info = {
         static = false,
         icon = love.graphics.newImage('assets/images/powers/star.png'),
         uses = -1,
-        cooldown = 60,
+        cooldown = 40,
         updates = true
     },
     ['Flower Bomb'] = {
         name = 'Flower Bomb',
         static = false,
         icon = love.graphics.newImage('assets/images/powers/flower.png'),
-        uses = -1,
-        cooldown = 120,
+        uses = 10,
+        cooldown = 20,
         updates = true
     },
     ['Chuckie'] = {

@@ -65,7 +65,7 @@ function addEnemy(x, y)
     return e
 end
 
-function Game:update(dt)
+function Game:update()
     if timer > 0 then
         timer = timer - 1
     else
@@ -88,24 +88,24 @@ function Game:update(dt)
     if Input:pressed('w') then p:setPower(Powerup.names.star) end
     if Input:pressed('e') then p:setPower(Powerup.names.flower) end
 
-    p:update(dt)
+    p:update()
     for key, enemy in pairs(enemies) do
-        enemy:update(dt)
+        enemy:update()
         if enemy:isDead() then
             enemies[key] = nil
         end
     end
     for key, bullet in pairs(bullets) do
-        bullet:update(dt)
+        bullet:update()
         if bullet:isDead() then
             bullets[key] = nil
         end
     end
     for _, solid in pairs(solids) do
-        solid:update(dt)
+        solid:update()
     end
 
-    l:update(dt)
+    l:update()
 
     -- object removal
     for key, enemy in pairs(enemies) do

@@ -25,7 +25,7 @@ function GUI:draw()
     local bar = 12
     self:outline(function()
         for _, enemy in pairs(self.enemies) do
-            enemy:drawHealth(self.cam)
+            self:drawEnemyHealth(enemy)
         end
 
         self:drawPower(self.player.staticPowers[1], 1)
@@ -97,7 +97,27 @@ function GUI:drawPower(power, i)
         love.graphics.setFont(GUI.numberFont)
         love.graphics.print(uses, x+2, y+24)
     end
+end
 
+function GUI:drawEnemyHealth(enemy)
+    if enemy.healthTimer <= 0 then return end
+    if enemy.health == 0 and enemy.healthTimer <= 30 then return end
+    local x, y = (enemy.pos + enemy.healthOffset):unpack()
+    x, y = self.cam:cameraCoords(x-480/2, y-360/2) --screen resolution
+    local w, h = 32, 6
+    local damage = enemy.health
+    if enemy.healthTimer > 50 then
+        damage = enemy.preHealth
+    elseif enemy.healthTimer > 40 then
+        damage = enemy.health + (enemy.preHealth-enemy.health)*(enemy.healthTimer-40)/(50-40)
+    end
+    love.graphics.setColor(128, 64, 64)
+    love.graphics.rectangle('fill', x-w/2, y-h/2, w, h)
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.rectangle('fill', x-w/2, y-h/2, w*damage/enemy.maxHealth, h)
+    love.graphics.setColor(255, 128, 96)
+    love.graphics.rectangle('fill', x-w/2, y-h/2, w*enemy.health/enemy.maxHealth, h)
+    love.graphics.setColor(255, 255, 255)
 end
 
 return GUI

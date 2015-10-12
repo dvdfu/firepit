@@ -18,7 +18,7 @@ function Object:initialize(collider, body)
     self.tags = self.tags or {} --collision categories
 end
 
-function Object:update(dt) --invoke this after velocity is set
+function Object:update() --invoke this after velocity is set
     self.pos = self.pos + self.vel
     self:move()
     self:collide()
