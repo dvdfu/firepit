@@ -10,31 +10,20 @@ require 'AnAL'
 
 EnemyCharge.static.sprMove = love.graphics.newImage('assets/images/enemies/charge_move.png')
 EnemyCharge.static.sprAttack = love.graphics.newImage('assets/images/enemies/charge_attack.png')
-EnemyCharge.static.sprParticle = love.graphics.newImage('assets/images/particles/dot.png')
-
-EnemyCharge.static.glowShader = love.graphics.newShader[[
-    float fudge(vec2 seed) {
-        return fract(sin(dot(seed.xy, vec2(12.9898, 78.233))) * 43758.5453);
-    }
-
-    vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
-        vec4 pixel = vec4(0.6, 0.4, 0.1, 1);
-        vec2 d = 2.0*(texture_coords - vec2(0.5));
-        pixel.a = 1.0 - length(d);
-        pixel.a = floor(pixel.a*5)/5;
-        //pixel.a = floor(pixel.a*5 - fudge(texture_coords))/5;
-        return pixel * color;
-    }
-]]
+EnemyCharge.static.sprStun = love.graphics.newImage('assets/images/enemies/charge_stun.png')
+EnemyCharge.static.sprStar = love.graphics.newImage('assets/images/enemies/star.png')
 
 EnemyCharge.Move = EnemyCharge:addState('Move')
 EnemyCharge.Attack = EnemyCharge:addState('Attack')
+EnemyCharge.Stun = EnemyCharge:addState('Stun')
 EnemyCharge.Hit = EnemyCharge:addState('Hit')
 EnemyCharge.Dead = EnemyCharge:addState('Dead')
 
 EnemyCharge.static.fallVel = 7
 EnemyCharge.static.fallAcc = 0.3
 EnemyCharge.static.moveVel = 0.4
+EnemyCharge.static.attackAcc = 0.7
+EnemyCharge.static.attackVel = 9
 
 function EnemyCharge:initialize(collider, x, y)
     self.pos = Vector(x, y)
@@ -50,6 +39,8 @@ function EnemyCharge:initialize(collider, x, y)
 
     self.animMove = newAnimation(EnemyCharge.sprMove, 24, 24, 1/8, 0)
     self.animAttack = newAnimation(EnemyCharge.sprAttack, 24, 24, 1/8, 0)
+    self.animStun = newAnimation(EnemyCharge.sprStun, 24, 24, 1/8, 0)
+    self.animStar = newAnimation(EnemyCharge.sprStar, 10, 10, 1/8, 0)
     self:gotoState('Move')
 
     self.fire = Particles.newFire()
@@ -98,16 +89,17 @@ function EnemyCharge:draw()
     self.sprite:draw(x, y, 0, self.direction.x, 1, self.sprite:getWidth()/2, self.sprite:getHeight())
 end
 
-function EnemyCharge:drawGlow()
-    love.graphics.setBlendMode('additive')
-    love.graphics.setShader(EnemyCharge.glowShader)
-    love.graphics.draw(EnemyCharge.sprParticle, self.pos.x, self.pos.y-self.size.y/2, 0, 8, 8, EnemyCharge.sprParticle:getWidth()/2, EnemyCharge.sprParticle:getHeight()/2)
-    love.graphics.setShader()
-    love.graphics.setBlendMode('alpha')
-end
-
 function EnemyCharge:stomp()
     self:hit(nil, 3, 4)
+    return true
+end
+
+function EnemyCharge:hit(other, damage, hitstun)
+    Enemy.hit(self, other, damage, hitstun)
+    if self.health <= 0 and other then
+        self.vel = (self.pos - other.pos):normalized() * 4
+        self.vel.y = -5
+    end
     return true
 end
 
@@ -129,11 +121,6 @@ function EnemyCharge.Move:update()
     end
 end
 
-function EnemyCharge.Move:draw()
-    self:drawGlow()
-    EnemyCharge.draw(self)
-end
-
 function EnemyCharge.Move:isHarmful()
     return true
 end
@@ -146,16 +133,16 @@ end
 
 function EnemyCharge.Attack:update()
     if self.direction.x == 1 then
-        if self.vel.x < 10 then
-            self.vel.x = self.vel.x + 0.3
+        if self.vel.x < EnemyCharge.attackVel then
+            self.vel.x = self.vel.x + EnemyCharge.attackAcc
         else
-            self.vel.x = 10
+            self.vel.x = EnemyCharge.attackVel
         end
     else
-        if self.vel.x > -10 then
-            self.vel.x = self.vel.x - 0.3
+        if self.vel.x > -EnemyCharge.attackVel then
+            self.vel.x = self.vel.x - EnemyCharge.attackAcc
         else
-            self.vel.x = -10
+            self.vel.x = -EnemyCharge.attackVel
         end
     end
     self.fire:emit(3)
@@ -164,14 +151,52 @@ end
 
 function EnemyCharge.Attack:collide_solid(other, x, y)
     if math.abs(x-self.pos.x) > 0.1 then
-        self:gotoState('Move')
+        self:gotoState('Stun')
+        self.vel.x = -self.vel.x
+        self.vel.y = -4
     end
     self.pos = Vector(x, y)
 end
 
-function EnemyCharge.Attack:draw()
-    self:drawGlow()
+function EnemyCharge.Attack:collide_player(other, x, y)
+    if math.abs(x-self.pos.x) > 0.1 then
+        self:gotoState('Stun')
+        self.vel.x = -self.vel.x
+        self.vel.y = -4
+    end
+end
+
+--[[======== STUN STATE ========]]
+
+function EnemyCharge.Stun:enteredState()
+    self.sprite = self.animStun
+    self.stunTimer = 3*60
+end
+
+function EnemyCharge.Stun:update()
+    if math.abs(self.vel.x) > EnemyCharge.moveVel then
+        self.vel.x = self.vel.x * 0.92
+    else
+        self.vel.x = 0
+    end
+
+    if self.stunTimer > 0 then
+        self.stunTimer = self.stunTimer - 1
+    else
+        self:gotoState('Move')
+    end
+    EnemyCharge.update(self)
+end
+
+function EnemyCharge.Stun:draw()
     EnemyCharge.draw(self)
+    self.animStar:update(1/60)
+    local numStars = math.ceil(self.stunTimer/60)
+    for i = 1, numStars do
+        local sx = self.pos.x + 12*math.cos(self.stunTimer/20 + i/numStars*2*math.pi)
+        local sy = self.pos.y + 6*math.sin(self.stunTimer/20 + i/numStars*2*math.pi)
+        self.animStar:draw(sx, sy - self.size.y, 0, 1, 1, 5, 5)
+    end
 end
 
 --[[======== HIT STATE ========]]
@@ -193,7 +218,6 @@ function EnemyCharge.Hit:update()
 end
 
 function EnemyCharge.Hit:draw()
-    self:drawGlow()
     love.graphics.setShader(Enemy.hitShader)
     EnemyCharge.draw(self)
     love.graphics.setShader()
@@ -209,20 +233,14 @@ function EnemyCharge.Dead:enteredState()
     self.activeBody = false
     self.vel = Vector(0, 0)
     self.deadTimer = 60
+    self.sprite = self.animStun
 end
 
 function EnemyCharge.Dead:update()
     if self.deadTimer > 0 then
         self.deadTimer = self.deadTimer - 1
     end
-    Enemy.update(self)
-end
-
-function EnemyCharge.Dead:draw()
-    love.graphics.setColor(255, 255, 255, 255*self.deadTimer/60)
-    self:drawGlow()
-    love.graphics.setColor(255, 255, 255, 255)
-    EnemyCharge.draw(self)
+    EnemyCharge.update(self)
 end
 
 function EnemyCharge.Dead:hit()
