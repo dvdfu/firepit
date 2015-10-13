@@ -46,12 +46,7 @@ function EnemyFloat:initialize(collider, x, y)
     self.direction.x = -1
 
     self.player = nil
-
     self.moveTimer = 0
-    self.stompTimer = 0
-    self.holdTimer = 0
-    self.throwTimer = 0
-    self.deadTimer = 0
 
     self.animMove = newAnimation(EnemyFloat.sprMove, 32, 32, 1/8, 0)
     self.animDead = newAnimation(EnemyFloat.sprDead, 32, 32, 1/8, 0)

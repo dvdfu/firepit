@@ -6,7 +6,7 @@ local Object = require 'objects/object'
 local Solid = require 'objects/solid'
 local Player = require 'objects/player'
 local EnemyRock = require 'objects/enemy-rock'
-local EnemyFloat = require 'objects/enemy-float'
+local EnemyFloat = require 'objects/enemy-charge'
 local Powerup = require 'powerup'
 local Lava = require 'objects/lava'
 Sound = require('sound')
@@ -14,6 +14,7 @@ Sound = require('sound')
 local collider = {}
 local sw = 512
 local sh = 360
+local bg = love.graphics.newImage('assets/images/background.png')
 
 function Game:enter()
     collider = HC(128)
@@ -24,7 +25,7 @@ function Game:enter()
     p = Player:new(collider, 32, 0)
     p.bullets = bullets
     -- p:setPower(Powerup.names.chuckie)
-    p:setPower(Powerup.names.coldFeet)
+    -- p:setPower(Powerup.names.coldFeet)
     p:setPower(Powerup.names.flower)
     l = Lava:new(collider, sh)
 
@@ -56,10 +57,11 @@ end
 
 function addEnemy(x, y)
     local e = {}
-    if math.random() > 0.5 then
+    if math.random() > 1 then
         e = EnemyRock:new(collider, x, y)
     else
         e = EnemyFloat:new(collider, x, y)
+        e.player = p
     end
     table.insert(enemies, e)
     return e
@@ -131,6 +133,12 @@ local function camDraw(func)
 end
 
 function Game:draw()
+    for i = 0, sw, 128 do
+        for j = 0, sh, 128 do
+            love.graphics.draw(bg, i, j)
+        end
+    end
+
     camDraw(function()
         for _, solid in pairs(solids) do
             solid:draw()
@@ -141,7 +149,6 @@ function Game:draw()
         end
         for _, bullet in pairs(bullets) do
             bullet:draw()
-            -- Object.draw(bullet)
         end
         l:draw()
     end)
