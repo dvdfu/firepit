@@ -174,6 +174,9 @@ function EnemyCharge.Attack:update()
             self.vel.x = -EnemyCharge.attackVel
         end
     end
+    if self.ground then
+        -- self.ground:setState(Tile.state.iced, self.pos.x) TODO
+    end
     self.fire:emit(3)
     Enemy.update(self)
 end
