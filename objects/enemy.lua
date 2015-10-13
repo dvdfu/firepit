@@ -14,6 +14,7 @@ Enemy.static.hitShader = love.graphics.newShader[[
 function Enemy:initialize(collider, body)
     Object.initialize(self, collider, body)
     self.tags = { 'enemy' }
+    self.direction.x = math.random() > 0.5 and 1 or -1
 
     self.maxHealth = self.maxHealth or 1
     self.health = self.maxHealth

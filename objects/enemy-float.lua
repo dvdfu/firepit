@@ -39,11 +39,10 @@ EnemyFloat.static.jumpVel = 0.7
 function EnemyFloat:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(10, 10)
-    self.maxHealth = 2
+    self.maxHealth = 4
     self.healthOffset = Vector(0, -24)
     Enemy.initialize(self, collider, collider:circle(x, y, 10))
     self:addTag('enemy_float')
-    self.direction.x = -1
 
     self.player = nil
     self.moveTimer = 0

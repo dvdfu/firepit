@@ -6,7 +6,8 @@ local Object = require 'objects/object'
 local Solid = require 'objects/solid'
 local Player = require 'objects/player'
 local EnemyRock = require 'objects/enemy-rock'
-local EnemyFloat = require 'objects/enemy-charge'
+local EnemyFloat = require 'objects/enemy-float'
+local EnemyCharge = require 'objects/enemy-charge'
 local Powerup = require 'powerup'
 local Lava = require 'objects/lava'
 Sound = require('sound')
@@ -57,10 +58,13 @@ end
 
 function addEnemy(x, y)
     local e = {}
-    if math.random() > 1 then
+    local r = math.random()
+    if r > 0.66 then
         e = EnemyRock:new(collider, x, y)
-    else
+    elseif r > 0.33 then
         e = EnemyFloat:new(collider, x, y)
+    else
+        e = EnemyCharge:new(collider, x, y)
         e.player = p
     end
     table.insert(enemies, e)
@@ -72,7 +76,7 @@ function Game:update()
         timer = timer - 1
     else
         timer = 2*60
-        addEnemy(128, 0)
+        addEnemy(160, 64)
     end
 
     cx = cx + (sw/2 + (p.pos.x - sw/2)/4 - cx)/20

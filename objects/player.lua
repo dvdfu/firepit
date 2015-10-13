@@ -190,6 +190,16 @@ function Player:collide_enemy_float(other, x, y)
     end
 end
 
+function Player:collide_enemy_charge(other, x, y)
+    if self:hasPower(Powerup.names.coldFeet) and y < self.pos.y and self.vel.y > 0 and self.pos.y < other.pos.y then
+        self.vel.y = -Player.jumpVel
+        self.y = y
+        other:stomp()
+    else
+        self:getHit(other)
+    end
+end
+
 function Player:draw()
     self.dust:setPosition(self.pos.x, self.pos.y)
     self.dust:update(1/60)

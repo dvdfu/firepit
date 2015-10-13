@@ -10,11 +10,14 @@ require 'AnAL'
 
 EnemyCharge.static.sprMove = love.graphics.newImage('assets/images/enemies/charge_move.png')
 EnemyCharge.static.sprAttack = love.graphics.newImage('assets/images/enemies/charge_attack.png')
+EnemyCharge.static.sprGasp = love.graphics.newImage('assets/images/enemies/charge_gasp.png')
 EnemyCharge.static.sprStun = love.graphics.newImage('assets/images/enemies/charge_stun.png')
 EnemyCharge.static.sprStar = love.graphics.newImage('assets/images/enemies/star.png')
+EnemyCharge.static.sprExclamation = love.graphics.newImage('assets/images/enemies/exclamation.png')
 
 EnemyCharge.Move = EnemyCharge:addState('Move')
 EnemyCharge.Attack = EnemyCharge:addState('Attack')
+EnemyCharge.Gasp = EnemyCharge:addState('Gasp')
 EnemyCharge.Stun = EnemyCharge:addState('Stun')
 EnemyCharge.Hit = EnemyCharge:addState('Hit')
 EnemyCharge.Dead = EnemyCharge:addState('Dead')
@@ -28,17 +31,17 @@ EnemyCharge.static.attackVel = 9
 function EnemyCharge:initialize(collider, x, y)
     self.pos = Vector(x, y)
     self.size = Vector(16, 16)
-    self.maxHealth = 5
+    self.maxHealth = 3
     Enemy.initialize(self, collider, collider:rectangle(x, y, self.size:unpack()))
     self:addTag('enemy_charge')
     self.healthOffset = Vector(0, -32)
     self.offset.y = self.size.y/2
-    self.direction.x = -1
 
     self.player = nil
 
     self.animMove = newAnimation(EnemyCharge.sprMove, 24, 24, 1/8, 0)
     self.animAttack = newAnimation(EnemyCharge.sprAttack, 24, 24, 1/8, 0)
+    self.animGasp = newAnimation(EnemyCharge.sprGasp, 24, 24, 1/8, 0)
     self.animStun = newAnimation(EnemyCharge.sprStun, 24, 24, 1/8, 0)
     self.animStar = newAnimation(EnemyCharge.sprStar, 10, 10, 1/8, 0)
     self:gotoState('Move')
@@ -76,7 +79,7 @@ function EnemyCharge:collide_platform(other, x, y)
 end
 
 function EnemyCharge:collide_lava(other, x, y)
-    other:touch(self.pos.x, true)
+    other:touch(self.pos.x, false)
     self:hit(nil, -1)
 end
 
@@ -103,6 +106,10 @@ function EnemyCharge:hit(other, damage, hitstun)
     return true
 end
 
+function EnemyCharge:isHarmful()
+    return true
+end
+
 --[[======== MOVE STATE ========]]
 
 function EnemyCharge.Move:enteredState()
@@ -114,15 +121,37 @@ end
 function EnemyCharge.Move:update()
     self.direction.x = self.vel.x > 0 and 1 or -1
     EnemyCharge.update(self)
-    if self.ground and (self.player.pos.x > self.pos.x) == (self.direction.x == 1) and
+    if self.ground and self.player.ground and
+        (self.player.pos.x > self.pos.x) == (self.direction.x == 1) and
         math.abs(self.pos.x - self.player.pos.x) < 200 and
         math.abs(self.pos.y - self.player.pos.y) < 16 then
-            self:gotoState('Attack')
+            self:gotoState('Gasp')
     end
 end
 
-function EnemyCharge.Move:isHarmful()
-    return true
+function EnemyCharge.Move:collide_lava(other, x, y)
+    other:touch(self.pos.x, true)
+    self:hit(nil, -1)
+end
+
+--[[======== GASP STATE ========]]
+
+function EnemyCharge.Gasp:enteredState()
+    self.vel.y = -4
+    self.ground = nil
+    self.sprite = self.animGasp
+end
+
+function EnemyCharge.Gasp:update()
+    if self.ground then
+        self:gotoState('Attack')
+    end
+    EnemyCharge.update(self)
+end
+
+function EnemyCharge.Gasp:draw()
+    love.graphics.draw(EnemyCharge.sprExclamation, self.pos.x, self.pos.y-28, 0, 1, 1, 6, 6)
+    EnemyCharge.draw(self)
 end
 
 --[[======== ATTACK STATE ========]]
