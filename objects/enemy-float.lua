@@ -71,7 +71,7 @@ function EnemyFloat:update()
     if self.vel.y > EnemyFloat.fallVel then
         self.vel.y = EnemyFloat.fallVel
     end
-    if self.ground and self.ground:getState(self.pos.x) == Tile.state.iced then
+    if self.ground and self.ground:getState(self.pos.x) == Tile.names.iced then
         self:hit(nil, 1, 4)
     end
     self.ground = nil
@@ -114,14 +114,6 @@ function EnemyFloat:draw()
     end
 end
 
-function EnemyFloat:drawGlow()
-    love.graphics.setBlendMode('additive')
-    love.graphics.setShader(EnemyFloat.glowShader)
-    love.graphics.draw(EnemyFloat.sprParticle, self.pos.x, self.pos.y, 0, 8, 8, EnemyFloat.sprParticle:getWidth()/2, EnemyFloat.sprParticle:getHeight()/2)
-    love.graphics.setShader()
-    love.graphics.setBlendMode('alpha')
-end
-
 function EnemyFloat:stomp()
     self:hit(nil, 3, 4)
     return true
@@ -141,11 +133,6 @@ function EnemyFloat.Move:update()
     self.moveTimer = self.moveTimer + 1
     self.direction.x = self.vel.x > 0 and 1 or -1
     EnemyFloat.update(self)
-end
-
-function EnemyFloat.Move:draw()
-    self:drawGlow()
-    EnemyFloat.draw(self)
 end
 
 function EnemyFloat.Move:isHarmful()
@@ -171,7 +158,6 @@ function EnemyFloat.Hit:update()
 end
 
 function EnemyFloat.Hit:draw()
-    self:drawGlow()
     love.graphics.setShader(Enemy.hitShader)
     EnemyFloat.draw(self)
     love.graphics.setShader()
@@ -197,13 +183,6 @@ function EnemyFloat.Dead:update()
         self.deadTimer = self.deadTimer - 1
     end
     Enemy.update(self)
-end
-
-function EnemyFloat.Dead:draw()
-    love.graphics.setColor(255, 255, 255, 255*self.deadTimer/60)
-    self:drawGlow()
-    love.graphics.setColor(255, 255, 255, 255)
-    EnemyFloat.draw(self)
 end
 
 function EnemyFloat.Dead:hit()

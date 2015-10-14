@@ -117,7 +117,7 @@ end
 
 function EnemyRock.Move:update()
     self.vel.x = EnemyRock.moveVel * self.direction.x
-    if self.ground and self.ground:getState(self.pos.x) == Tile.state.iced then
+    if self.ground and self.ground:getState(self.pos.x) == Tile.names.iced then
         self.vel.x = EnemyRock.moveVel/4 * self.direction.x
     end
     self.direction.x = self.vel.x > 0 and 1 or -1

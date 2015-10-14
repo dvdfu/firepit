@@ -153,9 +153,9 @@ function Player:collide_platform(other, x, y)
         self.pos.y = y
         self.ground = other
         if self:hasPower(Powerup.names.coldFeet) and other.setState then
-            other:setState(Tile.state.iced, self.pos.x)
-            other:setState(Tile.state.iced, self.pos.x+16)
-            other:setState(Tile.state.iced, self.pos.x-16)
+            other:setState(Tile.names.iced, self.pos.x)
+            other:setState(Tile.names.iced, self.pos.x+16*self.direction.x)
+            -- other:setState(Tile.names.iced, self.pos.x-16)
         end
     end
 end

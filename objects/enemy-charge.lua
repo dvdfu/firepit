@@ -56,7 +56,7 @@ function EnemyCharge:update()
     if self.vel.y > EnemyCharge.fallVel then
         self.vel.y = EnemyCharge.fallVel
     end
-    if self.ground and self.ground:getState(self.pos.x) == Tile.state.iced then
+    if self.ground and self.ground:getState(self.pos.x) == Tile.names.iced then
         self:hit(nil, 1, 4)
     end
     self.ground = nil
@@ -160,6 +160,10 @@ function EnemyCharge.Attack:enteredState()
     self.sprite = self.animAttack
 end
 
+function EnemyCharge.Attack:exitedState()
+    cs = 10
+end
+
 function EnemyCharge.Attack:update()
     if self.direction.x == 1 then
         if self.vel.x < EnemyCharge.attackVel then
@@ -175,7 +179,7 @@ function EnemyCharge.Attack:update()
         end
     end
     if self.ground then
-        -- self.ground:setState(Tile.state.iced, self.pos.x) TODO
+        self.ground:setState(Tile.names.fire, self.pos.x)
     end
     self.fire:emit(3)
     Enemy.update(self)
@@ -184,7 +188,8 @@ end
 function EnemyCharge.Attack:collide_solid(other, x, y)
     if math.abs(x-self.pos.x) > 0.1 then
         self:gotoState('Stun')
-        self.vel.x = -self.vel.x
+        self:hit(nil, 1, 2)
+        self.vel.x = -4 * self.direction.x
         self.vel.y = -4
     end
     self.pos = Vector(x, y)

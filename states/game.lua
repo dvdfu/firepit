@@ -26,7 +26,7 @@ function Game:enter()
     p = Player:new(collider, 32, 0)
     p.bullets = bullets
     -- p:setPower(Powerup.names.chuckie)
-    -- p:setPower(Powerup.names.coldFeet)
+    p:setPower(Powerup.names.coldFeet)
     p:setPower(Powerup.names.flower)
     l = Lava:new(collider, sh)
 
@@ -59,14 +59,14 @@ end
 function addEnemy(x, y)
     local e = {}
     local r = math.random()
-    if r > 0.66 then
-        e = EnemyRock:new(collider, x, y)
-    elseif r > 0.33 then
-        e = EnemyFloat:new(collider, x, y)
-    else
+    -- if r > 0.66 then
+    --     e = EnemyRock:new(collider, x, y)
+    -- elseif r > 0.33 then
+    --     e = EnemyFloat:new(collider, x, y)
+    -- else
         e = EnemyCharge:new(collider, x, y)
         e.player = p
-    end
+    -- end
     table.insert(enemies, e)
     return e
 end

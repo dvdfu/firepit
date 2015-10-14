@@ -26,9 +26,9 @@ function Solid:initialize(collider, x, y, w, h, color, solid)
     end
 end
 
-function Solid:update(dt)
+function Solid:update()
     for i = 0, #self.tiles do
-        self.tiles[i]:update(dt)
+        self.tiles[i]:update()
     end
 end
 
@@ -41,14 +41,14 @@ function Solid:draw()
     end
 end
 
-function Solid:setState(state, x)
+function Solid:setState(name, x)
     local i = math.floor((x-self.pos.x)/16)
     if i < 0 then
         i = 0
     elseif i > #self.tiles then
         i = #self.tiles
     end
-    self.tiles[i]:setState(state)
+    self.tiles[i]:setState(name)
 end
 
 function Solid:getState(x)
