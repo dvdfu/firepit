@@ -51,18 +51,12 @@ function EnemyFloat:initialize(collider, x, y)
     self.animDead = newAnimation(EnemyFloat.sprDead, 32, 32, 1/8, 0)
     self.animDead:setMode('once')
 
+    self.explosion = Particles.newFireExplosion()
     self.speck = Particles.newFireSpeck()
     self.speck:setAreaSpread('normal', 4, 2)
     self.speck:setParticleLifetime(0, 0.4)
     self.speck:setSpeed(0, 30)
 
-    self.explosion = love.graphics.newParticleSystem(EnemyFloat.sprParticle)
-    self.explosion:setParticleLifetime(0, 0.5)
-    self.explosion:setSpread(math.pi*2)
-    self.explosion:setAreaSpread('normal', 4, 4)
-    self.explosion:setSpeed(0, 100)
-    self.explosion:setColors(255, 255, 0, 255, 255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
-    self.explosion:setSizes(2, 0)
     self:gotoState('Move')
 end
 

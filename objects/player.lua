@@ -109,6 +109,11 @@ function Player:update(dt)
             self.jumpTimer = Player.jumpTimerMax
             self.dust:emit(8)
         end
+        if self.hurtTimer == 0 and self.ground:getState(self.pos.x) == Tile.names.fire then --TODO
+            self.pushVel.y = -4 * self.direction.x
+            self.pushVel.y = -4
+            self:gotoState('Hurt')
+        end
     else
         if self.jumpTimer > 0 then
             self.jumpTimer = self.jumpTimer - 1

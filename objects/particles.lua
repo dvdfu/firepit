@@ -39,6 +39,17 @@ function Particles.newFireSpeck()
     return part
 end
 
+function Particles.newFireExplosion()
+    local part = love.graphics.newParticleSystem(Particles.sprDot)
+    part:setParticleLifetime(0, 0.5)
+    part:setSpread(math.pi*2)
+    part:setAreaSpread('normal', 4, 4)
+    part:setSpeed(0, 100)
+    part:setColors(255, 255, 0, 255, 255, 255, 0, 255, 255, 182, 0, 255, 255, 73, 73, 255, 146, 36, 36, 255)
+    part:setSizes(2, 0)
+    return part
+end
+
 function Particles.newFrost()
     local part = love.graphics.newParticleSystem(Particles.sprDiamond)
     part:setParticleLifetime(0.1, 0.5)
