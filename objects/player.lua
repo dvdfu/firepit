@@ -221,20 +221,20 @@ function Player:draw()
 end
 
 function Player:hasPower(power)
-    if self.staticPowers[1].set and self.staticPowers[1].info.name == power then return true end
-    if self.staticPowers[2].set and self.staticPowers[2].info.name == power then return true end
-    if self.activePower.set and self.activePower.info.name == power then return true end
+    if self.staticPowers[1].set and self.staticPowers[1].name == power then return true end
+    if self.staticPowers[2].set and self.staticPowers[2].name == power then return true end
+    if self.activePower.set and self.activePower.name == power then return true end
     return false
 end
 
 function Player:getPower(power)
-    if self.staticPowers[1].set and self.staticPowers[1].info.name == power then
+    if self.staticPowers[1].set and self.staticPowers[1].name == power then
         return self.staticPowers[1]
     end
-    if self.staticPowers[2].set and self.staticPowers[2].info.name == power then
+    if self.staticPowers[2].set and self.staticPowers[2].name == power then
         return self.staticPowers[2]
     end
-    if self.activePower.set and self.activePower.info.name == power then
+    if self.activePower.set and self.activePower.name == power then
         return self.activePower
     end
     return nil
@@ -242,14 +242,14 @@ end
 
 function Player:setPower(name)
     local power = Powerup.info[name]
-    if power.static then
+    if power.active then
+        self.activePower:setPower(name)
+    else
         if not self.staticPowers[1].set then
             self.staticPowers[1]:setPower(name)
         else
             self.staticPowers[2]:setPower(name)
         end
-    else
-        self.activePower:setPower(name)
     end
 end
 
@@ -258,21 +258,19 @@ function Player:useActivePower()
     if not power.set then
         return
     end
-    if power.info.name == Powerup.names.apple then
+    if power.name == Powerup.names.apple then
         power:use()
         self.health = self.maxHealth
-    elseif power.info.name == Powerup.names.bubble then
-        if power.timer == 0 then
-            power:use()
+    elseif power.name == Powerup.names.bubble then
+        if power:use() then
             self:createBullet(Bullet.names.bubble)
         end
-    elseif power.info.name == Powerup.names.star then
-        if power.timer == 0 then
-            power:use()
+    elseif power.name == Powerup.names.star then
+        if power:use() then
             self:createBullet(Bullet.names.star)
             self.pushVel = self:getAimDirection(true) * -5
         end
-    elseif power.info.name == Powerup.names.flower then
+    elseif power.name == Powerup.names.flower then
         if power.timer == 0 then
             power:use()
             self:createBullet(Bullet.names.flower)

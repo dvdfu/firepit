@@ -29,7 +29,7 @@ Tile.static.info = {
         sprite = love.graphics.newImage('assets/images/stage/tile_fire.png'),
         animated = true,
         offset = Vector(0, 16),
-        duration = 30,
+        duration = 60,
         particles = 'FireSpeck'
     }
 }
