@@ -90,6 +90,11 @@ function GUI:drawPower(power, i)
         love.graphics.setColor(255, 255, 255, 255)
         love.graphics.setFont(GUI.numberFont)
         love.graphics.print(uses, x+2, y+24)
+    elseif power.type == 'Timed' then
+        local fill = power:getIconFill()*32
+        love.graphics.setColor(0, 0, 0, 128)
+        love.graphics.rectangle('fill', x, y, 32, fill)
+        love.graphics.setColor(255, 255, 255, 255)
     end
     love.graphics.rectangle('line', x, y, 33, 33)
 end

@@ -122,6 +122,12 @@ function Player:update(dt)
                 self.jumpTimer = 0
             end
         end
+        local p = self:getPower(Powerup.names.jumpGlide)
+        if p then
+            if Input:isDown(self.keyA) and self.vel.y >= 0 and p:use() then
+                self.vel.y = 0
+            end
+        end
         self.sprite = self.vel.y < 0 and self.animJump or self.animFall
     end
 

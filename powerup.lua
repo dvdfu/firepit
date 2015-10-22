@@ -32,8 +32,8 @@ Powerup.static.info = {
         name = 'Jump Glide',
         icon = love.graphics.newImage('assets/images/powers/jump_glide.png'),
         type = 'Timed',
-        quantity = 120,
-        refill = 1
+        cooldown = 120,
+        refill = 3
     },
     ['Apple'] = {
         name = 'Apple',
@@ -91,6 +91,7 @@ function Powerup:setPower(name)
     self.timer = 0
     self.remaining = self.quantity
     self.set = Powerup.info[name] and true or false
+    self.using = false
     self:gotoState(self.type)
 end
 
@@ -149,6 +150,32 @@ function Powerup.Reload:getIconFill()
     if self.quantity == 0 then
         return self.timer / self.refill
     end
+    return self.timer / self.cooldown
+end
+
+--[[======== TIMED STATE ========]]
+
+function Powerup.Timed:update()
+    if not self.using then
+        if self.timer > self.refill then
+            self.timer = self.timer - self.refill
+        else
+            self.timer = 0
+        end
+    end
+    self.using = false
+end
+
+function Powerup.Timed:use()
+    if self.timer < self.cooldown then
+        self.using = true
+        self.timer = self.timer + 1
+        return true
+    end
+    return false
+end
+
+function Powerup.Timed:getIconFill()
     return self.timer / self.cooldown
 end
 
