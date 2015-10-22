@@ -76,7 +76,7 @@ end
 function GUI:drawPower(power, i)
     local x, y = 16+(i-1)*40, 16
     love.graphics.setColor(128, 128, 128, 255)
-    love.graphics.rectangle('line', x, y, 33, 33)
+    love.graphics.rectangle('line', x, y-1, 33, 33)
     love.graphics.setColor(255, 255, 255, 255)
 
     if not power.set then return end
@@ -96,7 +96,7 @@ function GUI:drawPower(power, i)
         love.graphics.rectangle('fill', x, y, 32, fill)
         love.graphics.setColor(255, 255, 255, 255)
     end
-    love.graphics.rectangle('line', x, y, 33, 33)
+    love.graphics.rectangle('line', x, y-1, 33, 33)
 end
 
 function GUI:drawEnemyHealth(enemy)
