@@ -82,20 +82,22 @@ function GUI:drawPower(power, i)
     if not power.set then return end
 
     love.graphics.draw(power.icon, x, y)
+    local uses = power.quantity
+    local fill = power:getIconFill()*32
     if power.type == 'Reload' then
-        local uses = power.quantity
-        local fill = power:getIconFill()*32
         love.graphics.setColor(0, 0, 0, 128)
         love.graphics.rectangle('fill', x, y, 32, fill)
         love.graphics.setColor(255, 255, 255, 255)
         love.graphics.setFont(GUI.numberFont)
         love.graphics.print(uses, x+2, y+24)
-    elseif power.type == 'Timed' then
-        local fill = power:getIconFill()*32
+    elseif power.type == 'Recharge' then
         love.graphics.setColor(0, 0, 0, 128)
         love.graphics.rectangle('fill', x, y, 32, fill)
-        love.graphics.setColor(255, 255, 255, 255)
+    elseif power.type == 'Timed' then
+        love.graphics.setColor(0, 0, 0, 128)
+        love.graphics.rectangle('fill', x, y, 32, fill)
     end
+    love.graphics.setColor(255, 255, 255, 255)
     love.graphics.rectangle('line', x, y-1, 33, 33)
 end
 

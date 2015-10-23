@@ -4,6 +4,7 @@ local Object = require 'objects/object'
 local Bullet = Class('bullet', Object)
 local Vector = require('vector')
 local Particles = require('objects/particles')
+local Tile = require('objects/tile')
 
 Bullet.sprBubble = love.graphics.newImage('assets/images/bullets/bubble.png')
 Bullet.sprBubblePop = love.graphics.newImage('assets/images/bullets/bubble_pop.png')
@@ -11,13 +12,15 @@ Bullet.sprEnergy = love.graphics.newImage('assets/images/bullets/energy.png')
 Bullet.sprStarSmall = love.graphics.newImage('assets/images/bullets/star.png')
 Bullet.sprFlower = love.graphics.newImage('assets/images/bullets/flower.png')
 Bullet.sprExplosion = love.graphics.newImage('assets/images/bullets/explosion.png')
+Bullet.sprIceball = love.graphics.newImage('assets/images/bullets/iceball.png')
 
 Bullet.static.names = {
     bubble = 'Bubble',
     star = 'Star',
     miniStar = 'MiniStar',
     flower = 'FlowerBomb',
-    explosion = 'Explosion'
+    explosion = 'Explosion',
+    iceBall = 'IceBall'
 }
 
 Bullet.static.info = {
@@ -81,6 +84,22 @@ Bullet.static.info = {
         damage = 10,
         hitstun = 12,
         time = 12
+    },
+    ['IceBall'] = {
+        name = 'IceBall',
+        sprite = Bullet.sprIceball,
+        animated = true,
+        makeBody = function(collider, x, y)
+            return collider:circle(x, y, 10)
+        end,
+        offset = Vector(0, -16),
+        damage = 3,
+        hitstun = 4,
+        speed = 6,
+        -- angle = {-30, 5},
+        acc = Vector(0, 0.3),
+        time = 5*60,
+        -- symmetrical = true
     }
 }
 
@@ -89,6 +108,7 @@ Bullet.Star = Bullet:addState('Star')
 Bullet.MiniStar = Bullet:addState('MiniStar')
 Bullet.FlowerBomb = Bullet:addState('FlowerBomb')
 Bullet.Explosion = Bullet:addState('Explosion')
+Bullet.IceBall = Bullet:addState('IceBall')
 
 function Bullet:initialize(name, parent, pool, override)
     self.name = name
@@ -336,6 +356,32 @@ end
 
 function Bullet.Explosion:isDead()
     return self.dead and self.timer == 0
+end
+
+--[[======== ICEBALL STATE ========]]
+
+function Bullet.IceBall:enteredState()
+    self.vel = self.parent:getAimDirection(true) * Bullet.info[self.name].speed
+    self.vel.y = self.vel.y - 3
+    -- if self.parent:getAimDirection(true)
+end
+
+function Bullet.IceBall:collide_platform(other, x, y)
+    if y <= self.pos.y and self.vel.y > 0 and self.pos.y - self.vel.y <= other.pos.y then
+        for i = -2, 2 do
+            other:setState(Tile.names.iced, self.pos.x + i*16)
+        end
+    end
+    Bullet.collide_platform(self, other, x, y)
+end
+
+function Bullet.IceBall:collide_solid(other, x, y)
+    if y <= self.pos.y and self.vel.y > 0 and self.pos.y - self.vel.y <= other.pos.y then
+        for i = -2, 2 do
+            other:setState(Tile.names.iced, self.pos.x + i*16)
+        end
+    end
+    Bullet.collide_solid(self, other, x, y)
 end
 
 return Bullet

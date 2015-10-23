@@ -281,6 +281,11 @@ function Player:useActivePower()
             power:use()
             self:createBullet(Bullet.names.flower)
         end
+    elseif power.name == Powerup.names.iceBall then
+        if power.timer == 0 then
+            power:use()
+            self:createBullet(Bullet.names.iceBall)
+        end
     end
 end
 

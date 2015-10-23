@@ -19,7 +19,8 @@ Powerup.static.names = {
     bubble = 'Bubble Blower',
     star = 'Star Cannon',
     flower = 'Flower Bomb',
-    chuckie = 'Chuckie'
+    chuckie = 'Chuckie',
+    iceBall = 'Ice Ball'
 }
 
 Powerup.static.info = {
@@ -69,8 +70,14 @@ Powerup.static.info = {
     },
     ['Chuckie'] = {
         name = 'Chuckie',
-        active = false,
         icon = love.graphics.newImage('assets/images/powers/flower.png')
+    },
+    ['Ice Ball'] = {
+        name = 'Ice Ball',
+        active = true,
+        icon = love.graphics.newImage('assets/images/powers/cold_feet.png'),
+        type = 'Recharge',
+        cooldown = 0.25*60,
     }
 }
 
@@ -119,7 +126,17 @@ function Powerup.Rapid:use()
     return false
 end
 
-function Powerup.Rapid:getIconFill()
+--[[======== RAPID STATE ========]]
+
+function Powerup.Recharge:use()
+    if self.timer == 0 then
+        self.timer = self.cooldown
+        return true
+    end
+    return false
+end
+
+function Powerup.Recharge:getIconFill()
     return self.timer / self.cooldown
 end
 
